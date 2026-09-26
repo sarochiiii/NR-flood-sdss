@@ -1,0 +1,248 @@
+/* เลเยอร์เพิ่มเติมจากหลายแหล่ง — โหลดเมื่อผู้ใช้เปิดเท่านั้น (lazy) เพื่อไม่ให้หน้าแรกช้า
+   แหล่งที่เรียกจากเบราว์เซอร์ตรง: ThaiWater public API, RainViewer
+   แหล่งที่ผ่าน GitHub Actions (ต้องใช้ key): GISTDA flood 7 วัน, Sentinel-1 (Earth Engine) */
+document.addEventListener('sdss:ready', () => {
+  'use strict';
+  const { map, cfg, hex } = window.SDSS;
+  const L_ = cfg.layers;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmt = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v)) ? '—' : Number(v).toFixed(d);
+  const tTime = (s) => s ? new Date(String(s).replace(' ', 'T') + (/[zZ+]/.test(s) ? '' : '+07:00'))
+    .toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+
+  async function json(url, opt) {
+    const r = await fetch(url, Object.assign({ cache: 'no-cache' }, opt || {}));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+
+  /* ---------- ThaiWater: เรียกตรง ถ้าไม่ได้ใช้ snapshot ---------- */
+  let twCache = null;
+  function bbox() {
+    const b = L.geoJSON(window.SDSS.amphoe || window.SDSS.tambon).getBounds(), d = L_.station_buffer_deg;
+    return [b.getWest() - d, b.getSouth() - d, b.getEast() + d, b.getNorth() + d];
+  }
+  const MARK = {};   // key → circleMarker สำหรับกดจากรายการสถานี
+  const inBox = (la, lo, bb) => la != null && lo != null && lo >= bb[0] && lo <= bb[2] && la >= bb[1] && la <= bb[3];
+  const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
+  const th = (x) => (x && typeof x === 'object') ? x.th : x;
+
+  function thaiwater() {
+    if (!twCache) twCache = loadThaiwater().catch(e => { twCache = null; throw e; });
+    return twCache;
+  }
+  async function loadThaiwater() {
+    const bb = bbox(), out = { rain: [], waterlevel: [], via: 'api', time: new Date().toISOString() };
+    try {
+      const [r, w] = await Promise.all([json(L_.thaiwater_base + 'rain_24h'), json(L_.thaiwater_base + 'waterlevel_load')]);
+      (r.data || []).forEach(x => {
+        const s = x.station || {}, la = n(s.tele_station_lat), lo = n(s.tele_station_long);
+        if (!inBox(la, lo, bb)) return;
+        out.rain.push({ name: th(s.tele_station_name), lat: la, lon: lo, rain_24h: n(x.rain_24h), rain_1h: n(x.rain_1h),
+          time: x.rainfall_datetime, amphoe: th((x.geocode || {}).amphoe_name) });
+      });
+      ((w.waterlevel_data || {}).data || []).forEach(x => {
+        const s = x.station || {}, la = n(s.tele_station_lat), lo = n(s.tele_station_long);
+        if (!inBox(la, lo, bb)) return;
+        out.waterlevel.push({ code: String(s.tele_station_oldcode || s.id), name: th(s.tele_station_name), lat: la, lon: lo,
+          level_msl: n(x.waterlevel_msl), bank_msl: n(s.min_bank), storage_pct: n(x.storage_percent),
+          discharge: n(x.discharge), measured_at: x.waterlevel_datetime, amphoe: th((x.geocode || {}).amphoe_name) });
+      });
+    } catch (e) {
+      console.warn('ThaiWater API ตรงไม่สำเร็จ ใช้ snapshot', e);
+      const s = await json('data/live/thaiwater_region.json').catch(() => null);
+      if (!s || !s.updated_at) throw new Error('ไม่มีข้อมูล ThaiWater');
+      Object.assign(out, { rain: s.rain, waterlevel: s.waterlevel, via: 'snapshot', time: s.updated_at });
+    }
+    return out;
+  }
+
+  /* ---------- สีตามเกณฑ์ ---------- */
+  const RAIN_BR = [[90.1, '#08306B'], [35.1, '#2171B5'], [10.1, '#6BAED6'], [0.1, '#C6DBEF'], [-1, '#E2E8F0']];
+  const rainColor = v => (RAIN_BR.find(([b]) => (v ?? -1) >= b) || RAIN_BR[4])[1];
+  const WL_BR = [[100, '#C0392B'], [70, '#E67E22'], [30, '#1E8449'], [-1e9, '#D68910']];
+  const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
+
+  /* ---------- นิยามเลเยอร์ ---------- */
+  const defs = [
+    {
+      id: 'gistda', icon: 'ti-satellite', label: 'น้ำท่วมตรวจพบ (ดาวเทียม)', on: true,
+      async build() {
+        const d = await json('data/live/gistda_flood_7d.geojson');
+        if (d.status === 'not_configured') throw new Error('ยังไม่ตั้ง GISTDA_API_KEY');
+        const lyr = L.geoJSON(d, { style: { color: '#1D4ED8', weight: 0.5, fillColor: '#3B82F6', fillOpacity: 0.55 },
+          onEachFeature: (f, l) => l.bindPopup(`<b>พื้นที่น้ำท่วม (GISTDA)</b><br>${fmt(f.properties.area_rai, 0)} ไร่`) });
+        return { lyr, sub: `รวม 7 วัน · ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${d.features.length} แปลง`,
+          attr: 'น้ำท่วม © GISTDA' };
+      }
+    },
+    {
+      id: 's1', icon: 'ti-radar-2', label: 'ภาพเรดาร์ Sentinel-1', on: false,
+      async build() {
+        const m = await json('data/live/s1_latest.json');
+        if (m.status === 'not_configured') throw new Error('ยังไม่ตั้ง Earth Engine service account');
+        if (!m.date) throw new Error(m.status === 'no_image' ? 'ไม่มีภาพในรอบ 14 วัน' : 'ยังไม่มีภาพ');
+        const lyr = L.imageOverlay('data/live/s1_latest.png?d=' + m.date, m.bounds, { opacity: 0.8 });
+        return { lyr, sub: `VV ${m.date} · ผิวน้ำเรียบเป็นสีเข้ม`, attr: 'Contains Copernicus Sentinel data' };
+      }
+    },
+    {
+      id: 'labels', icon: 'ti-map-pin', label: 'ชื่อตำบล + ขอบเขตอำเภอ', on: true,
+      async build() {
+        return { toggle: (on) => map.getContainer().classList.toggle('hide-labels', !on), sub: 'อำเภอ ตำบล' };
+      }
+    },
+    {
+      id: 'radar', icon: 'ti-cloud-rain', label: 'เรดาร์ฝน', on: true,
+      async build() {
+        const d = await json(L_.rainviewer);
+        const f = d.radar && d.radar.past && d.radar.past[d.radar.past.length - 1];
+        if (!f) throw new Error('ไม่มีภาพเรดาร์');
+        const lyr = L.tileLayer(d.host + f.path + '/256/{z}/{x}/{y}/2/1_1.png',
+          { opacity: 0.6, maxNativeZoom: L_.rainviewer_max_native_zoom, maxZoom: 18, zIndex: 400,
+            attribution: 'Weather data by <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>' });
+        return { lyr, sub: 'RainViewer · ' + new Date(f.time * 1000).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) };
+      }
+    },
+    {
+      id: 'rainsta', icon: 'ti-droplet', label: 'ฝนสถานีตรวจวัด', on: true, sw: ['rain_24h', 'rain_1h'],
+      swLabels: ['สะสม 24 ชม.', 'ความเข้มตอนนี้'],
+      async build(state) {
+        const tw = await thaiwater(), key = state.sw || 'rain_24h';
+        const lyr = L.layerGroup(tw.rain.map(s => MARK['r:' + s.lat + ',' + s.lon] = L.circleMarker([s.lat, s.lon], {
+          radius: 6, weight: 1, color: '#0F172A', fillColor: rainColor(s[key]), fillOpacity: 0.9
+        }).bindPopup(`<b>${esc(s.name)}</b><br>อ.${esc(s.amphoe)}<br>ฝน 24 ชม. <b>${fmt(s.rain_24h)}</b> มม.<br>
+            ฝน 1 ชม. ${fmt(s.rain_1h)} มม.<br><span class="muted">${tTime(s.time)}</span>`)));
+        return { lyr, sub: `ThaiWater · ${tw.rain.length} สถานี · ${key === 'rain_24h' ? 'ฝน 24 ชม.' : 'ฝน 1 ชม.'}${tw.via === 'snapshot' ? ' (snapshot)' : ''}`,
+          attr: 'สถานี © สสน. (ThaiWater)' };
+      }
+    },
+    {
+      id: 'wlsta', icon: 'ti-ripple', label: 'ระดับน้ำสถานีตรวจวัด', on: true,
+      async build() {
+        const tw = await thaiwater();
+        const lyr = L.layerGroup(tw.waterlevel.map(s => MARK['w:' + s.code] = L.circleMarker([s.lat, s.lon], {
+          radius: 7, weight: 1.5, color: '#0F172A', fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
+        }).bindPopup(`<b>${esc(s.name)}</b> <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
+            ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b><br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
+            ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>`)));
+        return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };
+      }
+    },
+    {
+      id: 'bldg', icon: 'ti-building', label: 'บ้านเรือน (ความหนาแน่น)', on: false,
+      async build() {
+        if (!hex || !hex.features.length || hex.features[0].properties.bldg === undefined) throw new Error('รอชั้น hexagon จาก GEE');
+        const mx = Math.max(...hex.features.map(f => f.properties.bldg));
+        const ramp = ['#F1F5F9', '#CBD5E1', '#94A3B8', '#475569', '#0F172A'];
+        const lyr = L.geoJSON(hex, { style: f => ({ stroke: false, fillOpacity: 0.7,
+          fillColor: ramp[Math.min(4, Math.floor(5 * f.properties.bldg / (mx + 1)))] }),
+          onEachFeature: (f, l) => l.bindPopup(`อาคาร ${f.properties.bldg} หลัง ต่อ hexagon`) });
+        const tot = hex.features.reduce((a, f) => a + f.properties.bldg, 0);
+        return { lyr, sub: `${tot.toLocaleString('th-TH')} หลัง · Open Buildings V3`, attr: 'อาคาร © Google Open Buildings' };
+      }
+    }
+  ];
+
+  /* ---------- UI แผงสวิตช์ ---------- */
+  const state = {};
+  function row(d) {
+    const s = state[d.id];
+    const swHtml = d.sw && s.on ? `<div class="lsw">${d.sw.map((k, i) =>
+      `<button data-sw="${k}" class="${(s.sw || d.sw[0]) === k ? 'on' : ''}">${d.swLabels[i]}</button>`).join('')}</div>` : '';
+    return `<div class="lrow" data-id="${d.id}">
+      <i class="ti ${d.icon} licon" aria-hidden="true"></i>
+      <div class="ltext"><div class="llab">${d.label}</div><div class="lsub ${s.err ? 'lerr' : ''}">${esc(s.err || s.sub || (s.loading ? 'กำลังโหลด…' : 'แตะเพื่อเปิด'))}</div></div>
+      <label class="tog"><input type="checkbox" ${s.on ? 'checked' : ''} aria-label="${d.label}"><span></span></label>
+    </div>${swHtml}`;
+  }
+  function render() {
+    $('layers').innerHTML = defs.map(row).join('');
+    $('layers').querySelectorAll('.lrow input').forEach(cb => cb.onchange = () => setOn(cb.closest('.lrow').dataset.id, cb.checked));
+    $('layers').querySelectorAll('.lsw button').forEach(b => b.onclick = () => {
+      const id = b.closest('.lsw').previousElementSibling.dataset.id;
+      state[id].sw = b.dataset.sw; rebuild(id);
+    });
+  }
+  async function rebuild(id) {
+    const s = state[id];
+    if (s.lyr) { map.removeLayer(s.lyr); s.lyr = null; }
+    await setOn(id, true);
+  }
+  async function setOn(id, on) {
+    const d = defs.find(x => x.id === id), s = state[id];
+    s.on = on; s.err = null;
+    if (!on) {
+      if (s.lyr) map.removeLayer(s.lyr);
+      if (s.toggle) s.toggle(false);
+      if (s.attr) map.attributionControl.removeAttribution(s.attr);
+      return render();
+    }
+    s.loading = true; render();
+    try {
+      const r = await d.build(s);
+      Object.assign(s, { sub: r.sub, toggle: r.toggle, attr: r.attr });
+      if (r.lyr) { s.lyr = r.lyr; if (s.on) s.lyr.addTo(map); }
+      if (r.toggle) r.toggle(true);
+      if (r.attr) map.attributionControl.addAttribution(r.attr);
+    } catch (e) {
+      s.err = e.message; s.on = false;
+    }
+    s.loading = false; render();
+  }
+  /* ---------- สถานการณ์ปัจจุบัน: KPI + รายการสถานีที่ควรจับตา ---------- */
+  function setK(id, v, sub) { $(id).textContent = v; if ($(id + '-s')) $(id + '-s').textContent = sub || ''; }
+  async function refreshNow() {
+    try {
+      const tw = await thaiwater();
+      const rain = tw.rain.filter(s => s.rain_24h != null).sort((a, b) => b.rain_24h - a.rain_24h);
+      const wl = tw.waterlevel.filter(s => s.storage_pct != null).sort((a, b) => b.storage_pct - a.storage_pct);
+      const heavy = rain.filter(s => s.rain_24h >= 35.1);
+      setK('k-rmax', rain.length ? fmt(rain[0].rain_24h) + ' มม.' : '—', rain.length ? rain[0].name : 'ไม่มีข้อมูลสถานี');
+      setK('k-heavy', `${heavy.length}`, `จาก ${rain.length} สถานีในพื้นที่`);
+      setK('k-wl', `${wl.filter(s => s.storage_pct >= 70).length}`, `จาก ${wl.length} สถานี`);
+      const top = [
+        ...wl.filter(s => s.storage_pct >= 30).slice(0, 5).map(s => ({ k: 'w:' + s.code, lyr: 'wlsta', c: wlColor(s.storage_pct),
+          t: s.name, sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'), v: fmt(s.storage_pct, 0) + '%' })),
+        ...rain.filter(s => s.rain_24h >= 10.1).slice(0, 5).map(s => ({ k: 'r:' + s.lat + ',' + s.lon, lyr: 'rainsta', c: rainColor(s.rain_24h),
+          t: s.name, sub: 'ฝน 24 ชม. · อ.' + (s.amphoe || '—'), v: fmt(s.rain_24h) + ' มม.' }))
+      ];
+      $('now').innerHTML = top.length ? top.map(x => `<div class="wrow" data-k="${esc(x.k)}" data-l="${x.lyr}">
+          <span><span class="dot" style="background:${x.c}"></span>${esc(x.t)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">${esc(x.sub)}</span></span>
+          <span class="mono">${x.v}</span></div>`).join('')
+        : '<div class="muted" style="font-size:13px">ไม่มีสถานีที่ระดับน้ำ ≥ 30% ความจุ หรือฝน ≥ 10 มม. ใน 24 ชม.</div>';
+      $('now-ts').textContent = '· ' + new Date(tw.time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        + (tw.via === 'snapshot' ? ' (snapshot)' : '');
+      $('now').querySelectorAll('.wrow').forEach(el => el.onclick = async () => {
+        if (!state[el.dataset.l].on) await setOn(el.dataset.l, true);
+        const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 12)); m.openPopup(); }
+      });
+    } catch (e) {
+      $('now').innerHTML = `<div class="muted" style="font-size:13px">ดึงข้อมูลสถานี ThaiWater ไม่สำเร็จ: ${esc(e.message)}</div>`;
+      ['k-rmax', 'k-heavy', 'k-wl'].forEach(id => setK(id, '—', 'ไม่มีข้อมูล'));
+    }
+    try {
+      const g = await json('data/live/gistda_flood_7d.geojson');
+      if (g.status === 'ok') setK('k-flood', Number(g.total_rai || 0).toLocaleString('th-TH') + ' ไร่', `GISTDA · ${g.features.length} แปลง`);
+      else setK('k-flood', '—', g.status === 'not_configured' ? 'รอ GISTDA API key' : 'ดึงไม่สำเร็จ');
+    } catch (e) { setK('k-flood', '—', 'ไม่มีข้อมูล'); }
+  }
+
+  /* ---------- รีเฟรชอัตโนมัติทุก 10 นาที (เฉพาะเมื่อแท็บเปิดอยู่) ---------- */
+  let lastRun = Date.now();
+  async function refreshAll() {
+    if (document.hidden) return;
+    lastRun = Date.now();
+    twCache = null;
+    for (const d of defs) if (state[d.id].on && d.id !== 'labels') await rebuild(d.id);
+    await refreshNow();
+  }
+  setInterval(refreshAll, 10 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastRun > 10 * 60 * 1000) refreshAll(); });
+
+  defs.forEach(d => state[d.id] = { on: false });
+  render();
+  defs.filter(d => d.on).forEach(d => setOn(d.id, true));
+  refreshNow();
+});

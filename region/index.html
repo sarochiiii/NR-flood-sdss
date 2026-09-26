@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1628">
+<title>SDSS น้ำท่วม โนนไทย–โนนสูง — ระบบสนับสนุนการตัดสินใจเชิงพื้นที่</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/region.css">
+</head>
+<body>
+<header class="hdr">
+  <div>
+    <div class="hdr-title">SDSS น้ำท่วม · อำเภอโนนไทย–โนนสูง</div>
+    <div class="hdr-sub">ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ · โครงการวิจัยย่อยที่ 2 มรภ.นครราชสีมา</div>
+  </div>
+  <div class="hdr-right">
+    <span id="badge" class="badge badge-warn">กำลังโหลด</span>
+    <span id="updated" class="mono hdr-ts">—</span>
+  </div>
+</header>
+
+<section class="kpi">
+  <div class="kpi-card"><div class="kpi-lab">ฝนสถานีสูงสุด 24 ชม.</div><div class="kpi-val mono" id="k-rmax">—</div><div class="kpi-sub" id="k-rmax-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">สถานีฝนหนัก ≥ 35.1 มม.</div><div class="kpi-val mono" id="k-heavy">—</div><div class="kpi-sub" id="k-heavy-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">สถานีน้ำ ≥ 70% ความจุ</div><div class="kpi-val mono" id="k-wl">—</div><div class="kpi-sub" id="k-wl-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">น้ำท่วมตรวจพบ 7 วัน</div><div class="kpi-val mono" id="k-flood">—</div><div class="kpi-sub" id="k-flood-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">คาดการณ์ฝน 24 ชม. สูงสุด</div><div class="kpi-val mono" id="k-fcst">—</div><div class="kpi-sub">Open-Meteo รายตำบล</div></div>
+</section>
+
+<main class="body">
+  <div class="mapwrap">
+    <div id="map"></div>
+    <div class="modes" id="modes" role="group" aria-label="เลือกชั้นแสดงผล"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <aside class="rail">
+    <section class="card" id="query">
+      <div class="muted">แตะตำบลบนแผนที่เพื่อดูรายละเอียด</div>
+    </section>
+    <section>
+      <h2 class="rail-h">สถานีที่ควรจับตา <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
+      <div id="now"></div>
+    </section>
+    <section>
+      <h2 class="rail-h">เลเยอร์ข้อมูล</h2>
+      <div id="layers" class="layers"></div>
+    </section>
+    <section>
+      <h2 class="rail-h">ตำบลเรียงตามฝน (แบบจำลอง)</h2>
+      <div id="watch"></div>
+    </section>
+    <section>
+      <h2 class="rail-h">สถานะข้อมูล</h2>
+      <div id="status"></div>
+    </section>
+    <section>
+      <h2 class="rail-h">วิธีคำนวณ</h2>
+      <details class="method">
+        <summary>Risk matrix: Susceptibility (S) × Trigger (T)</summary>
+        <div id="method"></div>
+      </details>
+    </section>
+  </aside>
+</main>
+
+<footer class="disc">
+  ระบบนี้เป็นเครื่องมือสนับสนุนการตัดสินใจสำหรับ ADM และ อบต. <b>ไม่ใช่การประกาศเตือนภัย</b>
+  ซึ่งเป็นอำนาจของกรมป้องกันและบรรเทาสาธารณภัยตาม พ.ร.บ.ป้องกันและบรรเทาสาธารณภัย พ.ศ. 2550 ·
+  ฝนรายตำบลเป็นค่าจากแบบจำลอง Open-Meteo · สถานีฝนและระดับน้ำจาก สสน. (ThaiWater) · เรดาร์ฝนจาก RainViewer · น้ำท่วมตรวจพบจาก GISTDA · ขอบเขตตำบลจาก OpenGISData-Thailand (รอเทียบกับข้อมูลกรมการปกครอง)
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/region.js"></script>
+</body>
+</html>

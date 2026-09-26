@@ -1,0 +1,102 @@
+{
+  "_note": "ไฟล์นี้ใช้ร่วมกันระหว่างหน้าเว็บ (region.js) และสคริปต์ Python (compute_risk.py) แก้ที่นี่ที่เดียว",
+  "region_name": "อำเภอโนนไทย–โนนสูง จังหวัดนครราชสีมา",
+  "sandbox": {
+    "tcode": "301010",
+    "url": "../chanat/",
+    "label": "Sandbox ตำบลจันอัด"
+  },
+  "stale_after_min": 360,
+  "levels": [
+    {
+      "rank": 0,
+      "key": "green",
+      "label": "เขียว",
+      "desc": "ปกติ"
+    },
+    {
+      "rank": 1,
+      "key": "yellow",
+      "label": "เหลือง",
+      "desc": "เฝ้าระวัง"
+    },
+    {
+      "rank": 2,
+      "key": "orange",
+      "label": "ส้ม",
+      "desc": "เตรียมพร้อม"
+    },
+    {
+      "rank": 3,
+      "key": "red",
+      "label": "แดง",
+      "desc": "วิกฤต"
+    }
+  ],
+  "t_states": [
+    "ปกติ",
+    "เฝ้าระวัง",
+    "เตือน",
+    "วิกฤต"
+  ],
+  "s_classes": [
+    "ต่ำ",
+    "ปานกลาง",
+    "สูง",
+    "สูงมาก"
+  ],
+  "matrix_verified": false,
+  "matrix": [
+    [
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    [
+      1,
+      2,
+      3,
+      3
+    ]
+  ],
+  "rain": {
+    "source": "Open-Meteo Forecast API (แบบจำลองเชิงตัวเลข ไม่ใช่สถานีวัดจริง)",
+    "tmd_24h_mm": {
+      "heavy": 35.1,
+      "very_heavy": 90.1
+    },
+    "tmd_ref": "เกณฑ์ปริมาณฝน 24 ชม. ของกรมอุตุนิยมวิทยา: ฝนหนัก 35.1–90.0 มม., ฝนหนักมาก > 90.0 มม.",
+    "wet_7d_mm": null,
+    "wet_7d_note": "ยังไม่กำหนด — ต้อง calibrate กับเหตุการณ์ปี 2564 ก่อน ถ้าเป็น null ระบบจะไม่ใช้เงื่อนไขนี้"
+  },
+  "water": {
+    "verified": false,
+    "basis": "storage_percent ของ ThaiWater (ร้อยละของความจุลำน้ำถึงระดับตลิ่งต่ำสุด) หารด้วย 100",
+    "ratio": {
+      "watch": 0.6,
+      "warn": 0.75,
+      "crit": 0.9
+    },
+    "note": "เกณฑ์สัดส่วนความจุลำน้ำ ยังไม่ได้รับการยืนยันจากกรมชลประทานและ ปภ."
+  },
+  "layers": {
+    "thaiwater_base": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/",
+    "rainviewer": "https://api.rainviewer.com/public/weather-maps.json",
+    "rainviewer_max_native_zoom": 7,
+    "station_buffer_deg": 0.15,
+    "_note": "ThaiWater public API และ RainViewer เรียกจากเบราว์เซอร์โดยตรง ถ้าไม่สำเร็จจะใช้ snapshot จาก GitHub Actions"
+  }
+}

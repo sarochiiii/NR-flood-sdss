@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDSS จันอัด Sandbox — ระบบสนับสนุนการตัดสินใจเชิงพื้นที่</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --navy:    #0A1628;
+  --navy2:   #112240;
+  --blue:    #1B4F8A;
+  --teal:    #0E7C7B;
+  --teal2:   #0D9488;
+  --white:   #FFFFFF;
+  --offwh:   #F8FAFC;
+  --panel:   #F1F5F9;
+  --red:     #C0392B;
+  --redlt:   #FEF2F2;
+  --amber:   #D68910;
+  --amberlt: #FFFBEB;
+  --green:   #1E8449;
+  --greenlt: #F0FDF4;
+  --border:  #E2E8F0;
+  --border2: #CBD5E1;
+  --text:    #0F172A;
+  --text2:   #334155;
+  --muted:   #64748B;
+  --font:    'IBM Plex Sans Thai', system-ui, sans-serif;
+  --mono:    'IBM Plex Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--offwh);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: var(--navy);
+  border-bottom: 2px solid var(--teal);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-logo { display: flex; flex-direction: column; }
+.app-title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
+.app-sub   { font-size: 10px; color: #5EEAD4; margin-top: 2px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.alert-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--red); color: #fff; font-size: 11px; font-weight: 600;
+  padding: 5px 12px; border-radius: 20px; letter-spacing: 0.04em;
+}
+.blink { width: 7px; height: 7px; border-radius: 50%; background: #fff;
+  animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.ts { font-size: 10px; color: #5EEAD4; font-family: var(--mono); }
+
+/* ── NAV TABS ────────────────────────────────────────────── */
+.nav-bar {
+  display: flex;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  overflow-x: auto;
+}
+.nav-tab {
+  font-size: 11px; font-weight: 500;
+  padding: 9px 14px; color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+  transition: color .2s, border-color .2s;
+}
+.nav-tab:hover { color: var(--teal2); }
+.nav-tab.active { color: var(--teal2); border-bottom-color: var(--teal2); font-weight: 600; }
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.app-body { display: flex; gap: 0; height: calc(100vh - 80px); overflow: hidden; background: var(--white); }
+
+.left-panel {
+  flex: 1; display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--white);
+}
+.right-panel {
+  width: 260px; display: flex; flex-direction: column;
+  background: var(--panel); overflow-y: auto;
+  border-left: 1px solid var(--border);
+}
+
+/* ── METRIC ROW ──────────────────────────────────────────── */
+.metric-row {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.metric-card {
+  padding: 11px 14px; background: var(--white);
+}
+.metric-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); margin-bottom: 4px;
+}
+.metric-value { font-size: 24px; font-weight: 700; line-height: 1; }
+.metric-unit  { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.metric-delta { font-size: 10px; margin-top: 4px; }
+.val-red   { color: #DC2626; }
+.val-green { color: #16A34A; }
+.val-white { color: var(--text); }
+.delta-up   { color: #DC2626; }
+.delta-ok   { color: #16A34A; }
+
+/* ── MAP PANEL ───────────────────────────────────────────── */
+.map-section { flex: 1; padding: 12px; overflow: hidden; display: flex; flex-direction: column; background: var(--white); }
+.map-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.map-label { font-size: 11px; font-weight: 600; color: var(--text); }
+.map-badge {
+  font-size: 9px; padding: 2px 8px; border-radius: 8px;
+  background: #CCFBF1; color: #0F766E;
+  border: 1px solid #99F6E4;
+}
+.map-container {
+  flex: 1; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: #E8F5E9;
+}
+.map-container svg { display: block; width: 100%; height: 100%; }
+
+/* ── MAP ACTION BUTTONS ──────────────────────────────────── */
+.map-actions { display: flex; gap: 6px; margin-top: 8px; }
+.map-btn {
+  flex: 1; padding: 7px 10px; border-radius: 6px; cursor: pointer;
+  background: var(--white); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 10px; font-weight: 500;
+  text-align: center; font-family: var(--font);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.map-btn:hover { background: #CCFBF1; border-color: var(--teal2); color: var(--teal2); }
+
+/* ── RIGHT PANEL SECTIONS ────────────────────────────────── */
+.rp-section { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--white); margin-bottom: 1px; }
+.rp-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); margin-bottom: 8px;
+}
+
+/* Risk tiers */
+.risk-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.risk-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.risk-name { font-size: 10px; color: var(--text2); flex: 1; }
+.risk-bar-bg { flex: 2; height: 4px; background: var(--border); border-radius: 2px; }
+.risk-bar    { height: 4px; border-radius: 2px; }
+.risk-count  { font-size: 11px; font-weight: 600; color: var(--text); min-width: 28px; text-align: right; }
+
+/* Forecast bars */
+.fc-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.fc-day { font-size: 9px; color: var(--muted); width: 38px; flex-shrink: 0; }
+.fc-bar-bg { flex: 1; height: 5px; background: var(--border); border-radius: 3px; }
+.fc-bar { height: 5px; border-radius: 3px; transition: width .4s ease; }
+.fc-val { font-size: 10px; font-weight: 600; min-width: 32px; text-align: right; color: var(--text); }
+
+/* Agency rows */
+.ag-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.ag-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ag-name { font-size: 10px; color: var(--text2); flex: 1; }
+.ag-status { font-size: 9px; padding: 2px 7px; border-radius: 8px; font-weight: 500; }
+.s-active  { background: #DCFCE7; color: #15803D; }
+.s-alert   { background: #FEF2F2; color: #B91C1C; }
+.s-standby { background: #FFFBEB; color: #92400E; }
+
+/* ── BOTTOM STRIP ────────────────────────────────────────── */
+.bottom-strip {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.bs-cell { padding: 9px 14px; background: var(--offwh); }
+.bs-cell:first-child { border-right: 1px solid var(--border); }
+.bs-section-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); margin-bottom: 7px;
+}
+
+/* Alert feed */
+.alert-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; }
+.alert-item:last-child { margin-bottom: 0; }
+.alert-icon {
+  width: 18px; height: 18px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.ic-red    { background: #FEE2E2; color: #B91C1C; }
+.ic-amber  { background: #FEF3C7; color: #92400E; }
+.ic-green  { background: #DCFCE7; color: #15803D; }
+.alert-text { font-size: 10px; color: var(--text2); line-height: 1.4; }
+.alert-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+/* DSS actions */
+.dss-action {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border-radius: 6px;
+  background: var(--white); border: 1px solid var(--border);
+  margin-bottom: 5px; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.dss-action:hover { background: #F0FDFA; border-color: #99F6E4; }
+.dss-action-label { font-size: 10px; color: var(--text2); font-weight: 500; }
+.dss-arrow { font-size: 11px; color: var(--teal2); }
+
+/* Footer tag */
+.sdk-tag {
+  margin-top: 7px; font-size: 9px; color: var(--muted);
+  padding: 5px 8px; border-radius: 5px;
+  background: var(--panel); border: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Fallback fonts if Google Fonts unavailable */
+@font-face {
+  font-family: 'IBM Plex Sans Thai Fallback';
+  src: local('Tahoma'), local('Arial');
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="app-logo">
+    <div class="app-title">SDSS จันอัด Sandbox — ระบบสนับสนุนการตัดสินใจเชิงพื้นที่</div>
+    <div class="app-sub">ต.จันอัด อ.โนนสูง จ.นครราชสีมา · GEE + ML Forecast (LSTM) · PPPConnext · Open-source</div>
+  </div>
+  <div class="header-right">
+    <div class="alert-pill"><div class="blink"></div>เตือนภัยระดับแดง · ลำเชียงไกร</div>
+    <div class="ts" id="ts">อัปเดต —</div>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<nav class="nav-bar">
+  <div class="nav-tab active">แผนที่ SDSS</div>
+  <div class="nav-tab">ครัวเรือน PPPConnext</div>
+  <div class="nav-tab">ML Forecast</div>
+  <div class="nav-tab">แผนเผชิญเหตุ</div>
+  <div class="nav-tab">ADM Network</div>
+</nav>
+
+<div class="app-body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <!-- METRIC ROW -->
+    <div class="metric-row">
+      <div class="metric-card">
+        <div class="metric-label">ครัวเรือนเสี่ยงภัย</div>
+        <div class="metric-value val-red">312</div>
+        <div class="metric-unit">จาก 977 ครัวเรือน 4 หมู่</div>
+        <div class="metric-delta delta-up">▲ 47 จากเมื่อวาน</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">ระดับน้ำ ลำเชียงไกร</div>
+        <div class="metric-value val-red">4.82</div>
+        <div class="metric-unit">ม. (เกณฑ์วิกฤต &gt;4.50 ม.)</div>
+        <div class="metric-delta delta-up">▲ 0.34 ม./6 ชม.</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">ADM ปฏิบัติการ</div>
+        <div class="metric-value val-green">28</div>
+        <div class="metric-unit">จาก 30 คน · 4 หมู่บ้าน</div>
+        <div class="metric-delta delta-ok">✓ ประจำจุด 7 จุด</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">ML Confidence</div>
+        <div class="metric-value val-white">87%</div>
+        <div class="metric-unit">LSTM 7-day forecast</div>
+        <div class="metric-delta delta-up">▲ ระดับน้ำเพิ่มต่อเนื่อง</div>
+      </div>
+    </div>
+
+    <!-- MAP + ACTIONS -->
+    <div class="map-section">
+      <div class="map-header">
+        <span class="map-label">Interactive Risk Map · ตำบลจันอัด (Spatial Decision Layer)</span>
+        <span class="map-badge">GEE · ERA5 · PPPConnext</span>
+      </div>
+
+      <div class="map-container">
+        <svg viewBox="0 0 540 320" xmlns="http://www.w3.org/2000/svg" aria-label="แผนที่ความเสี่ยงภัยพิบัติตำบลจันอัด">
+          <defs>
+            <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
+              <path d="M22 0L0 0 0 22" fill="none" stroke="#C8DFC8" stroke-width="0.5"/>
+            </pattern>
+            <radialGradient id="grd" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stop-color="#E8F5E9"/>
+              <stop offset="100%" stop-color="#D4EDDA"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Background -->
+          <rect width="540" height="320" fill="url(#grd)"/>
+          <rect width="540" height="320" fill="url(#grid)" opacity="0.5"/>
+
+          <!-- Sub-district boundary -->
+          <path d="M80 72 Q100 50 140 58 Q185 44 220 64 Q265 52 305 68 Q345 58 390 76 Q430 82 462 108 Q455 138 448 162 Q468 184 458 218 Q428 252 386 262 Q344 278 302 268 Q258 274 224 260 Q178 266 148 246 Q112 224 118 192 Q100 160 110 126 Q114 96 80 72Z"
+                fill="rgba(180,220,180,0.45)" stroke="#5A9E5A" stroke-width="1.5"/>
+
+          <!-- Lam Chiang Krai river -->
+          <path d="M0 128 Q50 114 90 120 Q130 114 158 136 Q185 148 210 142 Q240 136 272 148 Q308 142 348 158 Q385 152 420 166 Q445 172 480 170 Q510 168 540 172"
+                fill="none" stroke="#2980B9" stroke-width="5" opacity="0.7"/>
+          <path d="M0 136 Q55 124 95 130 Q135 124 163 145 Q188 156 214 150 Q244 144 278 156 Q314 150 354 166 Q390 160 425 174 Q450 180 485 178 Q515 176 540 180"
+                fill="#AED6F1" stroke="none" opacity="0.45"/>
+          <text x="310" y="172" font-size="9" fill="#1A5276" font-family="IBM Plex Sans Thai, sans-serif" font-weight="600">ลำเชียงไกร</text>
+
+          <!-- Village 5: บ้านด่านติง (HIGH RISK - RED) -->
+          <ellipse cx="160" cy="180" rx="55" ry="33" fill="rgba(192,57,43,0.22)" stroke="#E74C3C" stroke-width="1.5"/>
+          <!-- Pulse animation -->
+          <ellipse cx="160" cy="175" rx="14" ry="14" fill="none" stroke="#E74C3C" stroke-width="1.5" opacity="0">
+            <animate attributeName="rx" from="12" to="30" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="ry" from="12" to="30" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" from="0.6" to="0" dur="2.5s" repeatCount="indefinite"/>
+          </ellipse>
+          <circle cx="160" cy="175" r="12" fill="#C0392B" stroke="#fff" stroke-width="1.5"/>
+          <text x="160" y="179" font-size="10" fill="white" text-anchor="middle" font-weight="700">5</text>
+          <!-- HH dots -->
+          <rect x="136" y="163" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.8"/>
+          <rect x="150" y="168" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.7"/>
+          <rect x="172" y="165" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.8"/>
+          <rect x="184" y="170" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.6"/>
+          <text x="160" y="205" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="600">บ้านด่านติง</text>
+          <text x="160" y="217" font-size="8"  fill="#B91C1C" text-anchor="middle">285 ครัวเรือน · เสี่ยงสูงสุด</text>
+
+          <!-- Village 2: บ้านจันอัด (HIGH - ORANGE) -->
+          <ellipse cx="300" cy="220" rx="50" ry="30" fill="rgba(214,137,16,0.2)" stroke="#F39C12" stroke-width="1.5"/>
+          <circle cx="300" cy="215" r="11" fill="#BA7517" stroke="#fff" stroke-width="1.5"/>
+          <text x="300" y="219" font-size="10" fill="white" text-anchor="middle" font-weight="700">2</text>
+          <rect x="278" y="204" width="4" height="4" rx="1" fill="#F39C12" opacity="0.8"/>
+          <rect x="292" y="200" width="4" height="4" rx="1" fill="#F39C12" opacity="0.7"/>
+          <rect x="312" y="205" width="4" height="4" rx="1" fill="#F39C12" opacity="0.8"/>
+          <text x="300" y="243" font-size="10" fill="#78350F" text-anchor="middle" font-weight="600">บ้านจันอัด</text>
+          <text x="300" y="254" font-size="8"  fill="#92400E" text-anchor="middle">287 ครัวเรือน</text>
+
+          <!-- Village 4: บ้านโค้งกระชาย (ORANGE) -->
+          <ellipse cx="400" cy="120" rx="46" ry="28" fill="rgba(214,137,16,0.18)" stroke="#F59E0B" stroke-width="1.2"/>
+          <circle cx="400" cy="115" r="11" fill="#BA7517" stroke="#fff" stroke-width="1.5"/>
+          <text x="400" y="119" font-size="10" fill="white" text-anchor="middle" font-weight="700">4</text>
+          <text x="400" y="142" font-size="10" fill="#78350F" text-anchor="middle" font-weight="600">บ้านโค้งกระชาย</text>
+          <text x="400" y="153" font-size="8"  fill="#92400E" text-anchor="middle">231 ครัวเรือน</text>
+
+          <!-- Village 1: บ้านสำโรง (LOW - GREEN) -->
+          <ellipse cx="218" cy="90" rx="42" ry="26" fill="rgba(39,174,96,0.2)" stroke="#16A34A" stroke-width="1.2"/>
+          <circle cx="218" cy="85" r="11" fill="#1E8449" stroke="#fff" stroke-width="1.5"/>
+          <text x="218" y="89" font-size="10" fill="white" text-anchor="middle" font-weight="700">1</text>
+          <text x="218" y="110" font-size="10" fill="#14532D" text-anchor="middle" font-weight="600">บ้านสำโรง</text>
+          <text x="218" y="121" font-size="8"  fill="#166534" text-anchor="middle">174 ครัวเรือน</text>
+
+          <!-- Shelter icon -->
+          <rect x="112" y="232" width="14" height="10" rx="2" fill="#DC2626" opacity="0.85"/>
+          <text x="119" y="252" font-size="7" fill="#7F1D1D" text-anchor="middle">ศูนย์พักพิง</text>
+          <text x="119" y="260" font-size="7" fill="#7F1D1D" text-anchor="middle">วัดด่านติง</text>
+
+          <!-- Water gauge -->
+          <rect x="368" y="70" width="10" height="16" rx="1" fill="#2980B9" opacity="0.9"/>
+          <text x="373" y="62" font-size="7" fill="#1A5276" text-anchor="middle">สถานีวัดน้ำ</text>
+
+          <!-- Legend -->
+          <rect x="16" y="260" width="100" height="52" rx="4" fill="rgba(255,255,255,0.92)" stroke="#CBD5E1" stroke-width="0.8"/>
+          <text x="22" y="274" font-size="8" fill="#0F172A" font-weight="600">ระดับความเสี่ยง</text>
+          <rect x="22" y="280" width="9" height="7" rx="1" fill="#DC2626"/>
+          <text x="35" y="287" font-size="7" fill="#334155">สูงมาก (แดง)</text>
+          <rect x="22" y="291" width="9" height="7" rx="1" fill="#F59E0B"/>
+          <text x="35" y="298" font-size="7" fill="#334155">สูง (ส้ม)</text>
+          <rect x="22" y="302" width="9" height="7" rx="1" fill="#16A34A"/>
+          <text x="35" y="309" font-size="7" fill="#334155">ต่ำ (เขียว)</text>
+
+          <!-- Compass -->
+          <text x="500" y="24" font-size="10" fill="#1A5276" text-anchor="middle">N ↑</text>
+          <text x="500" y="36" font-size="7" fill="#5D7A8A" text-anchor="middle">ต.จันอัด</text>
+        </svg>
+      </div>
+
+      <div class="map-actions">
+        <button class="map-btn" onclick="alert('PPPConnext Layer: แสดงครัวเรือนยากจนรายจุด บ้านด่านติง หมู่ 5')">PPPConnext Layer ↗</button>
+        <button class="map-btn" onclick="alert('Evacuation Route: คำนวณเส้นทางอพยพ GIS routing ไปวัดด่านติง')">Evacuation Route ↗</button>
+        <button class="map-btn" onclick="alert('ML Forecast: ดูผล LSTM 7 วันระดับน้ำลำเชียงไกร')">ML Forecast ↗</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM STRIP -->
+    <div class="bottom-strip">
+      <div class="bs-cell">
+        <div class="bs-section-label">แจ้งเตือน Line OA · Feed อัตโนมัติ</div>
+
+        <div class="alert-item">
+          <div class="alert-icon ic-red">!</div>
+          <div>
+            <div class="alert-text">ระดับน้ำลำเชียงไกร 4.82 ม. เกินเกณฑ์วิกฤต — ส่งเตือน Line OA 977 ครัวเรือน</div>
+            <div class="alert-time">06:00 · ระดับแดง · LSTM confidence 87%</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon ic-red">!</div>
+          <div>
+            <div class="alert-text">บ้านด่านติง หมู่ 5 — เปิดศูนย์พักพิงวัดด่านติง · ADM 8 คน ประจำจุด</div>
+            <div class="alert-time">05:30 · อบต.จันอัด + ปภ.</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon ic-amber">~</div>
+          <div>
+            <div class="alert-text">บ้านจันอัด หมู่ 2 — ระดับส้ม เตรียมพร้อมอพยพครัวเรือนริมน้ำ 143 หลัง</div>
+            <div class="alert-time">04:45 · ADM ตรวจสอบแล้ว</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon ic-green">✓</div>
+          <div>
+            <div class="alert-text">บ้านสำโรง หมู่ 1 — ระดับเขียว ปกติ ไม่พบครัวเรือนเสี่ยงเพิ่ม</div>
+            <div class="alert-time">03:00 · ระบบอัตโนมัติ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bs-cell">
+        <div class="bs-section-label">DSS — ระบบสนับสนุนการตัดสินใจ (อบต./ADM)</div>
+        <div class="dss-action" onclick="alert('แผนเผชิญเหตุ 3 ระยะ ระดับแดง: ก่อน / ระหว่าง / หลังเกิดภัย')">
+          <span class="dss-action-label">ดูแผนเผชิญเหตุ 3 ระยะ (วิกฤต-แดง)</span><span class="dss-arrow">↗</span>
+        </div>
+        <div class="dss-action" onclick="alert('คำนวณ Evacuation Route: GIS routing บ้านด่านติง → วัดด่านติง')">
+          <span class="dss-action-label">คำนวณ Evacuation Route (GIS)</span><span class="dss-arrow">↗</span>
+        </div>
+        <div class="dss-action" onclick="alert('ตรวจสอบ PPPConnext: ครัวเรือนยากจนเสี่ยงสูงที่ยังไม่ได้รับการช่วยเหลือ')">
+          <span class="dss-action-label">ตรวจสอบ PPPConnext Target HH</span><span class="dss-arrow">↗</span>
+        </div>
+        <div class="dss-action" onclick="alert('สร้างรายงาน After Action Review (AAR) อัตโนมัติ')">
+          <span class="dss-action-label">สร้างรายงาน AAR อัตโนมัติ</span><span class="dss-arrow">↗</span>
+        </div>
+        <div class="dss-action" onclick="alert('Temporal Analysis: เปรียบเทียบข้อมูลน้ำท่วม 2567–2569')">
+          <span class="dss-action-label">Temporal Analysis 2567–2569</span><span class="dss-arrow">↗</span>
+        </div>
+        <div class="sdk-tag">SDSS Engine: GEE (Qwen/KIMI Agent) · Open-source stack · ไม่มีค่า API รายเดือน</div>
+      </div>
+    </div>
+
+  </div><!-- end left-panel -->
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="rp-section">
+      <div class="rp-label">ระดับความเสี่ยง (Household Risk Tiers)</div>
+      <div class="risk-row">
+        <div class="risk-dot" style="background:#E74C3C;"></div>
+        <div class="risk-name">แดง — วิกฤต</div>
+        <div class="risk-bar-bg"><div class="risk-bar" style="background:#E74C3C;width:85%;"></div></div>
+        <div class="risk-count" style="color:#E74C3C;">84</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-dot" style="background:#F39C12;"></div>
+        <div class="risk-name">ส้ม — สูง</div>
+        <div class="risk-bar-bg"><div class="risk-bar" style="background:#F39C12;width:65%;"></div></div>
+        <div class="risk-count" style="color:#F0B842;">143</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-dot" style="background:#F1C40F;"></div>
+        <div class="risk-name">เหลือง — ปานกลาง</div>
+        <div class="risk-bar-bg"><div class="risk-bar" style="background:#F1C40F;width:45%;"></div></div>
+        <div class="risk-count">85</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-dot" style="background:#27AE60;"></div>
+        <div class="risk-name">เขียว — ต่ำ</div>
+        <div class="risk-bar-bg"><div class="risk-bar" style="background:#27AE60;width:18%;"></div></div>
+        <div class="risk-count" style="color:#5DCA88;">665</div>
+      </div>
+      <div style="margin-top:6px;font-size:9px;color:var(--muted);">เป้าหมาย Sandbox 100 ครัวเรือน · ติดตามแล้ว 100%</div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-label">ML Forecast · ระดับน้ำ 7 วัน (LSTM)</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:7px;">หน่วย: ม. AMSL · ERA5 + สสน. Real-time</div>
+      <div class="fc-row">
+        <div class="fc-day">พ. 4 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#E74C3C;width:96%;"></div></div>
+        <div class="fc-val" style="color:#E74C3C;">4.82</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">พฤ. 5 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#E74C3C;width:91%;"></div></div>
+        <div class="fc-val" style="color:#E74C3C;">4.63</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">ศ. 6 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F39C12;width:79%;"></div></div>
+        <div class="fc-val" style="color:#F0B842;">4.02</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">ส. 7 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F39C12;width:67%;"></div></div>
+        <div class="fc-val" style="color:#F0B842;">3.41</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">อา. 8 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F1C40F;width:54%;"></div></div>
+        <div class="fc-val" style="color:#F1C40F;">2.69</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">จ. 9 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#27AE60;width:38%;"></div></div>
+        <div class="fc-val" style="color:#5DCA88;">1.91</div>
+      </div>
+      <div class="fc-row">
+        <div class="fc-day">อ. 10 พ.</div>
+        <div class="fc-bar-bg"><div class="fc-bar" style="background:#27AE60;width:22%;"></div></div>
+        <div class="fc-val" style="color:#5DCA88;">1.12</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
+          <div style="width:8px;height:8px;border-radius:2px;background:#E74C3C;"></div>&gt;4.50 วิกฤต
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
+          <div style="width:8px;height:8px;border-radius:2px;background:#F39C12;"></div>3.00–4.50 สูง
+        </div>
+      </div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-label">ภาคีจัดการภัยพิบัติ (7 หน่วยงาน)</div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#27AE60;"></div>
+        <div class="ag-name">อบต.จันอัด (IC)</div>
+        <div class="ag-status s-alert">สั่งการ</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#E74C3C;"></div>
+        <div class="ag-name">ปภ. นครราชสีมา</div>
+        <div class="ag-status s-alert">ประกาศแดง</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#3498DB;"></div>
+        <div class="ag-name">สสน. (Water RT)</div>
+        <div class="ag-status s-active">streaming</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#F39C12;"></div>
+        <div class="ag-name">กรมชลประทาน</div>
+        <div class="ag-status s-standby">standby</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#27AE60;"></div>
+        <div class="ag-name">อสม. 4 หมู่บ้าน</div>
+        <div class="ag-status s-alert">ปฏิบัติการ</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#9B59B6;"></div>
+        <div class="ag-name">กำนัน/ผู้ใหญ่บ้าน</div>
+        <div class="ag-status s-alert">ประสานงาน</div>
+      </div>
+      <div class="ag-row">
+        <div class="ag-dot" style="background:#0E7C7B;"></div>
+        <div class="ag-name">สนง.เกษตรอำเภอ</div>
+        <div class="ag-status s-standby">standby</div>
+      </div>
+    </div>
+
+  </div><!-- end right-panel -->
+</div><!-- end app-body -->
+
+<script>
+// Timestamp
+function updateTs() {
+  const now = new Date();
+  const opts = { timeZone: 'Asia/Bangkok', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false };
+  const t = new Intl.DateTimeFormat('th-TH', opts).format(now);
+  document.getElementById('ts').textContent = 'อัปเดต ' + t + ' ICT';
+}
+updateTs();
+setInterval(updateTs, 1000);
+
+// Nav tab switching
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Animate forecast bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.fc-bar').forEach((bar, i) => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = w; }, 200 + i * 80);
+  });
+});
+</script>
+</body>
+</html>
