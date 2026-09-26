@@ -1,1 +1,162 @@
-{ "updated_at": null, "tambon": [] }
+{
+ "updated_at": "2026-09-26T17:28:31+00:00",
+ "matrix_verified": false,
+ "tambon": [
+  {
+   "tcode": "300901",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300902",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300903",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300904",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300905",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300906",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300907",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300908",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300909",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "300914",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301001",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301002",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301003",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301004",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301005",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301006",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301007",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301008",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301009",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301010",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301011",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301012",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301013",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301014",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301015",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  },
+  {
+   "tcode": "301016",
+   "t_state": 0,
+   "s_class": null,
+   "level_rank": null
+  }
+ ]
+}
