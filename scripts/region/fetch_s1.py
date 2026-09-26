@@ -4,7 +4,7 @@
 และ EE_PROJECT (เช่น ee-sarochineek)
 ข้ามการเขียนไฟล์ถ้าวันที่ภาพเท่าเดิม เพื่อไม่ให้ repo โตจาก commit PNG ซ้ำ
 """
-import json, os, urllib.request
+import json, os, urllib.request, datetime as dt
 from _common import LIVE, now_iso, read, write, region_bbox
 
 META = "s1_latest.json"
@@ -22,7 +22,7 @@ def main():
                       project=os.environ.get("EE_PROJECT") or info.get("project_id"))
         bb = region_bbox(0.03)
         region = ee.Geometry.Rectangle(list(bb))
-        end = ee.Date(ee.Date.now().format("YYYY-MM-dd"))
+        end = ee.Date(dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d"))
         col = (ee.ImageCollection("COPERNICUS/S1_GRD").filterBounds(region)
                .filterDate(end.advance(-14, "day"), end.advance(1, "day"))
                .filter(ee.Filter.eq("instrumentMode", "IW"))

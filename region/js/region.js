@@ -177,7 +177,7 @@
     let h = '';
     if (mode === 'risk') h = '<b>ระดับความเสี่ยง</b>' + cfg.levels.map(l => row(LEVEL_COLOR[l.rank], `${l.label} · ${l.desc}`)).join('');
     else if (mode === 't') h = '<b>สภาวะกระตุ้น (T)</b>' + cfg.t_states.map((s, i) => row(LEVEL_COLOR[i], s)).join('')
-      + (!hasS ? '<div class="muted" style="margin-top:4px">ยังไม่มีชั้น S จาก GEE จึงแสดง T อย่างเดียว</div>' : '');
+;
     else if (mode === 's') h = '<b>ความอ่อนไหว (S) เชิงสัมพัทธ์</b>' + cfg.s_classes.map((s, i) => row(S_COLOR[i], s)).join('');
     else {
       const sc = mode === 'r24' ? RAIN24 : RAIN7;
@@ -195,7 +195,7 @@
     const o = T[code], p = o.p;
     const lvl = o.rank !== null
       ? `<span class="lvl lvl-${o.rank}">ระดับ${cfg.levels[o.rank].label} · ${cfg.levels[o.rank].desc}</span>`
-      : `<span class="lvl lvl-na">${hasS ? 'ข้อมูลไม่พอคำนวณระดับ' : 'ยังไม่มีชั้น S — แสดง T'}</span>`;
+      : `<span class="lvl lvl-na">${hasS ? 'ข้อมูลไม่พอคำนวณระดับ' : 'แสดงสภาวะกระตุ้น (T)'}</span>`;
     const st = o.st ? `${fmt(o.st.storage_pct, 0)}% ความจุ (${o.st.code})` : (p.station_code ? 'ไม่มีข้อมูลสถานี' : 'ยังไม่กำหนดสถานีตัวแทน');
     $('query').innerHTML = `
       <div class="q-name">ต.${p.name}</div>
@@ -253,14 +253,13 @@
     $('status').innerHTML =
       statusLine('ฝน (Open-Meteo)', rain, viaTxt) +
       statusLine('ระดับน้ำ (ThaiWater)', water) +
-      `<div class="srow">${hasS ? '<span style="color:var(--green)">●</span> ชั้น S จาก GEE: พร้อมใช้' : '<span style="color:var(--amber)">●</span> ชั้น S จาก GEE: ยังไม่นำเข้า'}</div>` +
-      (!cfg.matrix_verified ? '<div class="srow"><span style="color:var(--amber)">●</span> Risk matrix: ยังไม่ calibrate</div>' : '') +
+      (hasS ? '<div class="srow"><span style="color:var(--green)">●</span> ชั้น S จาก GEE: พร้อมใช้</div>' : '') +
+      (hasS && !cfg.matrix_verified ? '<div class="srow"><span style="color:var(--amber)">●</span> Risk matrix: ยังไม่ calibrate</div>' : '') +
       (!cfg.water.verified ? '<div class="srow"><span style="color:var(--amber)">●</span> เกณฑ์ระดับน้ำ: ยังไม่ยืนยันกับหน่วยงาน</div>' : '');
 
     const liveOk = rain && rain.status === 'ok' && ageMin(rain.updated_at) <= cfg.stale_after_min;
     const b = $('badge');
     if (!liveOk) { b.className = 'badge badge-err'; b.textContent = 'ไม่มีข้อมูลฝนล่าสุด'; }
-    else if (!hasS) { b.className = 'badge badge-warn'; b.textContent = 'ข้อมูลฝนสด · ยังไม่มีชั้น S'; }
     else { b.className = 'badge badge-ok'; b.textContent = 'ข้อมูลสด'; }
     $('updated').textContent = rain && rain.updated_at ? 'อัปเดต ' + new Date(rain.updated_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '—';
   }

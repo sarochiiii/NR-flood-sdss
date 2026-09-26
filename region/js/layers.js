@@ -24,6 +24,19 @@ document.addEventListener('sdss:ready', () => {
     return [b.getWest() - d, b.getSouth() - d, b.getEast() + d, b.getNorth() + d];
   }
   const MARK = {};   // key → circleMarker สำหรับกดจากรายการสถานี
+  // จุดอยู่ในขอบเขตสองอำเภอหรือไม่ (ray casting บน amphoe.geojson)
+  const AREA = (window.SDSS.amphoe || window.SDSS.tambon).features.flatMap(f =>
+    f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates);
+  function inRing(x, y, r) {
+    let c = false;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+      const [xi, yi] = r[i], [xj, yj] = r[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  }
+  const inArea = (la, lo) => AREA.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
+  const tag = (s) => inArea(s.lat, s.lon) ? '<span class="tag-in">ในพื้นที่</span>' : '<span class="tag-out">ใกล้เคียง</span>';
   const inBox = (la, lo, bb) => la != null && lo != null && lo >= bb[0] && lo <= bb[2] && la >= bb[1] && la <= bb[3];
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
   const th = (x) => (x && typeof x === 'object') ? x.th : x;
@@ -111,8 +124,10 @@ document.addEventListener('sdss:ready', () => {
       async build(state) {
         const tw = await thaiwater(), key = state.sw || 'rain_24h';
         const lyr = L.layerGroup(tw.rain.map(s => MARK['r:' + s.lat + ',' + s.lon] = L.circleMarker([s.lat, s.lon], {
-          radius: 6, weight: 1, color: '#0F172A', fillColor: rainColor(s[key]), fillOpacity: 0.9
-        }).bindPopup(`<b>${esc(s.name)}</b><br>อ.${esc(s.amphoe)}<br>ฝน 24 ชม. <b>${fmt(s.rain_24h)}</b> มม.<br>
+          radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
+          color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
+          fillColor: rainColor(s[key]), fillOpacity: 0.9
+        }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)}<br>อ.${esc(s.amphoe)}<br>ฝน 24 ชม. <b>${fmt(s.rain_24h)}</b> มม.<br>
             ฝน 1 ชม. ${fmt(s.rain_1h)} มม.<br><span class="muted">${tTime(s.time)}</span>`)));
         return { lyr, sub: `ThaiWater · ${tw.rain.length} สถานี · ${key === 'rain_24h' ? 'ฝน 24 ชม.' : 'ฝน 1 ชม.'}${tw.via === 'snapshot' ? ' (snapshot)' : ''}`,
           attr: 'สถานี © สสน. (ThaiWater)' };
@@ -123,8 +138,10 @@ document.addEventListener('sdss:ready', () => {
       async build() {
         const tw = await thaiwater();
         const lyr = L.layerGroup(tw.waterlevel.map(s => MARK['w:' + s.code] = L.circleMarker([s.lat, s.lon], {
-          radius: 7, weight: 1.5, color: '#0F172A', fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
-        }).bindPopup(`<b>${esc(s.name)}</b> <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
+          radius: inArea(s.lat, s.lon) ? 8 : 6, weight: inArea(s.lat, s.lon) ? 2 : 1,
+          color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
+          fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
+        }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
             ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b><br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
             ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>`)));
         return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };
@@ -199,17 +216,20 @@ document.addEventListener('sdss:ready', () => {
       const rain = tw.rain.filter(s => s.rain_24h != null).sort((a, b) => b.rain_24h - a.rain_24h);
       const wl = tw.waterlevel.filter(s => s.storage_pct != null).sort((a, b) => b.storage_pct - a.storage_pct);
       const heavy = rain.filter(s => s.rain_24h >= 35.1);
-      setK('k-rmax', rain.length ? fmt(rain[0].rain_24h) + ' มม.' : '—', rain.length ? rain[0].name : 'ไม่มีข้อมูลสถานี');
-      setK('k-heavy', `${heavy.length}`, `จาก ${rain.length} สถานีในพื้นที่`);
-      setK('k-wl', `${wl.filter(s => s.storage_pct >= 70).length}`, `จาก ${wl.length} สถานี`);
+      const nIn = (a) => a.filter(s => inArea(s.lat, s.lon)).length;
+      const where = (s) => inArea(s.lat, s.lon) ? '' : ' (ใกล้เคียง)';
+      setK('k-rmax', rain.length ? fmt(rain[0].rain_24h) + ' มม.' : '—', rain.length ? rain[0].name + where(rain[0]) : 'ไม่มีข้อมูลสถานี');
+      setK('k-heavy', `${heavy.length}`, `จาก ${rain.length} สถานี (ในพื้นที่ ${nIn(rain)})`);
+      const wl70 = wl.filter(s => s.storage_pct >= 70);
+      setK('k-wl', `${wl70.length}`, `จาก ${wl.length} สถานี (ในพื้นที่ ${nIn(wl70)}/${nIn(wl)})`);
       const top = [
         ...wl.filter(s => s.storage_pct >= 30).slice(0, 5).map(s => ({ k: 'w:' + s.code, lyr: 'wlsta', c: wlColor(s.storage_pct),
-          t: s.name, sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'), v: fmt(s.storage_pct, 0) + '%' })),
+          t: s.name, tg: tag(s), sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'), v: fmt(s.storage_pct, 0) + '%' })),
         ...rain.filter(s => s.rain_24h >= 10.1).slice(0, 5).map(s => ({ k: 'r:' + s.lat + ',' + s.lon, lyr: 'rainsta', c: rainColor(s.rain_24h),
-          t: s.name, sub: 'ฝน 24 ชม. · อ.' + (s.amphoe || '—'), v: fmt(s.rain_24h) + ' มม.' }))
+          t: s.name, tg: tag(s), sub: 'ฝน 24 ชม. · อ.' + (s.amphoe || '—'), v: fmt(s.rain_24h) + ' มม.' }))
       ];
       $('now').innerHTML = top.length ? top.map(x => `<div class="wrow" data-k="${esc(x.k)}" data-l="${x.lyr}">
-          <span><span class="dot" style="background:${x.c}"></span>${esc(x.t)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">${esc(x.sub)}</span></span>
+          <span><span class="dot" style="background:${x.c}"></span>${esc(x.t)} ${x.tg}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">${esc(x.sub)}</span></span>
           <span class="mono">${x.v}</span></div>`).join('')
         : '<div class="muted" style="font-size:13px">ไม่มีสถานีที่ระดับน้ำ ≥ 30% ความจุ หรือฝน ≥ 10 มม. ใน 24 ชม.</div>';
       $('now-ts').textContent = '· ' + new Date(tw.time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
