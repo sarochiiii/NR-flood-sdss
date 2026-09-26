@@ -1,0 +1,36 @@
+name: region-live
+on:
+  schedule:
+    - cron: '15 */3 * * *'      # ทุก 3 ชม. (ฤดูน้ำหลากปรับเป็น '15 * * * *')
+  workflow_dispatch:
+concurrency: { group: live-data, cancel-in-progress: false }
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: ติดตั้ง library (เฉพาะ GISTDA และ Sentinel-1)
+        run: pip install --quiet shapely pyproj earthengine-api
+      - name: ฝนรายตำบล (Open-Meteo)
+        run: python scripts/region/fetch_rain.py
+      - name: สถานีฝนและระดับน้ำ (ThaiWater)
+        run: python scripts/region/fetch_thaiwater.py
+      - name: น้ำท่วม 7 วัน (GISTDA)
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: python scripts/region/fetch_gistda_flood.py
+      - name: ภาพ Sentinel-1 ล่าสุด (Earth Engine)
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: ee-sarochineek
+        run: python scripts/region/fetch_s1.py
+      - name: คำนวณระดับความเสี่ยง
+        run: python scripts/region/compute_risk.py
+      - name: commit ผลลัพธ์
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add region/data/live/
+          git diff --staged --quiet || { git commit -m "data(region): อัปเดตข้อมูลสด $(date -u '+%Y-%m-%d %H:%M UTC')" && git pull --rebase && git push; }
