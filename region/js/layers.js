@@ -136,6 +136,31 @@ document.addEventListener('sdss:ready', () => {
       <div class="spark-lab"><span>${d(x0)}</span><span>${label}</span><span>${d(x1)}</span></div></div>`;
   }
 
+  /* ---------- สถานะเทียบตลิ่ง + เวลาคาดถึงตลิ่ง ---------- */
+  const BK = cfg.bank;
+  function bankStatus(s, t) {
+    if (s.storage_pct == null) return { key: 'na', label: 'ไม่มีข้อมูล', color: '#94A3B8', rank: -1 };
+    const lv = BK.levels.find(l => s.storage_pct >= l.min);
+    const rank = BK.levels.length - 1 - BK.levels.indexOf(lv);
+    if (lv.key === 'over' && t && t.d != null && t.d >= BK.severe.rise_cm) return Object.assign({ rank: rank + 1 }, BK.severe);
+    return Object.assign({ rank }, lv);
+  }
+  // อัตราขึ้นเฉลี่ยช่วง lookback ชม. → ชั่วโมงที่น้ำจะถึงระดับตลิ่งต่ำสุด ถ้าอัตราคงเดิม
+  function bankEta(s, t) {
+    const E = BK.eta;
+    if (!t || !t.series || s.bank_msl == null || s.level_msl == null || s.level_msl >= s.bank_msl) return null;
+    const last = t.series[t.series.length - 1], from = +last[0] - E.lookback_h * 3.6e6;
+    const base = t.series.filter(p => +p[0] >= from)[0];
+    if (!base) return null;
+    const span = (+last[0] - +base[0]) / 3.6e6;
+    if (span < E.min_span_h) return null;
+    const rate = (last[1] - base[1]) * 100 / span;                  // ซม./ชม.
+    if (rate < E.min_rate_cm_h) return null;
+    const h = (s.bank_msl - s.level_msl) * 100 / rate;
+    return h <= E.max_hours ? { h, rate, span } : null;
+  }
+  const etaTxt = (e) => e ? `คาดถึงตลิ่งใน ~${e.h < 1 ? '<1' : Math.round(e.h)} ชม. ถ้าน้ำขึ้นด้วยอัตราเดิม (${fmt(e.rate, 1)} ซม./ชม. เฉลี่ย ${Math.round(e.span)} ชม. ล่าสุด)` : '';
+
   /* ---------- สีตามเกณฑ์ ---------- */
   const RAIN_BR = [[90.1, '#08306B'], [35.1, '#2171B5'], [10.1, '#6BAED6'], [0.1, '#C6DBEF'], [-1, '#E2E8F0']];
   const rainColor = v => (RAIN_BR.find(([b]) => (v ?? -1) >= b) || RAIN_BR[4])[1];
@@ -218,13 +243,18 @@ document.addEventListener('sdss:ready', () => {
           bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 8 : 6, weight: inArea(s.lat, s.lon) ? 2 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
-          fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
-        }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
+          fillColor: bankStatus(s, trendWL(h, s)).color, fillOpacity: 0.95
+        }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>
+            ${(() => { const t = trendWL(h, s), b = bankStatus(s, t), e = bankEta(s, t);
+              const gap = s.bank_msl != null && s.level_msl != null ? s.bank_msl - s.level_msl : null;
+              return `<span class="bk" style="background:${b.color}">${b.label}</span>
+                ${gap != null ? (gap >= 0 ? ` ต่ำกว่าตลิ่ง ${fmt(gap, 2)} ม.` : ` <b>สูงกว่าตลิ่ง ${fmt(-gap, 2)} ม.</b>`) : ''}
+                ${e ? `<div class="eta">${etaTxt(e)}</div>` : ''}<br>`; })()}อ.${esc(s.amphoe)}<br>
             ${R[s.code] ? `ลำน้ำ <b>${esc(R[s.code].river)}</b> · พื้นที่รับน้ำ ${Number(R[s.code].da).toLocaleString('th-TH')} ตร.กม.<br>` : ''}
             ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b>${R[s.code] && R[s.code].zg && s.level_msl != null ? ` · ความลึกน้ำ <b>${fmt(s.level_msl - R[s.code].zg, 2)} ม.</b>` : ''}<br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
             ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>
             ${(() => { const t = trendWL(h, s); return t ? `<div class="trend">เทียบครั้งก่อน ${arrow(t.d, 'ซม.', 0)}<br>เทียบ 24 ชม. ${arrow(t.d24, 'ซม.', 0)}</div>${spark(t.series, 'ระดับน้ำ ม.รทก.')}` : ''; })()}`)));
-        return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };
+        return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = สถานะเทียบตลิ่ง`, attr: 'สถานี © สสน. (ThaiWater)' };
       }
     },
     {
@@ -334,11 +364,15 @@ document.addEventListener('sdss:ready', () => {
       const where = (s) => inArea(s.lat, s.lon) ? '' : ' (ใกล้เคียง)';
       setK('k-rmax', rain.length ? fmt(rain[0].rain_24h) + ' มม.' : '—', rain.length ? rain[0].name + where(rain[0]) : 'ไม่มีข้อมูลสถานี');
       setK('k-heavy', `${heavy.length}`, `จาก ${rain.length} สถานี (ในพื้นที่ ${nIn(rain)})`);
-      const wl70 = wl.filter(s => s.storage_pct >= 70);
-      setK('k-wl', `${wl70.length}`, `จาก ${wl.length} สถานี (ในพื้นที่ ${nIn(wl70)}/${nIn(wl)})`);
+      const st = wl.map(s => ({ s, t: trendWL(h, s) })).map(x => Object.assign(x, { b: bankStatus(x.s, x.t), e: bankEta(x.s, x.t) }));
+      const alarm = st.filter(x => ['near', 'over', 'severe'].includes(x.b.key) || x.e).sort((a, b) => b.b.rank - a.b.rank || b.s.storage_pct - a.s.storage_pct);
+      const nOver = st.filter(x => ['over', 'severe'].includes(x.b.key)).length;
+      setK('k-wl', `${alarm.filter(x => x.b.key !== 'high' && x.b.key !== 'normal').length}`,
+        `ล้นตลิ่ง ${nOver} · จาก ${wl.length} สถานี (ในพื้นที่ ${nIn(wl)})`);
+      renderAlert(alarm);
       const top = [
-        ...wl.filter(s => s.storage_pct >= 30).slice(0, 5).map(s => ({ k: 'w:' + s.code, lyr: 'wlsta', c: wlColor(s.storage_pct),
-          t: s.name, tg: tag(s), sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'),
+        ...wl.filter(s => s.storage_pct >= 30).slice(0, 5).map(s => ({ k: 'w:' + s.code, lyr: 'wlsta', c: bankStatus(s, trendWL(h, s)).color,
+          t: s.name, tg: tag(s), sub: bankStatus(s, trendWL(h, s)).label + ' · อ.' + (s.amphoe || '—'),
           v: fmt(s.storage_pct, 0) + '%' + arrowShort((trendWL(h, s) || {}).d, 'cm') })),
         ...rain.filter(s => s.rain_24h >= 10.1).slice(0, 5).map(s => ({ k: 'r:' + s.lat + ',' + s.lon, lyr: 'rainsta', c: rainColor(s.rain_24h),
           t: s.name, tg: tag(s), sub: 'ฝน 24 ชม. · อ.' + (s.amphoe || '—'), v: fmt(s.rain_24h) + ' มม.' }))
@@ -378,6 +412,27 @@ document.addEventListener('sdss:ready', () => {
     } catch (e) { setK('k-flood', '—', 'ไม่มีข้อมูล'); }
   }
 
+  /* ---------- แถบแจ้งเตือนระดับน้ำเทียบตลิ่ง ---------- */
+  function renderAlert(alarm) {
+    const el = $('bank-alert');
+    if (!el) return;
+    if (!alarm.length) { el.hidden = true; return; }
+    const top = alarm[0].b;
+    el.hidden = false;
+    el.style.background = top.color;
+    el.style.color = top.key === 'high' ? '#0F172A' : '#FFFFFF';
+    el.innerHTML = `<b>เฝ้าระวังระดับน้ำ:</b> ` + alarm.slice(0, 4).map(x =>
+      `<a href="#" data-k="w:${esc(x.s.code)}">${esc(x.s.name)}</a> ${x.b.label} ${fmt(x.s.storage_pct, 0)}%` +
+      `${inArea(x.s.lat, x.s.lon) ? ' (ในพื้นที่)' : ''}${x.e ? ` · คาดถึงตลิ่ง ~${x.e.h < 1 ? '<1' : Math.round(x.e.h)} ชม.` : ''}`).join(' · ')
+      + (alarm.length > 4 ? ` · และอีก ${alarm.length - 4} สถานี` : '')
+      + `<span class="bk-note">${BK.verified ? '' : ' · เกณฑ์ 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ</span>`;
+    el.querySelectorAll('a').forEach(a => a.onclick = async (ev) => {
+      ev.preventDefault();
+      if (!state.wlsta.on) await setOn('wlsta', true);
+      const m = MARK[a.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 12)); m.openPopup(); }
+    });
+  }
+
   /* ---------- แตะจุดใดก็ได้: สถานีและอ่างที่ใกล้ที่สุด ---------- */
   const TAMB = window.SDSS.tambon.features.map(f => ({ code: f.properties.tcode,
     polys: f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates }));
@@ -408,7 +463,7 @@ document.addEventListener('sdss:ready', () => {
         ${fl}
         ${row('ฝน 24 ชม. ใกล้สุด', rs, s => `<span class="mono">${fmt(s.rain_24h)} มม.</span>`)}
         ${row('ฝนสะสม 7 วัน ใกล้สุด', r7, s => `<span class="mono">${fmt(s.v)} มม.</span>`)}
-        ${row('ระดับน้ำ ใกล้สุด', ws, s => `<span class="mono">${fmt(s.storage_pct, 0)}%</span>${arrowShort((trendWL(h, s) || {}).d, 'cm')}`)}
+        ${row('ระดับน้ำ ใกล้สุด', ws, s => `<span class="bk" style="background:${bankStatus(s, trendWL(h, s)).color}">${bankStatus(s, trendWL(h, s)).label}</span> <span class="mono">${fmt(s.storage_pct, 0)}%</span>${arrowShort((trendWL(h, s) || {}).d, 'cm')}`)}
         ${row('อ่างเก็บน้ำ ใกล้สุด', dm, d => `<span class="mono">${fmt(d.pct, 0)}%</span>${arrowShort(trendDam(h, d).d, '%')}`)}
       </dl>
       <div class="muted" style="font-size:11px;margin-top:4px">ระยะทางเป็นเส้นตรง ไม่ได้บอกว่าสถานีอยู่ต้นน้ำหรือท้ายน้ำของจุดนี้</div>

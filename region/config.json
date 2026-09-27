@@ -4,7 +4,7 @@
   "sandbox": {
     "tcode": "301010",
     "url": "../chanat/",
-    "label": "Sandbox ตำบลจันอัด"
+    "label": "Sandbox ตำบลจันอัด (ต้นแบบหน้าจอ · ข้อมูลสมมติ)"
   },
   "stale_after_min": 360,
   "levels": [
@@ -98,5 +98,47 @@
     "rainviewer_max_native_zoom": 7,
     "station_buffer_deg": 0.15,
     "_note": "ThaiWater public API และ RainViewer เรียกจากเบราว์เซอร์โดยตรง ถ้าไม่สำเร็จจะใช้ snapshot จาก GitHub Actions"
+  },
+  "bank": {
+    "_note": "สถานะเทียบตลิ่ง ใช้ storage_pct ของ ThaiWater (ระดับน้ำเทียบตลิ่งต่ำสุดของสถานี) · 100% = น้ำเสมอตลิ่ง ซึ่งเป็นนิยามทางกายภาพ ส่วนเกณฑ์ 70/90 เป็นค่าเริ่มต้นเพื่อเฝ้าระวัง ยังไม่ได้ยืนยันกับชลประทาน/ปภ.",
+    "verified": false,
+    "levels": [
+      {
+        "min": 100,
+        "key": "over",
+        "label": "ล้นตลิ่ง",
+        "color": "#C0392B"
+      },
+      {
+        "min": 90,
+        "key": "near",
+        "label": "ใกล้ล้นตลิ่ง",
+        "color": "#E67E22"
+      },
+      {
+        "min": 70,
+        "key": "high",
+        "label": "ค่อนข้างสูง",
+        "color": "#F4D03F"
+      },
+      {
+        "min": -1000000000.0,
+        "key": "normal",
+        "label": "ปกติ",
+        "color": "#1E8449"
+      }
+    ],
+    "severe": {
+      "key": "severe",
+      "label": "ล้นตลิ่งและยังเพิ่มขึ้น",
+      "color": "#7E22CE",
+      "rise_cm": 1
+    },
+    "eta": {
+      "lookback_h": 6,
+      "min_span_h": 2,
+      "min_rate_cm_h": 0.5,
+      "max_hours": 72
+    }
   }
 }

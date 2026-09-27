@@ -67,7 +67,7 @@
     { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนบน' },
     { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนล่าง' },
     { t: 'wl', code: 'M.206' },
-    { t: 'place', name: 'ตำบลจันอัด · Sandbox', href: '../chanat/', note: 'ตำแหน่งโดยประมาณจากพิกัด อยู่ระหว่าง M.206 กับ M.188A' },
+    { t: 'place', name: 'ตำบลจันอัด', href: '../chanat/', note: 'ตำแหน่งโดยประมาณจากพิกัด อยู่ระหว่าง M.206 กับ M.188A · ลิงก์ไปหน้าต้นแบบ Sandbox (ข้อมูลสมมติ)' },
     { t: 'wl', code: 'M.188A', main: true },
     { t: 'conf', name: 'ไหลลงแม่น้ำมูล' }
   ];
@@ -85,6 +85,24 @@
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
   const get = (u) => fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
   const tparse = (t) => new Date(String(t).replace(' ', 'T').slice(0, 16) + (String(t).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+  let BK = null;
+  function status(pct, d) {
+    if (!BK || pct == null) return null;
+    const lv = BK.levels.find(l => pct >= l.min);
+    return lv.key === 'over' && d != null && d >= BK.severe.rise_cm ? BK.severe : lv;
+  }
+  function eta(s, arr) {
+    if (!BK || s.bank == null || s.level == null || s.level >= s.bank) return null;
+    const E = BK.eta, last = tparse(s.t), from = last - E.lookback_h * 3.6e6;
+    const base = arr.filter(p => tparse(p[0]) >= from)[0];
+    if (!base) return null;
+    const span = (last - tparse(base[0])) / 3.6e6;
+    if (span < E.min_span_h) return null;
+    const rate = (s.level - base[2]) * 100 / span;
+    if (rate < E.min_rate_cm_h) return null;
+    const h = (s.bank - s.level) * 100 / rate;
+    return h <= E.max_hours ? { h, rate } : null;
+  }
   const pctColor = (v) => v == null ? '#94A3B8' : v >= 100 ? '#7F1D1D' : v >= 70 ? '#E67E22' : v >= 30 ? '#1E8449' : '#D68910';
   const arrow = (v, unit, dec, eps) => v == null ? '<span class="muted">—</span>'
     : Math.abs(v) < eps ? '<span class="tr-flat">▬ คงที่</span>'
@@ -101,21 +119,23 @@
   }
 
   async function load() {
-    const [rid, hist, prov] = await Promise.all([
+    const [rid, hist, prov, cfg] = await Promise.all([
       get('data/rid_stations.json').then(d => d.stations).catch(() => ({})),
       get('data/live/history.json').catch(() => ({ wl: {}, dam: {} })),
-      get('data/live/tw_province.json').catch(() => ({ dams: [] }))
+      get('data/live/tw_province.json').catch(() => ({ dams: [] })),
+      get('config.json').catch(() => null)
     ]);
+    if (cfg && cfg.bank) BK = cfg.bank;
     let wl = {}, via = 'ThaiWater (สด)';
     try {
       const d = await get(TW);
       ((d.waterlevel_data || {}).data || []).forEach(x => {
         const s = x.station || {}, code = String(s.tele_station_oldcode || '');
-        if (code) wl[code] = { level: n(x.waterlevel_msl), pct: n(x.storage_percent), q: n(x.discharge), t: x.waterlevel_datetime };
+        if (code) wl[code] = { level: n(x.waterlevel_msl), pct: n(x.storage_percent), q: n(x.discharge), t: x.waterlevel_datetime, bank: n(s.min_bank) };
       });
     } catch (e) {
       const s = await get('data/live/thaiwater_region.json').catch(() => ({ waterlevel: [] }));
-      (s.waterlevel || []).forEach(x => wl[x.code] = { level: x.level_msl, pct: x.storage_pct, q: x.discharge, t: x.measured_at });
+      (s.waterlevel || []).forEach(x => wl[x.code] = { level: x.level_msl, pct: x.storage_pct, q: x.discharge, t: x.measured_at, bank: x.bank_msl });
       via = 'snapshot จาก Actions';
     }
     const dams = {}; (prov.dams || []).forEach(d => { if (!dams[d.name] || !d.stale) dams[d.name] = d; });
@@ -146,9 +166,15 @@
         <div class="nodata">ไม่พบข้อมูลของสถานีนี้ในระบบ ThaiWater</div></div>`;
     const depth = r.zg ? s.level - r.zg : null;
     const arr = (hist.wl[x.code] || []).filter(p => p[2] != null && p[0] < s.t), prev = arr[arr.length - 1];
+    const st = status(s.pct, prev ? (s.level - prev[2]) * 100 : null), et = eta(s, arr);
+    const gap = s.bank != null ? s.bank - s.level : null;
+    const col = st ? st.color : pctColor(s.pct);
     const t24 = tparse(s.t) - 24 * 3.6e6, p24 = arr.filter(p => tparse(p[0]) <= t24).pop();
-    return `<div class="node${x.main ? ' main' : ''}" style="--c:${pctColor(s.pct)}"><div class="n-top">${head}
-        <span class="n-big" style="color:${pctColor(s.pct)}">${fmt(s.pct, 0)}%</span></div>
+    return `<div class="node${x.main ? ' main' : ''}" style="--c:${col}"><div class="n-top">${head}
+        <span class="n-big" style="color:${col === '#F4D03F' ? '#A16207' : col}">${fmt(s.pct, 0)}%</span></div>
+      ${st ? `<div class="n-row"><span class="bk" style="background:${st.color}">${st.label}</span>
+        ${gap != null ? (gap >= 0 ? ` ต่ำกว่าตลิ่ง ${fmt(gap, 2)} ม.` : ` <b>สูงกว่าตลิ่ง ${fmt(-gap, 2)} ม.</b>`) : ''}</div>` : ''}
+      ${et ? `<div class="eta">คาดถึงตลิ่งใน ~${et.h < 1 ? '<1' : Math.round(et.h)} ชม. ถ้าน้ำขึ้นด้วยอัตราเดิม (${fmt(et.rate, 1)} ซม./ชม.)</div>` : ''}
       <div class="n-row">ระดับน้ำ ${fmt(s.level, 2)} ม.รทก.${depth != null ? ` · ความลึก <b>${fmt(depth, 2)} ม.</b>` : ''}${s.q != null ? ` · ${fmt(s.q)} ลบ.ม./วิ` : ''}</div>
       <div class="n-row">เทียบครั้งก่อน ${arrow(prev ? (s.level - prev[2]) * 100 : null, 'ซม.', 0, 1)} · เทียบ 24 ชม. ${arrow(p24 ? (s.level - p24[2]) * 100 : null, 'ซม.', 0, 1)}
         <span class="muted">· ${esc(s.t)}</span></div>
