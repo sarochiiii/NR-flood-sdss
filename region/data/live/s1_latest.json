@@ -1,4 +1,20 @@
 {
- "status": "error",
- "message": "EEException: Permission 'earthengine.thumbnails.create' denied on resource 'projects/ee-sarochineek' (or it may not exist)."
+ "status": "ok",
+ "date": "2026-09-26",
+ "checked_at": "2026-09-27T07:47:22+00:00",
+ "polarisation": "VV",
+ "stretch_db": [
+  -25,
+  0
+ ],
+ "bounds": [
+  [
+   15.000200000000001,
+   101.83796
+  ],
+  [
+   15.414259999999999,
+   102.46576
+  ]
+ ]
 }
