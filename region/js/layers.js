@@ -74,6 +74,12 @@ document.addEventListener('sdss:ready', () => {
     return out;
   }
 
+  const imgs = (str) => [...new Set(String(str || '').split(',').map(x => x.trim()).filter(Boolean))].map(x => {
+    const m = x.match(/^(.*?)_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})$/);
+    const sensor = m && ({ rd2: 'RADARSAT-2', S1A: 'Sentinel-1A', S1B: 'Sentinel-1B', S1C: 'Sentinel-1C', S1D: 'Sentinel-1D' }[m[1]] || m[1]);
+    return m ? `${sensor} ${+m[4]}/${+m[3]} ${m[5]}:${m[6]}` : x;
+  }).join(', ') || '—';
+
   /* ---------- ThaiWater จังหวัด (ฝนสะสม 3/7 วัน, อ่างเก็บน้ำ) — มาจาก Actions เท่านั้น เพราะ CORS ---------- */
   let provCache = null;
   function province() {
@@ -148,9 +154,15 @@ document.addEventListener('sdss:ready', () => {
       async build() {
         const d = await json('data/live/gistda_flood_7d.geojson');
         if (d.status === 'not_configured') throw new Error('ยังไม่ตั้ง GISTDA_API_KEY');
-        const lyr = L.geoJSON(d, { style: { color: '#1D4ED8', weight: 0.5, fillColor: '#3B82F6', fillOpacity: 0.55 },
-          onEachFeature: (f, l) => l.bindPopup(`<b>พื้นที่น้ำท่วม (GISTDA)</b><br>${fmt(f.properties.area_rai, 0)} ไร่`) });
-        return { lyr, sub: `รวม 7 วัน · ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${d.features.length} แปลง`,
+        if (d.status === 'error' && !d.features.length) throw new Error('ดึงจาก GISTDA ไม่สำเร็จ');
+        const lyr = L.geoJSON(d, { style: f => ({ color: f.properties.in_area ? '#1D4ED8' : '#64748B', weight: 0.4,
+            fillColor: '#3B82F6', fillOpacity: f.properties.in_area ? 0.6 : 0.35 }),
+          onEachFeature: (f, l) => l.bindPopup(`<b>น้ำท่วมตรวจพบ (GISTDA 7 วัน)</b><br>ต.${esc(f.properties.tb_name)} อ.${esc(f.properties.ap_name)}<br>
+            ${fmt(f.properties.area_rai, 1)} ไร่ในเซลล์นี้<br>
+            ${f.properties.bldg ? `อาคาร ${f.properties.bldg} หลัง · ` : ''}${f.properties.pop ? `ประชากร ~${f.properties.pop} คน · ` : ''}${f.properties.school ? `โรงเรียน ${f.properties.school} · ` : ''}${f.properties.hosp ? `สถานพยาบาล ${f.properties.hosp}` : ''}
+            <br><span class="muted">ภาพ ${esc(imgs(f.properties.img))}</span>`) });
+        const nT = Object.keys(d.by_tambon || {}).length;
+        return { lyr, sub: `ในพื้นที่ ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${nT} ตำบล · ภาพล่าสุด ${imgs((d.images || []).slice(-1)[0])}`,
           attr: 'น้ำท่วม © GISTDA' };
       }
     },
@@ -360,7 +372,8 @@ document.addEventListener('sdss:ready', () => {
     } catch (e) { setK('k-dam', '—', e.message); }
     try {
       const g = await json('data/live/gistda_flood_7d.geojson');
-      if (g.status === 'ok') setK('k-flood', Number(g.total_rai || 0).toLocaleString('th-TH') + ' ไร่', `GISTDA · ${g.features.length} แปลง`);
+      if (g.status === 'ok') setK('k-flood', Number(g.total_rai || 0).toLocaleString('th-TH') + ' ไร่',
+        `${Object.keys(g.by_tambon || {}).length} ตำบล · อาคาร ${Number((g.exposure || {}).building || 0).toLocaleString('th-TH')} หลัง · ทั้งจังหวัด ${Number(g.province_rai || 0).toLocaleString('th-TH')} ไร่`);
       else setK('k-flood', '—', g.status === 'not_configured' ? 'รอ GISTDA API key' : 'ดึงไม่สำเร็จ');
     } catch (e) { setK('k-flood', '—', 'ไม่มีข้อมูล'); }
   }
@@ -381,7 +394,9 @@ document.addEventListener('sdss:ready', () => {
     const t = TAMB.find(tb => tb.polys.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(hh => inRing(lo, la, hh))));
     if (t) window.SDSS.select(t.code);
     else $('query').innerHTML = '<div class="q-name">จุดนอกพื้นที่ศึกษา</div>';
-    const [tw, p, h] = await Promise.all([thaiwater().catch(() => null), province().catch(() => null), history()]);
+    const [tw, p, h, gf] = await Promise.all([thaiwater().catch(() => null), province().catch(() => null), history(),
+      json('data/live/gistda_flood_7d.geojson').catch(() => null)]);
+    const fl = gf && gf.status === 'ok' && t ? `<dt>น้ำท่วมตรวจพบ 7 วัน (ทั้งตำบล)</dt><dd class="mono">${fmt((gf.by_tambon || {})[t.code] || 0, 0)} ไร่</dd>` : '';
     const row = (lab, hit, val) => hit ? `<dt>${lab}</dt><dd>${val(hit[0])}<span class="muted" style="display:block;font-size:11px">${esc(hit[0].name)} · ${fmt(hit[1], 1)} กม.</span></dd>` : `<dt>${lab}</dt><dd>—</dd>`;
     const rs = tw && nearest(tw.rain, la, lo, x => x.rain_24h != null);
     const ws = tw && nearest(tw.waterlevel, la, lo, x => x.storage_pct != null);
@@ -390,6 +405,7 @@ document.addEventListener('sdss:ready', () => {
     const block = `<div class="probe">
       <div class="probe-h">จุดที่แตะ <span class="mono">${la.toFixed(4)}, ${lo.toFixed(4)}</span></div>
       <dl class="kv">
+        ${fl}
         ${row('ฝน 24 ชม. ใกล้สุด', rs, s => `<span class="mono">${fmt(s.rain_24h)} มม.</span>`)}
         ${row('ฝนสะสม 7 วัน ใกล้สุด', r7, s => `<span class="mono">${fmt(s.v)} มม.</span>`)}
         ${row('ระดับน้ำ ใกล้สุด', ws, s => `<span class="mono">${fmt(s.storage_pct, 0)}%</span>${arrowShort((trendWL(h, s) || {}).d, 'cm')}`)}
