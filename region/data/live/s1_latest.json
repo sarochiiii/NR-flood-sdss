@@ -1,4 +1,4 @@
 {
  "status": "error",
- "message": "EEException: Caller does not have required permission to use project ee-sarochineek. Grant the caller the roles/serviceusage.serviceU"
+ "message": "EEException: Permission 'earthengine.thumbnails.create' denied on resource 'projects/ee-sarochineek' (or it may not exist)."
 }
