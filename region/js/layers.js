@@ -85,6 +85,49 @@ document.addEventListener('sdss:ready', () => {
   }
   const hhmm = (iso) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
 
+  /* ---------- ประวัติ (บันทึกโดย Actions ทุกชั่วโมง) → แนวโน้มและกราฟ ---------- */
+  let histCache = null;
+  function history() {
+    if (!histCache) histCache = json('data/live/history.json').catch(() => ({ wl: {}, dam: {} }));
+    return histCache;
+  }
+  const tparse = (t) => new Date(String(t).replace(' ', 'T').slice(0, 16) + (String(t).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+  // แนวโน้มระดับน้ำ: ค่าล่าสุดเทียบจุดก่อนหน้า และเทียบประมาณ 24 ชม. ก่อน (ใช้ระดับ ม.รทก. ละเอียดกว่า %)
+  function trendWL(h, s) {
+    const arr = (h.wl[s.code] || []).filter(x => x[2] != null);
+    const cur = s.measured_at && s.level_msl != null ? [s.measured_at, s.storage_pct, s.level_msl] : arr[arr.length - 1];
+    if (!cur) return null;
+    const before = arr.filter(x => x[0] < cur[0]);
+    const prev = before[before.length - 1];
+    const t0 = tparse(cur[0]) - 24 * 3.6e6;
+    const d24 = before.filter(x => tparse(x[0]) <= t0).pop();
+    return { d: prev ? (cur[2] - prev[2]) * 100 : null, prevT: prev && prev[0],
+      d24: d24 ? (cur[2] - d24[2]) * 100 : null, series: [...before, cur].map(x => [tparse(x[0]), x[2]]) };
+  }
+  function trendDam(h, d) {
+    const arr = (h.dam[d.name] || []).filter(x => x[0] < d.date);
+    const prev = arr[arr.length - 1];
+    return { d: prev ? d.pct - prev[1] : null, prevT: prev && prev[0],
+      series: [...arr, [d.date, d.pct]].map(x => [tparse(x[0]), x[1]]) };
+  }
+  function arrow(v, unit, dec) {
+    if (v == null) return '<span class="muted">—</span>';
+    if (Math.abs(v) < (unit === 'ซม.' ? 1 : 0.05)) return `<span class="tr-flat">▬ คงที่</span>`;
+    return v > 0 ? `<span class="tr-up">▲ +${fmt(v, dec)} ${unit}</span>` : `<span class="tr-dn">▼ ${fmt(v, dec)} ${unit}</span>`;
+  }
+  const arrowShort = (v, unit) => v == null ? '' : Math.abs(v) < (unit === 'cm' ? 1 : 0.05) ? ' <span class="tr-flat">▬</span>'
+    : v > 0 ? ' <span class="tr-up">▲</span>' : ' <span class="tr-dn">▼</span>';
+  function spark(series, label) {
+    if (!series || series.length < 2) return `<div class="spark-empty">${label}: กำลังเก็บประวัติ (ต้องมีอย่างน้อย 2 ช่วงเวลา)</div>`;
+    const W = 220, H = 44, xs = series.map(p => +p[0]), ys = series.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), ry = (y1 - y0) || 1;
+    const pts = series.map(p => `${(4 + (W - 8) * ((+p[0] - x0) / ((x1 - x0) || 1))).toFixed(1)},${(H - 4 - (H - 8) * ((p[1] - y0) / ry)).toFixed(1)}`).join(' ');
+    const d = (t) => new Date(t).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+    return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${label}">
+      <polyline points="${pts}" fill="none" stroke="#0E7C7B" stroke-width="1.8"/></svg>
+      <div class="spark-lab"><span>${d(x0)}</span><span>${label}</span><span>${d(x1)}</span></div></div>`;
+  }
+
   /* ---------- สีตามเกณฑ์ ---------- */
   const RAIN_BR = [[90.1, '#08306B'], [35.1, '#2171B5'], [10.1, '#6BAED6'], [0.1, '#C6DBEF'], [-1, '#E2E8F0']];
   const rainColor = v => (RAIN_BR.find(([b]) => (v ?? -1) >= b) || RAIN_BR[4])[1];
@@ -143,6 +186,7 @@ document.addEventListener('sdss:ready', () => {
       async build(state) {
         const tw = await thaiwater(), key = state.sw || 'rain_24h';
         const lyr = L.layerGroup(tw.rain.map(s => MARK['r:' + s.lat + ',' + s.lon] = L.circleMarker([s.lat, s.lon], {
+          bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
           fillColor: rainColor(s[key]), fillOpacity: 0.9
@@ -155,14 +199,16 @@ document.addEventListener('sdss:ready', () => {
     {
       id: 'wlsta', icon: 'ti-ripple', label: 'ระดับน้ำสถานีตรวจวัด', on: true,
       async build() {
-        const tw = await thaiwater();
+        const [tw, h] = await Promise.all([thaiwater(), history()]);
         const lyr = L.layerGroup(tw.waterlevel.map(s => MARK['w:' + s.code] = L.circleMarker([s.lat, s.lon], {
+          bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 8 : 6, weight: inArea(s.lat, s.lon) ? 2 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
           fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
         }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
             ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b><br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
-            ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>`)));
+            ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>
+            ${(() => { const t = trendWL(h, s); return t ? `<div class="trend">เทียบครั้งก่อน ${arrow(t.d, 'ซม.', 0)}<br>เทียบ 24 ชม. ${arrow(t.d24, 'ซม.', 0)}</div>${spark(t.series, 'ระดับน้ำ ม.รทก.')}` : ''; })()}`)));
         return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };
       }
     },
@@ -172,6 +218,7 @@ document.addEventListener('sdss:ready', () => {
       async build(state) {
         const p = await province(), key = state.sw || 'rain7d', rows = p[key] || [];
         const lyr = L.layerGroup(rows.map(s => L.circleMarker([s.lat, s.lon], {
+          bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
           fillColor: r7Color(key === 'rain7d' ? s.v : s.v * 7 / 3), fillOpacity: 0.9
@@ -184,13 +231,15 @@ document.addEventListener('sdss:ready', () => {
     {
       id: 'dams', icon: 'ti-building-bridge-2', label: 'อ่างเก็บน้ำ', on: true,
       async build() {
-        const p = await province(), rows = p.dams || [];
+        const [p, h] = await Promise.all([province(), history()]), rows = p.dams || [];
         const lyr = L.layerGroup(rows.map(d => L.circleMarker([d.lat, d.lon], {
+          bubblingMouseEvents: false,
           radius: d.kind === 'large' ? 11 : 7, weight: 2, color: '#FFFFFF', fillColor: damColor(d), fillOpacity: 0.95
         }).bindPopup(`<b>${esc(d.name)}</b> ${tag(d)}<br>${d.kind === 'large' ? 'เขื่อน/อ่างขนาดใหญ่' : 'อ่างขนาดกลาง'} · อ.${esc(d.amphoe)}<br>
             ปริมาณน้ำ <b>${fmt(d.pct, 1)}%</b> (${fmt(d.storage, 2)} ล้าน ลบ.ม.)<br>
             น้ำไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน<br>
-            <span class="muted">ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' — ข้อมูลเก่า' : ''}</span>`)
+            <span class="muted">ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' — ข้อมูลเก่า' : ''}</span>
+            ${d.stale ? '' : (() => { const t = trendDam(h, d); return `<div class="trend">เทียบวันก่อน ${arrow(t.d, '%', 1)}</div>${spark(t.series, 'ปริมาณน้ำ %')}`; })()}`)
           .on('add', function () { MARK['d:' + d.name] = this; })));
         const n = rows.filter(d => !d.stale && d.pct != null).length;
         return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater)' };
@@ -260,6 +309,7 @@ document.addEventListener('sdss:ready', () => {
   /* ---------- สถานการณ์ปัจจุบัน: KPI + รายการสถานีที่ควรจับตา ---------- */
   function setK(id, v, sub) { $(id).textContent = v; if ($(id + '-s')) $(id + '-s').textContent = sub || ''; }
   async function refreshNow() {
+    const h = await history();
     try {
       const tw = await thaiwater();
       const rain = tw.rain.filter(s => s.rain_24h != null).sort((a, b) => b.rain_24h - a.rain_24h);
@@ -273,7 +323,8 @@ document.addEventListener('sdss:ready', () => {
       setK('k-wl', `${wl70.length}`, `จาก ${wl.length} สถานี (ในพื้นที่ ${nIn(wl70)}/${nIn(wl)})`);
       const top = [
         ...wl.filter(s => s.storage_pct >= 30).slice(0, 5).map(s => ({ k: 'w:' + s.code, lyr: 'wlsta', c: wlColor(s.storage_pct),
-          t: s.name, tg: tag(s), sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'), v: fmt(s.storage_pct, 0) + '%' })),
+          t: s.name, tg: tag(s), sub: 'ระดับน้ำ · อ.' + (s.amphoe || '—'),
+          v: fmt(s.storage_pct, 0) + '%' + arrowShort((trendWL(h, s) || {}).d, 'cm') })),
         ...rain.filter(s => s.rain_24h >= 10.1).slice(0, 5).map(s => ({ k: 'r:' + s.lat + ',' + s.lon, lyr: 'rainsta', c: rainColor(s.rain_24h),
           t: s.name, tg: tag(s), sub: 'ฝน 24 ชม. · อ.' + (s.amphoe || '—'), v: fmt(s.rain_24h) + ' มม.' }))
       ];
@@ -297,7 +348,7 @@ document.addEventListener('sdss:ready', () => {
       setK('k-dam', `${hi.length}`, `เกินความจุ ${over.length} · จาก ${dams.length} อ่าง`);
       const rows = hi.slice(0, 6).map(d => `<div class="wrow" data-k="d:${esc(d.name)}" data-l="dams">
           <span><span class="dot" style="background:${damColor(d)}"></span>${esc(d.name)} ${tag(d)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">อ่างเก็บน้ำ · อ.${esc(d.amphoe || '—')}</span></span>
-          <span class="mono">${fmt(d.pct, 0)}%</span></div>`).join('');
+          <span class="mono">${fmt(d.pct, 0)}%${arrowShort(trendDam(h, d).d, '%')}</span></div>`).join('');
       $('now').insertAdjacentHTML('afterbegin', rows);
       $('now').querySelectorAll('.wrow[data-l="dams"]').forEach(el => el.onclick = async () => {
         if (!state.dams.on) await setOn('dams', true);
@@ -311,12 +362,47 @@ document.addEventListener('sdss:ready', () => {
     } catch (e) { setK('k-flood', '—', 'ไม่มีข้อมูล'); }
   }
 
+  /* ---------- แตะจุดใดก็ได้: สถานีและอ่างที่ใกล้ที่สุด ---------- */
+  const TAMB = window.SDSS.tambon.features.map(f => ({ code: f.properties.tcode,
+    polys: f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates }));
+  const km = (a, b, c, d) => {   // haversine
+    const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(x));
+  };
+  const nearest = (arr, la, lo, ok = () => true) => arr.filter(ok).map(x => [x, km(la, lo, x.lat, x.lon)]).sort((a, b) => a[1] - b[1])[0];
+  let probe = null;
+  map.on('click', async (e) => {
+    const la = e.latlng.lat, lo = e.latlng.lng;
+    if (probe) map.removeLayer(probe);
+    probe = L.circleMarker(e.latlng, { radius: 12, color: '#0F172A', weight: 2, dashArray: '4 3', fill: false, interactive: false }).addTo(map);
+    const t = TAMB.find(tb => tb.polys.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(hh => inRing(lo, la, hh))));
+    if (t) window.SDSS.select(t.code);
+    else $('query').innerHTML = '<div class="q-name">จุดนอกพื้นที่ศึกษา</div>';
+    const [tw, p, h] = await Promise.all([thaiwater().catch(() => null), province().catch(() => null), history()]);
+    const row = (lab, hit, val) => hit ? `<dt>${lab}</dt><dd>${val(hit[0])}<span class="muted" style="display:block;font-size:11px">${esc(hit[0].name)} · ${fmt(hit[1], 1)} กม.</span></dd>` : `<dt>${lab}</dt><dd>—</dd>`;
+    const rs = tw && nearest(tw.rain, la, lo, x => x.rain_24h != null);
+    const ws = tw && nearest(tw.waterlevel, la, lo, x => x.storage_pct != null);
+    const r7 = p && nearest(p.rain7d || [], la, lo, x => x.v != null);
+    const dm = p && nearest(p.dams || [], la, lo, x => !x.stale && x.pct != null);
+    const block = `<div class="probe">
+      <div class="probe-h">จุดที่แตะ <span class="mono">${la.toFixed(4)}, ${lo.toFixed(4)}</span></div>
+      <dl class="kv">
+        ${row('ฝน 24 ชม. ใกล้สุด', rs, s => `<span class="mono">${fmt(s.rain_24h)} มม.</span>`)}
+        ${row('ฝนสะสม 7 วัน ใกล้สุด', r7, s => `<span class="mono">${fmt(s.v)} มม.</span>`)}
+        ${row('ระดับน้ำ ใกล้สุด', ws, s => `<span class="mono">${fmt(s.storage_pct, 0)}%</span>${arrowShort((trendWL(h, s) || {}).d, 'cm')}`)}
+        ${row('อ่างเก็บน้ำ ใกล้สุด', dm, d => `<span class="mono">${fmt(d.pct, 0)}%</span>${arrowShort(trendDam(h, d).d, '%')}`)}
+      </dl>
+      <div class="muted" style="font-size:11px;margin-top:4px">ระยะทางเป็นเส้นตรง ไม่ได้บอกว่าสถานีอยู่ต้นน้ำหรือท้ายน้ำของจุดนี้</div>
+    </div>`;
+    $('query').insertAdjacentHTML('beforeend', block);
+  });
+
   /* ---------- รีเฟรชอัตโนมัติทุก 10 นาที (เฉพาะเมื่อแท็บเปิดอยู่) ---------- */
   let lastRun = Date.now();
   async function refreshAll() {
     if (document.hidden) return;
     lastRun = Date.now();
-    twCache = null; provCache = null;
+    twCache = null; provCache = null; histCache = null;
     for (const d of defs) {
       const st = state[d.id];
       // เลเยอร์ที่เปิดอยู่ → โหลดใหม่ · เลเยอร์ที่ตั้งให้เปิดแต่โหลดไม่สำเร็จตอนแรก → ลองใหม่
