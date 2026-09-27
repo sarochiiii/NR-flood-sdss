@@ -86,6 +86,8 @@ document.addEventListener('sdss:ready', () => {
   const hhmm = (iso) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
 
   /* ---------- ประวัติ (บันทึกโดย Actions ทุกชั่วโมง) → แนวโน้มและกราฟ ---------- */
+  let ridCache = null;   // ข้อมูลสถานีกรมชลประทาน (ลำน้ำ, ราคาศูนย์เสา, พื้นที่รับน้ำ)
+  const rid = () => ridCache || (ridCache = json('data/rid_stations.json').then(d => d.stations).catch(() => ({})));
   let histCache = null;
   function history() {
     if (!histCache) histCache = json('data/live/history.json').catch(() => ({ wl: {}, dam: {} }));
@@ -199,14 +201,15 @@ document.addEventListener('sdss:ready', () => {
     {
       id: 'wlsta', icon: 'ti-ripple', label: 'ระดับน้ำสถานีตรวจวัด', on: true,
       async build() {
-        const [tw, h] = await Promise.all([thaiwater(), history()]);
+        const [tw, h, R] = await Promise.all([thaiwater(), history(), rid()]);
         const lyr = L.layerGroup(tw.waterlevel.map(s => MARK['w:' + s.code] = L.circleMarker([s.lat, s.lon], {
           bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 8 : 6, weight: inArea(s.lat, s.lon) ? 2 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
           fillColor: wlColor(s.storage_pct), fillOpacity: 0.95
         }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>อ.${esc(s.amphoe)}<br>
-            ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b><br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
+            ${R[s.code] ? `ลำน้ำ <b>${esc(R[s.code].river)}</b> · พื้นที่รับน้ำ ${Number(R[s.code].da).toLocaleString('th-TH')} ตร.กม.<br>` : ''}
+            ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b>${R[s.code] && R[s.code].zg && s.level_msl != null ? ` · ความลึกน้ำ <b>${fmt(s.level_msl - R[s.code].zg, 2)} ม.</b>` : ''}<br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
             ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>
             ${(() => { const t = trendWL(h, s); return t ? `<div class="trend">เทียบครั้งก่อน ${arrow(t.d, 'ซม.', 0)}<br>เทียบ 24 ชม. ${arrow(t.d24, 'ซม.', 0)}</div>${spark(t.series, 'ระดับน้ำ ม.รทก.')}` : ''; })()}`)));
         return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };

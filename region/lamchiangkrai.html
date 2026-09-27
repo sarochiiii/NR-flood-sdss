@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1628">
+<title>เฝ้าระวังลำเชียงไกร · SDSS โนนไทย–โนนสูง</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/region.css">
+<style>
+  body{display:block;background:var(--offwh)}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  .back{color:#5EEAD4;text-decoration:none;font-size:13px}
+  h2.sec{font-size:15px;margin:22px 0 4px}
+  .sec-note{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.6}
+  .chain{position:relative;padding-left:26px}
+  .chain::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:3px;background:#93C5FD;border-radius:2px}
+  .node{position:relative;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .node::before{content:"";position:absolute;left:-23px;top:14px;width:13px;height:13px;border-radius:50%;background:var(--c,#94A3B8);border:2px solid #fff;box-shadow:0 0 0 1px #94A3B8}
+  .node.main{border:2px solid var(--teal)}
+  .node.place{background:#F0FDFA;border-style:dashed}
+  .node.conf{background:transparent;border:0;padding:2px 0;font-size:12.5px;color:#1D4ED8;font-weight:600}
+  .node.conf::before{background:#1D4ED8;width:9px;height:9px;left:-21px;top:6px}
+  .n-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .n-name{font-weight:600;font-size:14.5px}
+  .n-code{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .n-big{font-family:var(--mono);font-size:22px;font-weight:500;white-space:nowrap}
+  .n-meta{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.55}
+  .n-row{font-size:13px;margin-top:4px}
+  .nodata{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .foot{font-size:12px;color:var(--muted);line-height:1.6;margin-top:20px;border-top:1px solid var(--border);padding-top:10px}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div>
+    <a class="back" href="./">← ภาพรวมโนนไทย–โนนสูง</a>
+    <div class="hdr-title">เฝ้าระวังลำเชียงไกร</div>
+    <div class="hdr-sub">อ่างเก็บน้ำต้นน้ำ → สถานีตามลำน้ำ → แม่น้ำมูล · ข้อมูล สสน. (ThaiWater) และกรมชลประทาน</div>
+  </div>
+  <div class="hdr-right"><span id="ts" class="mono hdr-ts">กำลังโหลด…</span></div>
+</header>
+
+<div class="wrap">
+  <h2 class="sec">ลำเชียงไกร · ต้นน้ำ → จุดบรรจบแม่น้ำมูล</h2>
+  <p class="sec-note">เรียงจากต้นน้ำตามพื้นที่รับน้ำ (D.A) ของกรมชลประทาน สถานีที่ D.A มากกว่าอยู่ท้ายน้ำ · อ่างตอนบนและตอนล่างเรียงตามชื่อและตำแหน่ง</p>
+  <div class="chain" id="lck"></div>
+
+  <h2 class="sec">แม่น้ำมูล · เหนือ → ใต้จุดบรรจบ</h2>
+  <p class="sec-note">M.2A (D.A 4,724) + ลำเชียงไกรที่ M.188A (2,811) = 7,535 ตร.กม. ซึ่งน้อยกว่า M.194 (8,467) จุดบรรจบจึงอยู่ระหว่าง M.2A กับ M.194 · ถ้าน้ำมูลสูง น้ำจากลำเชียงไกรจะระบายลงมูลได้ช้า</p>
+  <div class="chain" id="mun"></div>
+
+  <div class="foot">
+    <b>%ความจุ</b> คือระดับน้ำเทียบตลิ่งต่ำสุดของสถานี (ค่าจาก ThaiWater) ถึง 100% = น้ำเสมอตลิ่ง ·
+    <b>ความลึกน้ำ</b> = ระดับน้ำ ม.รทก. − ราคาศูนย์เสา (กรมชลประทาน ปีน้ำ 2569) ·
+    <b>▲▼</b> เทียบค่าก่อนหน้าที่ระบบบันทึกไว้ (บันทึกทุกชั่วโมง) ·
+    ยังไม่แสดงเวลาที่น้ำเดินทางระหว่างสถานี เพราะต้องสอบเทียบจากประวัติช่วงน้ำหลากจริงก่อน ·
+    เป็นเครื่องมือแสดงข้อมูลเพื่อสนับสนุนการตัดสินใจ ไม่ใช่ประกาศเตือนภัยทางการ
+  </div>
+</div>
+
+<script>
+(async function () {
+  'use strict';
+  const LCK = [
+    { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนบน' },
+    { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนล่าง' },
+    { t: 'wl', code: 'M.206' },
+    { t: 'place', name: 'ตำบลจันอัด · Sandbox', href: '../chanat/', note: 'ตำแหน่งโดยประมาณจากพิกัด อยู่ระหว่าง M.206 กับ M.188A' },
+    { t: 'wl', code: 'M.188A', main: true },
+    { t: 'conf', name: 'ไหลลงแม่น้ำมูล' }
+  ];
+  const MUN = [
+    { t: 'wl', code: 'M.2A' },
+    { t: 'conf', name: 'ลำเชียงไกรบรรจบ' },
+    { t: 'wl', code: 'M.194' },
+    { t: 'wl', code: 'M.195' },
+    { t: 'wl', code: 'M.184' }
+  ];
+  const TW = 'https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmt = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v)) ? '—' : Number(v).toFixed(d);
+  const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
+  const get = (u) => fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  const tparse = (t) => new Date(String(t).replace(' ', 'T').slice(0, 16) + (String(t).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+  const pctColor = (v) => v == null ? '#94A3B8' : v >= 100 ? '#7F1D1D' : v >= 70 ? '#E67E22' : v >= 30 ? '#1E8449' : '#D68910';
+  const arrow = (v, unit, dec, eps) => v == null ? '<span class="muted">—</span>'
+    : Math.abs(v) < eps ? '<span class="tr-flat">▬ คงที่</span>'
+    : v > 0 ? `<span class="tr-up">▲ +${fmt(v, dec)} ${unit}</span>` : `<span class="tr-dn">▼ ${fmt(v, dec)} ${unit}</span>`;
+  function spark(series, label) {
+    if (!series || series.length < 2) return `<div class="spark-empty">${label}: กำลังเก็บประวัติ</div>`;
+    const W = 300, H = 46, xs = series.map(p => +p[0]), ys = series.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), ry = (y1 - y0) || 1;
+    const pts = series.map(p => `${(4 + (W - 8) * ((+p[0] - x0) / ((x1 - x0) || 1))).toFixed(1)},${(H - 4 - (H - 8) * ((p[1] - y0) / ry)).toFixed(1)}`).join(' ');
+    const d = (t) => new Date(t).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+    return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" role="img" aria-label="${label}">
+      <polyline points="${pts}" fill="none" stroke="#0E7C7B" stroke-width="1.8" vector-effect="non-scaling-stroke"/></svg>
+      <div class="spark-lab"><span>${d(x0)}</span><span>${label}</span><span>${d(x1)}</span></div></div>`;
+  }
+
+  async function load() {
+    const [rid, hist, prov] = await Promise.all([
+      get('data/rid_stations.json').then(d => d.stations).catch(() => ({})),
+      get('data/live/history.json').catch(() => ({ wl: {}, dam: {} })),
+      get('data/live/tw_province.json').catch(() => ({ dams: [] }))
+    ]);
+    let wl = {}, via = 'ThaiWater (สด)';
+    try {
+      const d = await get(TW);
+      ((d.waterlevel_data || {}).data || []).forEach(x => {
+        const s = x.station || {}, code = String(s.tele_station_oldcode || '');
+        if (code) wl[code] = { level: n(x.waterlevel_msl), pct: n(x.storage_percent), q: n(x.discharge), t: x.waterlevel_datetime };
+      });
+    } catch (e) {
+      const s = await get('data/live/thaiwater_region.json').catch(() => ({ waterlevel: [] }));
+      (s.waterlevel || []).forEach(x => wl[x.code] = { level: x.level_msl, pct: x.storage_pct, q: x.discharge, t: x.measured_at });
+      via = 'snapshot จาก Actions';
+    }
+    const dams = {}; (prov.dams || []).forEach(d => { if (!dams[d.name] || !d.stale) dams[d.name] = d; });
+    $('ts').textContent = `${via} · ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+    $('lck').innerHTML = LCK.map(x => node(x, rid, wl, dams, hist)).join('');
+    $('mun').innerHTML = MUN.map(x => node(x, rid, wl, dams, hist)).join('');
+  }
+
+  function node(x, rid, wl, dams, hist) {
+    if (x.t === 'conf') return `<div class="node conf">↓ ${esc(x.name)}</div>`;
+    if (x.t === 'place') return `<div class="node place" style="--c:#0E7C7B"><div class="n-top"><span class="n-name">${esc(x.name)}</span>
+        <a href="${x.href}" style="font-size:13px;color:var(--teal)">เปิด →</a></div><div class="n-meta">${esc(x.note)}</div></div>`;
+    if (x.t === 'dam') {
+      const d = dams[x.name];
+      if (!d) return `<div class="node"><div class="n-name">${esc(x.name)}</div><div class="nodata">ไม่มีข้อมูล</div></div>`;
+      const h = (hist.dam[d.name] || []).filter(p => p[0] < d.date), prev = h[h.length - 1];
+      return `<div class="node" style="--c:${pctColor(d.pct)}"><div class="n-top">
+          <span><span class="n-name">${esc(d.name)}</span><div class="n-meta">อ.${esc(d.amphoe)} · ${d.kind === 'large' ? 'ขนาดใหญ่' : 'ขนาดกลาง'}</div></span>
+          <span class="n-big" style="color:${pctColor(d.pct)}">${fmt(d.pct, 0)}%</span></div>
+        <div class="n-row">ปริมาณน้ำ ${fmt(d.storage, 2)} ล้าน ลบ.ม. · ไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน</div>
+        <div class="n-row">เทียบวันก่อน ${arrow(prev ? d.pct - prev[1] : null, '%', 1, 0.05)} <span class="muted">· ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' (เก่า)' : ''}</span></div>
+        ${spark([...h, [d.date, d.pct]].map(p => [tparse(p[0]), p[1]]), 'ปริมาณน้ำ %')}</div>`;
+    }
+    const r = rid[x.code] || {}, s = wl[x.code];
+    const head = `<span><span class="n-name">${esc(r.river || '')} · ${esc(r.village || '')}</span> <span class="n-code">${esc(x.code)}</span>
+        <div class="n-meta">ต.${esc(r.tambon)} อ.${esc(r.amphoe)} · พื้นที่รับน้ำ ${r.da ? Number(r.da).toLocaleString('th-TH') : '—'} ตร.กม.</div></span>`;
+    if (!s || s.level == null) return `<div class="node${x.main ? ' main' : ''}"><div class="n-top">${head}</div>
+        <div class="nodata">ไม่พบข้อมูลของสถานีนี้ในระบบ ThaiWater</div></div>`;
+    const depth = r.zg ? s.level - r.zg : null;
+    const arr = (hist.wl[x.code] || []).filter(p => p[2] != null && p[0] < s.t), prev = arr[arr.length - 1];
+    const t24 = tparse(s.t) - 24 * 3.6e6, p24 = arr.filter(p => tparse(p[0]) <= t24).pop();
+    return `<div class="node${x.main ? ' main' : ''}" style="--c:${pctColor(s.pct)}"><div class="n-top">${head}
+        <span class="n-big" style="color:${pctColor(s.pct)}">${fmt(s.pct, 0)}%</span></div>
+      <div class="n-row">ระดับน้ำ ${fmt(s.level, 2)} ม.รทก.${depth != null ? ` · ความลึก <b>${fmt(depth, 2)} ม.</b>` : ''}${s.q != null ? ` · ${fmt(s.q)} ลบ.ม./วิ` : ''}</div>
+      <div class="n-row">เทียบครั้งก่อน ${arrow(prev ? (s.level - prev[2]) * 100 : null, 'ซม.', 0, 1)} · เทียบ 24 ชม. ${arrow(p24 ? (s.level - p24[2]) * 100 : null, 'ซม.', 0, 1)}
+        <span class="muted">· ${esc(s.t)}</span></div>
+      ${spark([...arr, [s.t, null, s.level]].map(p => [tparse(p[0]), p[2]]), 'ระดับน้ำ ม.รทก.')}</div>`;
+  }
+
+  await load();
+  setInterval(() => { if (!document.hidden) load(); }, 10 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
