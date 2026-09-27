@@ -1,3 +1,4 @@
 {
- "status": "not_configured"
+ "status": "error",
+ "message": "EEException: Caller does not have required permission to use project ee-sarochineek. Grant the caller the roles/serviceusage.serviceU"
 }
