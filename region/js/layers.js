@@ -294,47 +294,55 @@ document.addEventListener('sdss:ready', () => {
     {
       id: 'bldg', icon: 'ti-building', label: 'บ้านเรือน', on: false,
       async build() {
-        if (!hex || !hex.features.length || hex.features[0].properties.bldg === undefined) throw new Error('รอข้อมูลอาคารจาก GEE');
-        // แบ่งชั้นแบบ quantile จากช่องที่มีอาคาร (แบบเส้นตรงทำให้เกือบทุกช่องเป็นสีอ่อน เพราะมีช่องหนาแน่นมากไม่กี่ช่อง)
-        const vals = hex.features.map(f => f.properties.bldg).filter(v => v > 0).sort((a, b) => a - b);
-        const q = [0.2, 0.4, 0.6, 0.8].map(p => vals[Math.floor(p * (vals.length - 1))]);
-        const ramp = ['#FEF3C7', '#FCD34D', '#F59E0B', '#C2410C', '#7C2D12'];
-        const cls = (v) => q.filter(b => v > b).length;
-        const dens = L.geoJSON(hex, { interactive: false, filter: f => f.properties.bldg > 0,
-          style: f => ({ stroke: false, fillOpacity: 0.7, fillColor: ramp[cls(f.properties.bldg)] }) });
-        const legendTxt = `อาคารต่อ hexagon: ≤${q[0]} · ${q[0] + 1}–${q[1]} · ${q[1] + 1}–${q[2]} · ${q[2] + 1}–${q[3]} · >${q[3]} หลัง`;
-        // จุดรายหลัง: โหลดครั้งเดียว วาดเฉพาะในจอเมื่อซูม ≥ 14
-        let P = null;
+        // ซูม 13–14: จุดอาคาร (buildings.json) · ซูม ≥ 15: รูปอาคาร polygon จาก tile รายตำบล (data/bldg/<tcode>.json)
+        const Z_PT = 13, Z_POLY = 15, CAP = 25000;
+        let P = null, idx = null;
         try {
           const b = await json('data/buildings.json');
-          P = new Float64Array(b.n * 2); const A = new Uint16Array(b.n);
+          P = new Float64Array(b.n * 2);
           let x = b.x0, y = b.y0;
-          for (let i = 0, k = 0; i < b.d.length; i += 3, k++) { x += b.d[i]; y += b.d[i + 1]; P[2 * k] = x / b.scale; P[2 * k + 1] = y / b.scale; A[k] = b.d[i + 2]; }
-          P.area = A;
+          for (let i = 0, k = 0; i < b.d.length; i += 3, k++) { x += b.d[i]; y += b.d[i + 1]; P[2 * k] = x / b.scale; P[2 * k + 1] = y / b.scale; }
         } catch (e) { P = null; }
-        const rend = L.canvas({ padding: 0.2 }), pts = L.layerGroup();
-        const draw = () => {
-          pts.clearLayers();
-          if (!P || map.getZoom() < 14) { if (!map.hasLayer(dens) && grp.__active) { dens.addTo(map); dens.bringToBack(); } return; }
-          if (map.hasLayer(dens)) map.removeLayer(dens);
+        try { idx = (await json('data/bldg/index.json')).tiles; } catch (e) { idx = null; }
+        if (!P && !idx) throw new Error('รอข้อมูลอาคารจาก GEE');
+        const tiles = {};
+        const loadTile = (c) => tiles[c] || (tiles[c] = json(`data/bldg/${c}.json`).then(t => t.p.map(e => {
+          const r = []; let x = e[0], y = e[1]; r.push([y / t.s, x / t.s]);
+          for (let i = 2; i < e.length; i += 2) { x += e[i]; y += e[i + 1]; r.push([y / t.s, x / t.s]); }
+          return r;
+        })).catch(() => []));
+        const rend = L.canvas({ padding: 0.2 }), out = L.layerGroup();
+        let ticket = 0;
+        const draw = async () => {
+          const my = ++ticket, z = map.getZoom();
           const bb = map.getBounds().pad(0.1), w = bb.getWest(), e = bb.getEast(), so = bb.getSouth(), no = bb.getNorth();
-          let n = 0;
-          for (let k = 0; k < P.length / 2 && n < 30000; k++) {
-            const lo = P[2 * k], la = P[2 * k + 1];
-            if (lo < w || lo > e || la < so || la > no) continue;
-            L.circleMarker([la, lo], { renderer: rend, radius: map.getZoom() >= 16 ? 3.5 : 2.2, weight: 0.6, color: '#7F1D1D',
-              fillColor: '#EF4444', fillOpacity: 0.8, interactive: false }).addTo(pts); n++;
+          if (z >= Z_POLY && idx) {
+            const want = Object.entries(idx).filter(([, v]) => !(v.bbox[2] < w || v.bbox[0] > e || v.bbox[3] < so || v.bbox[1] > no)).map(([c]) => c);
+            const polys = (await Promise.all(want.map(loadTile))).flat();
+            if (my !== ticket) return;
+            out.clearLayers(); let n = 0;
+            for (const r of polys) {
+              const [la, lo] = r[0];
+              if (lo < w || lo > e || la < so || la > no) continue;
+              L.polygon(r, { renderer: rend, color: '#1F2937', weight: 0.7, fillColor: '#F59E0B', fillOpacity: 0.85, interactive: false }).addTo(out);
+              if (++n >= CAP) break;
+            }
+            return;
+          }
+          out.clearLayers();
+          if (z >= Z_PT && P) {
+            let n = 0;
+            for (let k = 0; k < P.length / 2 && n < CAP; k++) {
+              const lo = P[2 * k], la = P[2 * k + 1];
+              if (lo < w || lo > e || la < so || la > no) continue;
+              L.circleMarker([la, lo], { renderer: rend, radius: 2, weight: 0.5, color: '#1F2937', fillColor: '#F59E0B', fillOpacity: 0.9, interactive: false }).addTo(out); n++;
+            }
           }
         };
-        const grp = L.layerGroup([pts]);
-        grp.on('add', () => {
-          grp.__active = true; if (map.getZoom() < 14 || !P) dens.addTo(map); draw(); map.on('moveend', draw);
-          // สีตำบลทับกับความหนาแน่นแล้วอ่านยาก → ปิดสีตำบลให้อัตโนมัติ (เปิดกลับได้ที่สวิตช์เขตตำบล)
-          if (state.labels.on) setOn('labels', false);
-        });
-        grp.on('remove', () => { grp.__active = false; map.off('moveend', draw); map.removeLayer(dens); pts.clearLayers(); });
-        const tot = hex.features.reduce((s2, f) => s2 + f.properties.bldg, 0);
-        return { lyr: grp, sub: `${tot.toLocaleString('th-TH')} หลัง · ${P ? 'ซูมถึงระดับ 14 เพื่อดูรายหลัง' : ''} · ${legendTxt}`,
+        out.on('add', () => { draw(); map.on('moveend', draw); });
+        out.on('remove', () => { map.off('moveend', draw); ticket++; out.clearLayers(); });
+        const tot = idx ? Object.values(idx).reduce((a, v) => a + v.n, 0) : P.length / 2;
+        return { lyr: out, sub: `${tot.toLocaleString('th-TH')} หลัง · ซูม ${Z_PT}+ จุด${idx ? ` · ซูม ${Z_POLY}+ รูปอาคาร` : ''}`,
           attr: 'อาคาร © Google Open Buildings (CC BY 4.0)' };
       }
     }
