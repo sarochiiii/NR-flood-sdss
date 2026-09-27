@@ -167,8 +167,8 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'rainacc', icon: 'ti-cloud-storm', label: 'ฝนสะสมหลายวัน (สถานีจังหวัด)', on: false, sw: ['rain3d', 'rain7d'],
-      swLabels: ['สะสม 3 วัน', 'สะสม 7 วัน'],
+      id: 'rainacc', icon: 'ti-cloud-storm', label: 'ฝนสะสมหลายวัน (สถานีจังหวัด)', on: false, sw: ['rain7d', 'rain3d'],
+      swLabels: ['สะสม 7 วัน', 'สะสม 3 วัน'],
       async build(state) {
         const p = await province(), key = state.sw || 'rain7d', rows = p[key] || [];
         const lyr = L.layerGroup(rows.map(s => L.circleMarker([s.lat, s.lon], {
@@ -317,7 +317,11 @@ document.addEventListener('sdss:ready', () => {
     if (document.hidden) return;
     lastRun = Date.now();
     twCache = null; provCache = null;
-    for (const d of defs) if (state[d.id].on && d.id !== 'labels') await rebuild(d.id);
+    for (const d of defs) {
+      const st = state[d.id];
+      // เลเยอร์ที่เปิดอยู่ → โหลดใหม่ · เลเยอร์ที่ตั้งให้เปิดแต่โหลดไม่สำเร็จตอนแรก → ลองใหม่
+      if (d.id !== 'labels' && (st.on || (d.on && st.err))) await rebuild(d.id);
+    }
     await refreshNow();
   }
   setInterval(refreshAll, 10 * 60 * 1000);
