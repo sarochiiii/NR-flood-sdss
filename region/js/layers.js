@@ -36,7 +36,10 @@ document.addEventListener('sdss:ready', () => {
     return c;
   }
   const inArea = (la, lo) => AREA.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
-  const tag = (s) => inArea(s.lat, s.lon) ? '<span class="tag-in">ในพื้นที่</span>' : '<span class="tag-out">ใกล้เคียง</span>';
+  // ในพื้นที่ = อยู่ในสองอำเภอ · ใกล้เคียง = อยู่ใน buffer รอบพื้นที่ · นอกพื้นที่ = ไกลกว่านั้น (ข้อมูลระดับจังหวัด)
+  let _bb = null;
+  const tag = (s) => inArea(s.lat, s.lon) ? '<span class="tag-in">ในพื้นที่</span>'
+    : inBox(s.lat, s.lon, _bb || (_bb = bbox())) ? '<span class="tag-out">ใกล้เคียง</span>' : '<span class="tag-out">นอกพื้นที่</span>';
   const inBox = (la, lo, bb) => la != null && lo != null && lo >= bb[0] && lo <= bb[2] && la >= bb[1] && la <= bb[3];
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
   const th = (x) => (x && typeof x === 'object') ? x.th : x;
@@ -71,10 +74,26 @@ document.addEventListener('sdss:ready', () => {
     return out;
   }
 
+  /* ---------- ThaiWater จังหวัด (ฝนสะสม 3/7 วัน, อ่างเก็บน้ำ) — มาจาก Actions เท่านั้น เพราะ CORS ---------- */
+  let provCache = null;
+  function province() {
+    if (!provCache) provCache = json('data/live/tw_province.json').then(d => {
+      if (!d.updated_at) throw new Error('รอ workflow รันรอบแรก');
+      return d;
+    }).catch(e => { provCache = null; throw e; });
+    return provCache;
+  }
+  const hhmm = (iso) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+
   /* ---------- สีตามเกณฑ์ ---------- */
   const RAIN_BR = [[90.1, '#08306B'], [35.1, '#2171B5'], [10.1, '#6BAED6'], [0.1, '#C6DBEF'], [-1, '#E2E8F0']];
   const rainColor = v => (RAIN_BR.find(([b]) => (v ?? -1) >= b) || RAIN_BR[4])[1];
   const WL_BR = [[100, '#C0392B'], [70, '#E67E22'], [30, '#1E8449'], [-1e9, '#D68910']];
+  const R7_BR = [[200, '#08306B'], [100, '#2171B5'], [50, '#6BAED6'], [10, '#C6DBEF'], [-1, '#E2E8F0']];
+  const r7Color = v => (R7_BR.find(([b]) => (v ?? -1) >= b) || R7_BR[4])[1];
+  // ช่วงสีอ่าง: > 100 เกินความจุ · 80–100 น้ำมาก · 50–80 ปานกลาง · 30–50 น้อย · < 30 น้อยวิกฤต
+  const DAM_BR = [[100, '#7F1D1D'], [80, '#C0392B'], [50, '#1E8449'], [30, '#D68910'], [-1e9, '#92400E']];
+  const damColor = (d) => d.stale || d.pct == null ? '#94A3B8' : DAM_BR.find(([b]) => d.pct > b || (b === 80 && d.pct >= 80))[1];
   const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
 
   /* ---------- นิยามเลเยอร์ ---------- */
@@ -145,6 +164,36 @@ document.addEventListener('sdss:ready', () => {
             ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b><br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
             ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>`)));
         return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = ร้อยละความจุ`, attr: 'สถานี © สสน. (ThaiWater)' };
+      }
+    },
+    {
+      id: 'rainacc', icon: 'ti-cloud-storm', label: 'ฝนสะสมหลายวัน (สถานีจังหวัด)', on: false, sw: ['rain3d', 'rain7d'],
+      swLabels: ['สะสม 3 วัน', 'สะสม 7 วัน'],
+      async build(state) {
+        const p = await province(), key = state.sw || 'rain7d', rows = p[key] || [];
+        const lyr = L.layerGroup(rows.map(s => L.circleMarker([s.lat, s.lon], {
+          radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
+          color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
+          fillColor: r7Color(key === 'rain7d' ? s.v : s.v * 7 / 3), fillOpacity: 0.9
+        }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)}<br>ต.${esc(s.tambon)} อ.${esc(s.amphoe)}<br>
+            ฝนสะสม ${key === 'rain7d' ? '7' : '3'} วัน <b>${fmt(s.v)}</b> มม.<br>
+            <span class="muted">${esc(s.start)} ถึง ${esc(s.end)} · ${esc(s.agency)}</span>`)));
+        return { lyr, sub: `ThaiWater จังหวัด · ${rows.length} สถานี · ${hhmm(p.updated_at)}`, attr: 'สถานี © สสน. (ThaiWater)' };
+      }
+    },
+    {
+      id: 'dams', icon: 'ti-building-bridge-2', label: 'อ่างเก็บน้ำ', on: true,
+      async build() {
+        const p = await province(), rows = p.dams || [];
+        const lyr = L.layerGroup(rows.map(d => L.circleMarker([d.lat, d.lon], {
+          radius: d.kind === 'large' ? 11 : 7, weight: 2, color: '#FFFFFF', fillColor: damColor(d), fillOpacity: 0.95
+        }).bindPopup(`<b>${esc(d.name)}</b> ${tag(d)}<br>${d.kind === 'large' ? 'เขื่อน/อ่างขนาดใหญ่' : 'อ่างขนาดกลาง'} · อ.${esc(d.amphoe)}<br>
+            ปริมาณน้ำ <b>${fmt(d.pct, 1)}%</b> (${fmt(d.storage, 2)} ล้าน ลบ.ม.)<br>
+            น้ำไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน<br>
+            <span class="muted">ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' — ข้อมูลเก่า' : ''}</span>`)
+          .on('add', function () { MARK['d:' + d.name] = this; })));
+        const n = rows.filter(d => !d.stale && d.pct != null).length;
+        return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater)' };
       }
     },
     {
@@ -243,6 +292,19 @@ document.addEventListener('sdss:ready', () => {
       ['k-rmax', 'k-heavy', 'k-wl'].forEach(id => setK(id, '—', 'ไม่มีข้อมูล'));
     }
     try {
+      const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null).sort((a, b) => b.pct - a.pct);
+      const hi = dams.filter(d => d.pct >= 80), over = dams.filter(d => d.pct > 100);
+      setK('k-dam', `${hi.length}`, `เกินความจุ ${over.length} · จาก ${dams.length} อ่าง`);
+      const rows = hi.slice(0, 6).map(d => `<div class="wrow" data-k="d:${esc(d.name)}" data-l="dams">
+          <span><span class="dot" style="background:${damColor(d)}"></span>${esc(d.name)} ${tag(d)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">อ่างเก็บน้ำ · อ.${esc(d.amphoe || '—')}</span></span>
+          <span class="mono">${fmt(d.pct, 0)}%</span></div>`).join('');
+      $('now').insertAdjacentHTML('afterbegin', rows);
+      $('now').querySelectorAll('.wrow[data-l="dams"]').forEach(el => el.onclick = async () => {
+        if (!state.dams.on) await setOn('dams', true);
+        const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 11)); m.openPopup(); }
+      });
+    } catch (e) { setK('k-dam', '—', e.message); }
+    try {
       const g = await json('data/live/gistda_flood_7d.geojson');
       if (g.status === 'ok') setK('k-flood', Number(g.total_rai || 0).toLocaleString('th-TH') + ' ไร่', `GISTDA · ${g.features.length} แปลง`);
       else setK('k-flood', '—', g.status === 'not_configured' ? 'รอ GISTDA API key' : 'ดึงไม่สำเร็จ');
@@ -254,7 +316,7 @@ document.addEventListener('sdss:ready', () => {
   async function refreshAll() {
     if (document.hidden) return;
     lastRun = Date.now();
-    twCache = null;
+    twCache = null; provCache = null;
     for (const d of defs) if (state[d.id].on && d.id !== 'labels') await rebuild(d.id);
     await refreshNow();
   }
