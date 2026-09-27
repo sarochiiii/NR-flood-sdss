@@ -14,14 +14,21 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 def main(hex_csv, pts_csv):
-    rows = {r["h3"]: int(float(r["bldg"] or 0)) for r in csv.DictReader(open(hex_csv, encoding="utf-8"))}
+    # นับอาคารต่อ hexagon จากจุดโดยตรงด้วย h3 (ค่าจาก GEE เป็นผลรวมถ่วงน้ำหนักพิกเซลขอบ จึงมีทศนิยม)
+    try:
+        import h3
+        rows = {}
+        for r in csv.DictReader(open(pts_csv, encoding="utf-8")):
+            c = h3.latlng_to_cell(float(r["lat"]), float(r["lon"]), 8)
+            rows[c] = rows.get(c, 0) + 1
+    except ImportError:
+        rows = {r["h3"]: round(float(r["bldg"] or 0)) for r in csv.DictReader(open(hex_csv, encoding="utf-8"))}
     grid = json.loads((ROOT / "gee/hex_grid_res8.geojson").read_text())
     feats = []
     for f in grid["features"]:
         h = f["properties"]["h3"]
-        if h in rows:
-            f["properties"]["bldg"] = rows[h]
-            feats.append(f)
+        f["properties"]["bldg"] = rows.get(h, 0)
+        feats.append(f)
     (ROOT / "region/data/hex.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}, separators=(",", ":")))
 
     area = prep(shape({"type": "MultiPolygon", "coordinates": sum(

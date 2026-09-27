@@ -204,6 +204,7 @@
       <dl class="kv">
         <dt>S (คงที่)</dt><dd>${o.s ? cfg.s_classes[o.s - 1] : '—'}</dd>
         <dt>T (ตอนนี้)</dt><dd>${o.t !== null ? cfg.t_states[o.t] : '—'}</dd>
+        ${p.bldg != null ? `<dt>อาคาร (Open Buildings)</dt><dd class="mono">${Number(p.bldg).toLocaleString('th-TH')} หลัง</dd>` : ''}
         <dt>ฝน 24 ชม. ที่ผ่านมา</dt><dd class="mono">${fmt(o.r && o.r.rain_24h_mm)} มม.</dd>
         <dt>คาดการณ์ 24 ชม.</dt><dd class="mono">${fmt(o.r && o.r.rain_next24h_mm)} มม.</dd>
         <dt>ฝนสะสม 7 วัน</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
