@@ -1,0 +1,3840 @@
+{
+ "fetched_at": "2026-09-27T01:42:17+00:00",
+ "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain7d?province_code=30",
+ "status": "ok",
+ "http": 200,
+ "body": {
+  "result": "OK",
+  "data": [
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "198.00",
+    "id": 4184970,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "อุดมทรัพย์",
+      "en": "Udom Sap"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 227,
+     "tele_station_name": {
+      "en": "Udomsup",
+      "th": "อบต.อุดมทรัพย์"
+     },
+     "tele_station_lat": 14.55706,
+     "tele_station_long": 101.97418,
+     "tele_station_oldcode": "UDMS",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "115.00",
+    "id": 4184971,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "เฉลิมพระเกียรติ",
+      "en": "Chaloem Phra Kiat District"
+     },
+     "tumbon_name": {
+      "th": "หนองยาง",
+      "en": "Nong Yang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 228,
+     "tele_station_name": {
+      "en": "Mun 2",
+      "th": "เฉลิมพระเกียรติ"
+     },
+     "tele_station_lat": 14.968,
+     "tele_station_long": 102.23782,
+     "tele_station_oldcode": "MUN002",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "148.00",
+    "id": 4186975,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สีคิ้ว",
+      "en": "Sikhio District"
+     },
+     "tumbon_name": {
+      "th": "หนองหญ้าขาว",
+      "en": "Nong Ya Khao"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1066,
+     "tele_station_name": {
+      "th": "บ้านหนองไผ่"
+     },
+     "tele_station_lat": 14.967927,
+     "tele_station_long": 101.56721,
+     "tele_station_oldcode": "STN0988",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "179.40",
+    "id": 4184956,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ครบุรี",
+      "en": "Khon Buri District"
+     },
+     "tumbon_name": {
+      "th": "บ้านใหม่",
+      "en": "Ban Mai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 202,
+     "tele_station_name": {
+      "en": "Ban Ang Kone - Huai Sai School",
+      "th": "ร.ร.บ้านอังโกน-ห้วยทราย"
+     },
+     "tele_station_lat": 14.49607,
+     "tele_station_long": 102.2472,
+     "tele_station_oldcode": "BUGN",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "48.60",
+    "id": 4184957,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "คง",
+      "en": "Khong District"
+     },
+     "tumbon_name": {
+      "th": "เมืองคง",
+      "en": "Mueang Khong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 203,
+     "tele_station_name": {
+      "en": "Khong",
+      "th": "ทต.เมืองคง"
+     },
+     "tele_station_lat": 15.44376,
+     "tele_station_long": 102.32843,
+     "tele_station_oldcode": "KHOG",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "164.20",
+    "id": 4184958,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "จักราช",
+      "en": "Chakkarat District"
+     },
+     "tumbon_name": {
+      "th": "ศรีละกอ",
+      "en": "Si Lako"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 204,
+     "tele_station_name": {
+      "en": "Si Lako",
+      "th": "อบต.ศรีละกอ"
+     },
+     "tele_station_lat": 14.9475,
+     "tele_station_long": 102.40295,
+     "tele_station_oldcode": "SISU",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "99.20",
+    "id": 4184959,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "เมืองนครราชสีมา",
+      "en": "Mueang Nakhon Ratchasima District"
+     },
+     "tumbon_name": {
+      "th": "ไชยมงคล",
+      "en": "Chai Mongkhon"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 205,
+     "tele_station_name": {
+      "en": "Chai Mongkhon",
+      "th": "ทต.ไชยมงคล"
+     },
+     "tele_station_lat": 14.83753,
+     "tele_station_long": 102.06885,
+     "tele_station_oldcode": "BSDE",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "138.60",
+    "id": 4184960,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ด่านขุนทด",
+      "en": "Dan Khun Thot District"
+     },
+     "tumbon_name": {
+      "th": "หนองบัวละคร",
+      "en": "Nong Bua Lakhon"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 207,
+     "tele_station_name": {
+      "en": "Nong Bua Lakhon",
+      "th": "อบต.หนองบัวละคร"
+     },
+     "tele_station_lat": 15.25427,
+     "tele_station_long": 101.86642,
+     "tele_station_oldcode": "NBLK",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "121.00",
+    "id": 4184961,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปักธงชัย",
+      "en": "Pak Thong Chai District"
+     },
+     "tumbon_name": {
+      "th": "ตะคุ",
+      "en": "Takhu"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 209,
+     "tele_station_name": {
+      "en": "Takhu",
+      "th": "อบต.ตะคุ"
+     },
+     "tele_station_lat": 14.72923,
+     "tele_station_long": 101.98731,
+     "tele_station_oldcode": "BKUG",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "77.60",
+    "id": 4184962,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "พิมาย",
+      "en": "Phimai District"
+     },
+     "tumbon_name": {
+      "th": "สัมฤทธิ์",
+      "en": "Samrit"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 213,
+     "tele_station_name": {
+      "en": "Samrit",
+      "th": "อบต.สัมฤทธิ์"
+     },
+     "tele_station_lat": 15.21211,
+     "tele_station_long": 102.44619,
+     "tele_station_oldcode": "BSUM",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "36.00",
+    "id": 4184963,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ชุมพวง",
+      "en": "Chum Phuang District"
+     },
+     "tumbon_name": {
+      "th": "ชุมพวง",
+      "en": "Chum Phuang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 216,
+     "tele_station_name": {
+      "en": "Chum Phuang Weir",
+      "th": "ท้ายฝายชุมพวง"
+     },
+     "tele_station_lat": 15.38654,
+     "tele_station_long": 102.71913,
+     "tele_station_oldcode": "WEI142",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "64.80",
+    "id": 4184964,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ชุมพวง",
+      "en": "Chum Phuang District"
+     },
+     "tumbon_name": {
+      "th": "ท่าลาด",
+      "en": "Tha Lat"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 218,
+     "tele_station_name": {
+      "en": "Mun 3",
+      "th": "ชุมพวง"
+     },
+     "tele_station_lat": 15.28663,
+     "tele_station_long": 102.68459,
+     "tele_station_oldcode": "MUN003",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "0.00",
+    "id": 4184965,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ชุมพวง",
+      "en": "Chum Phuang District"
+     },
+     "tumbon_name": {
+      "th": "ตลาดไทร",
+      "en": "Talat Sai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 219,
+     "tele_station_name": {
+      "en": "Talad Sai Communuty",
+      "th": "อบต.ตลาดไทร"
+     },
+     "tele_station_lat": 15.18156,
+     "tele_station_long": 102.84448,
+     "tele_station_oldcode": "VLGE01",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "158.40",
+    "id": 4184966,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สีคิ้ว",
+      "en": "Sikhio District"
+     },
+     "tumbon_name": {
+      "th": "วังโรงใหญ่",
+      "en": "Wang Rong Yai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 220,
+     "tele_station_name": {
+      "en": "Wang Rong Yai",
+      "th": "อบต.วังโรงใหญ่"
+     },
+     "tele_station_lat": 15.05111,
+     "tele_station_long": 101.66181,
+     "tele_station_oldcode": "WGRY",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "217.80",
+    "id": 4184967,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ขนงพระ",
+      "en": "Khanong Phra"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 221,
+     "tele_station_name": {
+      "en": "Khanong Phra",
+      "th": "อบต.ขนงพระ"
+     },
+     "tele_station_lat": 14.60689,
+     "tele_station_long": 101.45632,
+     "tele_station_oldcode": "TLPC",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "232.80",
+    "id": 4184968,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 225,
+     "tele_station_name": {
+      "en": "Wang Nam Khiao",
+      "th": "อบต.วังน้ำเขียว"
+     },
+     "tele_station_lat": 14.37476,
+     "tele_station_long": 101.86537,
+     "tele_station_oldcode": "WNKH",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "255.40",
+    "id": 4184969,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังหมี",
+      "en": "Wang Mi"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 226,
+     "tele_station_name": {
+      "en": "Wang Mi",
+      "th": "อบต.วังหมี"
+     },
+     "tele_station_lat": 14.4157,
+     "tele_station_long": 101.68403,
+     "tele_station_oldcode": "WNMI",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "160.00",
+    "id": 4186976,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สีคิ้ว",
+      "en": "Sikhio District"
+     },
+     "tumbon_name": {
+      "th": "คลองไผ่",
+      "en": "Khlong Phai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1067,
+     "tele_station_name": {
+      "th": "บ้านเขายายเที่ยง"
+     },
+     "tele_station_lat": 14.805396,
+     "tele_station_long": 101.567403,
+     "tele_station_oldcode": "STN0549",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "209.50",
+    "id": 4186977,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "วังกะทะ",
+      "en": "Wang Katha"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1068,
+     "tele_station_name": {
+      "th": "บ้านวังกะทะ"
+     },
+     "tele_station_lat": 14.535877,
+     "tele_station_long": 101.630446,
+     "tele_station_oldcode": "STN0775",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "38.00",
+    "id": 4186978,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หมูสี",
+      "en": "Mu Si"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1070,
+     "tele_station_name": {
+      "th": "บ้านคลองเพล"
+     },
+     "tele_station_lat": 14.516402,
+     "tele_station_long": 101.377397,
+     "tele_station_oldcode": "STN0551",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "121.50",
+    "id": 4186979,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หนองสาหร่าย",
+      "en": "Nong Sarai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1071,
+     "tele_station_name": {
+      "th": "บ้านโคกสง่า"
+     },
+     "tele_station_lat": 14.712083,
+     "tele_station_long": 101.454595,
+     "tele_station_oldcode": "STN0987",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "9.50",
+    "id": 4186980,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หนองสาหร่าย",
+      "en": "Nong Sarai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1072,
+     "tele_station_name": {
+      "th": "บ้านหลักเขต"
+     },
+     "tele_station_lat": 14.695093,
+     "tele_station_long": 101.505887,
+     "tele_station_oldcode": "STN0780",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "134.00",
+    "id": 4186981,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ขนงพระ",
+      "en": "Khanong Phra"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1073,
+     "tele_station_name": {
+      "th": "บ้านขนงพระใต้"
+     },
+     "tele_station_lat": 14.618429,
+     "tele_station_long": 101.443977,
+     "tele_station_oldcode": "STN0985",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "203.00",
+    "id": 4186982,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หมูสี",
+      "en": "Mu Si"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1074,
+     "tele_station_name": {
+      "th": "บ้านคลองดินดำ"
+     },
+     "tele_station_lat": 14.523982,
+     "tele_station_long": 101.476869,
+     "tele_station_oldcode": "STN0986",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "271.00",
+    "id": 4186983,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "โป่งตาลอง",
+      "en": "Pong Ta Long"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1075,
+     "tele_station_name": {
+      "th": "บ้านปอหู"
+     },
+     "tele_station_lat": 14.497153,
+     "tele_station_long": 101.554237,
+     "tele_station_oldcode": "STN0984",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "186.00",
+    "id": 4186984,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "โป่งตาลอง",
+      "en": "Pong Ta Long"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1076,
+     "tele_station_name": {
+      "th": "บ้านเทพนิมิตร"
+     },
+     "tele_station_lat": 14.457912,
+     "tele_station_long": 101.643218,
+     "tele_station_oldcode": "STN0058",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "186.50",
+    "id": 4186985,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1077,
+     "tele_station_name": {
+      "th": "บ้านคลองทราย"
+     },
+     "tele_station_lat": 14.364402,
+     "tele_station_long": 101.757113,
+     "tele_station_oldcode": "STN0777",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "219.50",
+    "id": 4186986,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1078,
+     "tele_station_name": {
+      "th": "บ้านคลองสอง"
+     },
+     "tele_station_lat": 14.37957,
+     "tele_station_long": 101.849891,
+     "tele_station_oldcode": "STN0216",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "130.00",
+    "id": 4186987,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1079,
+     "tele_station_name": {
+      "th": "บ้านซับไทรทอง"
+     },
+     "tele_station_lat": 14.503397,
+     "tele_station_long": 101.81842,
+     "tele_station_oldcode": "STN0983",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "145.00",
+    "id": 4186988,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "ระเริง",
+      "en": "Raroeng"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1080,
+     "tele_station_name": {
+      "th": "บ้านวังขอน"
+     },
+     "tele_station_lat": 14.514877,
+     "tele_station_long": 101.761444,
+     "tele_station_oldcode": "STN0776",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "0.00",
+    "id": 4186989,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังหมี",
+      "en": "Wang Mi"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1081,
+     "tele_station_name": {
+      "th": "บ้านคลองสะท้อน"
+     },
+     "tele_station_lat": 14.407495,
+     "tele_station_long": 101.685106,
+     "tele_station_oldcode": "STN0474",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "189.50",
+    "id": 4186990,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "ระเริง",
+      "en": "Raroeng"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1083,
+     "tele_station_name": {
+      "th": "บ้านระเริง"
+     },
+     "tele_station_lat": 14.581153,
+     "tele_station_long": 101.710822,
+     "tele_station_oldcode": "STN0276",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "167.50",
+    "id": 4186991,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "อุดมทรัพย์",
+      "en": "Udom Sap"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1084,
+     "tele_station_name": {
+      "th": "บ้านอุดมทรัพย์พัฒนา"
+     },
+     "tele_station_lat": 14.533591,
+     "tele_station_long": 101.971095,
+     "tele_station_oldcode": "STN0981",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "136.50",
+    "id": 4186992,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "อุดมทรัพย์",
+      "en": "Udom Sap"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1085,
+     "tele_station_name": {
+      "th": "บ้านซับเต่า"
+     },
+     "tele_station_lat": 14.460456,
+     "tele_station_long": 101.986167,
+     "tele_station_oldcode": "STN0778",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "160.50",
+    "id": 4186993,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "อุดมทรัพย์",
+      "en": "Udom Sap"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1086,
+     "tele_station_name": {
+      "th": "บ้านห้วยน้ำเค็ม"
+     },
+     "tele_station_lat": 14.464046,
+     "tele_station_long": 101.905837,
+     "tele_station_oldcode": "STN0982",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "218.60",
+    "id": 4185864,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ด่านขุนทด",
+      "en": "Dan Khun Thot District"
+     },
+     "tumbon_name": {
+      "th": "ด่านขุนทด",
+      "en": "Dan Khun Thot"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109510,
+     "tele_station_name": {
+      "en": "Khlong Chiang Krai Ban Don",
+      "th": "คลองเชียงไกร บ้านดอน"
+     },
+     "tele_station_lat": 15.240714,
+     "tele_station_long": 101.786194,
+     "tele_station_oldcode": "ONE021",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "171.50",
+    "id": 4187959,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 500144,
+     "tele_station_name": {
+      "th": "บ้านหนองกะโตวา"
+     },
+     "tele_station_lat": 14.718076,
+     "tele_station_long": 101.364047,
+     "tele_station_oldcode": "STN1475",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "219.50",
+    "id": 4187960,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 500145,
+     "tele_station_name": {
+      "th": "บ้านโนนสมบูรณ์"
+     },
+     "tele_station_lat": 14.777422,
+     "tele_station_long": 101.341215,
+     "tele_station_oldcode": "STN1476",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "42.50",
+    "id": 4188276,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ด่านขุนทด",
+      "en": "Dan Khun Thot District"
+     },
+     "tumbon_name": {
+      "th": "ห้วยบง",
+      "en": "Huai Bong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501501,
+     "tele_station_name": {
+      "th": "บ้านซับพลู"
+     },
+     "tele_station_lat": 15.200306,
+     "tele_station_long": 101.468902,
+     "tele_station_oldcode": "STN1473",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "120.00",
+    "id": 4188277,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "จันทึก",
+      "en": "Chan Thuek"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501502,
+     "tele_station_name": {
+      "th": "บ้านหนองไข่น้ำ"
+     },
+     "tele_station_lat": 14.829646,
+     "tele_station_long": 101.450214,
+     "tele_station_oldcode": "STN1474",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "192.00",
+    "id": 4188278,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "โป่งตาลอง",
+      "en": "Pong Ta Long"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501505,
+     "tele_station_name": {
+      "th": "บ้านสระน้ำใส"
+     },
+     "tele_station_lat": 14.550237,
+     "tele_station_long": 101.505542,
+     "tele_station_oldcode": "STN1477",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "169.50",
+    "id": 4188279,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "พญาเย็น",
+      "en": "Phaya Yen"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501506,
+     "tele_station_name": {
+      "th": "บ้านหนองยาง"
+     },
+     "tele_station_lat": 14.607045,
+     "tele_station_long": 101.207572,
+     "tele_station_oldcode": "STN1478",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "147.00",
+    "id": 4188280,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "พญาเย็น",
+      "en": "Phaya Yen"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501507,
+     "tele_station_name": {
+      "th": "บ้านซับใต้"
+     },
+     "tele_station_lat": 14.542774,
+     "tele_station_long": 101.243758,
+     "tele_station_oldcode": "STN1479",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "145.50",
+    "id": 4188281,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หนองสาหร่าย",
+      "en": "Nong Sarai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501508,
+     "tele_station_name": {
+      "th": "บ้านไทรงาม"
+     },
+     "tele_station_lat": 14.636177,
+     "tele_station_long": 101.508056,
+     "tele_station_oldcode": "STN1480",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "172.00",
+    "id": 4191734,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หมูสี",
+      "en": "Mu Si"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501509,
+     "tele_station_name": {
+      "th": "บ้านคลองเดื่อ"
+     },
+     "tele_station_lat": 14.514054,
+     "tele_station_long": 101.442372,
+     "tele_station_oldcode": "STN1481",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "114.00",
+    "id": 4188282,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หมูสี",
+      "en": "Mu Si"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501510,
+     "tele_station_name": {
+      "th": "บ้านเหวปลากั้ง"
+     },
+     "tele_station_lat": 14.55014,
+     "tele_station_long": 101.313189,
+     "tele_station_oldcode": "STN1482",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "97.50",
+    "id": 4188283,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "ระเริง",
+      "en": "Raroeng"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501511,
+     "tele_station_name": {
+      "th": "บ้านไทรงาม"
+     },
+     "tele_station_lat": 14.621957,
+     "tele_station_long": 101.72213,
+     "tele_station_oldcode": "STN1483",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "91.50",
+    "id": 4188284,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สีคิ้ว",
+      "en": "Sikhio District"
+     },
+     "tumbon_name": {
+      "th": "ดอนเมือง",
+      "en": "Don Mueang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 501512,
+     "tele_station_name": {
+      "th": "บ้านซับกระสังข์"
+     },
+     "tele_station_lat": 15.046621,
+     "tele_station_long": 101.445704,
+     "tele_station_oldcode": "STN1484",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "43.00",
+    "id": 4184528,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "พพภ",
+      "en": "FOP",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "พญาเย็น",
+      "en": "Phaya Yen"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 855496,
+     "tele_station_name": {
+      "en": "National Park Protection Unit of  Ko Yo 17 (Klang Dong)",
+      "th": "หน่วยพิทักษ์อุทยานแห่งชาติที่ ขญ.๑๗ (กลางดง)"
+     },
+     "tele_station_lat": 14.549575,
+     "tele_station_long": 101.26519,
+     "tele_station_oldcode": "MOU106",
+     "tele_station_type": "",
+     "basin_id": "12",
+     "sponsor_by": "บริษัท ทรู คอร์ปอเรชั่น จำกัด (มหาชน)"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "269.60",
+    "id": 4184529,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "พพภ",
+      "en": "FOP",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "โป่งตาลอง",
+      "en": "Pong Ta Long"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 855497,
+     "tele_station_name": {
+      "en": "Upper Mun Basin Watershed Conservation Development Study Center",
+      "th": "ศูนย์ศึกษาการพัฒนาการอนุรักษ์ต้นน้ำลุ่มน้ำมูลตอนบน"
+     },
+     "tele_station_lat": 14.467833,
+     "tele_station_long": 101.590866,
+     "tele_station_oldcode": "MOU107",
+     "tele_station_type": "",
+     "basin_id": "5",
+     "sponsor_by": "บริษัท ทรู คอร์ปอเรชั่น จำกัด (มหาชน)"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "119.60",
+    "id": 4184533,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "พพภ",
+      "en": "FOP",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังหมี",
+      "en": "Wang Mi"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 855501,
+     "tele_station_name": {
+      "en": "National Park Protection Unit of Ko Yo (Khlong Pla Kang)",
+      "th": "หน่วยพิทักษ์อุทยานแห่งชาติที่ ขญ.๔ (คลองปลากั้ง)"
+     },
+     "tele_station_lat": 14.356375,
+     "tele_station_long": 101.72591,
+     "tele_station_oldcode": "MOU111",
+     "tele_station_type": "",
+     "basin_id": "5",
+     "sponsor_by": "บริษัท ทรู คอร์ปอเรชั่น จำกัด (มหาชน)"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "175.20",
+    "id": 4185865,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ด่านขุนทด",
+      "en": "Dan Khun Thot District"
+     },
+     "tumbon_name": {
+      "th": "กุดพิมาน",
+      "en": "Kut Phiman"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109511,
+     "tele_station_name": {
+      "en": "Khlong Sam Bat Ban Kut Phiman",
+      "th": "คลองสามบาท บ้านกุดพิมาน"
+     },
+     "tele_station_lat": 15.31065,
+     "tele_station_long": 101.74405,
+     "tele_station_oldcode": "ONE022",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "45.60",
+    "id": 4184673,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "พพภ",
+      "en": "FOP",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1396724,
+     "tele_station_name": {
+      "en": "Watershed Management and Community Development Unit in the Lam Takhong Conservation Forest Area",
+      "th": "หน่วยจัดการต้นน้ำและพัฒนาชุมชนในพื้นที่ป่าอนุรักษ์ลำตะคอง"
+     },
+     "tele_station_lat": 14.735245,
+     "tele_station_long": 101.3785,
+     "tele_station_oldcode": "MOU263",
+     "tele_station_type": "",
+     "basin_id": "5",
+     "sponsor_by": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "205.40",
+    "id": 4185891,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ครบุรี",
+      "en": "Khon Buri District"
+     },
+     "tumbon_name": {
+      "th": "บ้านใหม่",
+      "en": "Ban Mai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109542,
+     "tele_station_name": {
+      "en": "Tambon Health Promoting Hospital of Ban Nong Bot",
+      "th": "รพ.สต.บ้านหนองโบสถ์"
+     },
+     "tele_station_lat": 14.418631,
+     "tele_station_long": 102.22089,
+     "tele_station_oldcode": "ONE053",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "44.80",
+    "id": 4185892,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "คง",
+      "en": "Khong District"
+     },
+     "tumbon_name": {
+      "th": "โนนเต็ง",
+      "en": "Non Teng"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109543,
+     "tele_station_name": {
+      "en": "Ban Non Teng School",
+      "th": "โรงเรียนบ้านโนนเต็ง"
+     },
+     "tele_station_lat": 15.486808,
+     "tele_station_long": 102.24148,
+     "tele_station_oldcode": "ONE054",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "62.00",
+    "id": 4185893,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "บ้านเหลื่อม",
+      "en": "Ban Lueam District"
+     },
+     "tumbon_name": {
+      "th": "โคกกระเบื้อง",
+      "en": "Khok Krabueang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109544,
+     "tele_station_name": {
+      "en": "Ban Nong Prue Pong School",
+      "th": "โรงเรียนบ้านหนองปรือโป่ง"
+     },
+     "tele_station_lat": 15.603799,
+     "tele_station_long": 102.217926,
+     "tele_station_oldcode": "ONE055",
+     "tele_station_type": "",
+     "basin_id": "4"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "57.00",
+    "id": 4185894,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สูงเนิน",
+      "en": "Sung Noen District"
+     },
+     "tumbon_name": {
+      "th": "มะเกลือใหม่",
+      "en": "Makluea Mai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109545,
+     "tele_station_name": {
+      "en": "Chin Wong Upatham School",
+      "th": "โรงเรียนชินวงศ์อุปถัมภ์"
+     },
+     "tele_station_lat": 14.772799,
+     "tele_station_long": 101.71571,
+     "tele_station_oldcode": "ONE056",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "178.80",
+    "id": 4185895,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)",
+      "en": "Hydro – Informatics Institute (Public Organization)",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "สสน.",
+      "en": "HII",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปักธงชัย",
+      "en": "Pak Thong Chai District"
+     },
+     "tumbon_name": {
+      "th": "ตะขบ",
+      "en": "Takhop"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1109546,
+     "tele_station_name": {
+      "en": "Ta Khop",
+      "th": "ทต.ตะขบ"
+     },
+     "tele_station_lat": 14.635938,
+     "tele_station_long": 101.844635,
+     "tele_station_oldcode": "ONE057",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "154.00",
+    "id": 4189137,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "เทพารักษ์",
+      "en": "Thepharak District"
+     },
+     "tumbon_name": {
+      "th": "บึงปรือ",
+      "en": "Bueng Prue"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123748,
+     "tele_station_name": {
+      "th": "บ้านน้ำโตน"
+     },
+     "tele_station_lat": 15.34415,
+     "tele_station_long": 101.445125,
+     "tele_station_oldcode": "STN1910",
+     "tele_station_type": "",
+     "basin_id": "12"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "224.50",
+    "id": 4189138,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "หมูสี",
+      "en": "Mu Si"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123750,
+     "tele_station_name": {
+      "th": "บ้านท่าช้างเหนือ"
+     },
+     "tele_station_lat": 14.547743,
+     "tele_station_long": 101.420603,
+     "tele_station_oldcode": "STN1912",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "126.50",
+    "id": 4189233,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ครบุรี",
+      "en": "Khon Buri District"
+     },
+     "tumbon_name": {
+      "th": "ครบุรีใต้",
+      "en": "Khon Buri Tai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123856,
+     "tele_station_name": {
+      "th": "บ้านหนองโสน"
+     },
+     "tele_station_lat": 14.537411,
+     "tele_station_long": 102.165851,
+     "tele_station_oldcode": "STN2018",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "187.50",
+    "id": 4189234,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ครบุรี",
+      "en": "Khon Buri District"
+     },
+     "tumbon_name": {
+      "th": "เฉลียง",
+      "en": "Chaliang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123857,
+     "tele_station_name": {
+      "th": "บ้านเฉลียงโศก"
+     },
+     "tele_station_lat": 14.489816,
+     "tele_station_long": 102.272918,
+     "tele_station_oldcode": "STN2019",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "102.00",
+    "id": 4189235,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "จักราช",
+      "en": "Chakkarat District"
+     },
+     "tumbon_name": {
+      "th": "จักราช",
+      "en": "Chakkarat"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123858,
+     "tele_station_name": {
+      "th": "บ้านจักราช"
+     },
+     "tele_station_lat": 15.008786,
+     "tele_station_long": 102.401874,
+     "tele_station_oldcode": "STN2020",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "133.00",
+    "id": 4189236,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "โนนไทย",
+      "en": "Non Thai District"
+     },
+     "tumbon_name": {
+      "th": "สำโรง",
+      "en": "Samrong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123859,
+     "tele_station_name": {
+      "th": "บ้านทรงธรรม"
+     },
+     "tele_station_lat": 15.128338,
+     "tele_station_long": 102.011196,
+     "tele_station_oldcode": "STN2021",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "44.00",
+    "id": 4189237,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ประทาย",
+      "en": "Prathai District"
+     },
+     "tumbon_name": {
+      "th": "โคกกลาง",
+      "en": "Khok Klang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123860,
+     "tele_station_name": {
+      "th": "บ้านธรรมจักรพัฒนา"
+     },
+     "tele_station_lat": 15.502502,
+     "tele_station_long": 102.753831,
+     "tele_station_oldcode": "STN2022",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "135.50",
+    "id": 4189238,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปักธงชัย",
+      "en": "Pak Thong Chai District"
+     },
+     "tumbon_name": {
+      "th": "บ่อปลาทอง",
+      "en": "Bo Pla Thong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123861,
+     "tele_station_name": {
+      "th": "บ้านพระบึงนอก"
+     },
+     "tele_station_lat": 14.654204,
+     "tele_station_long": 101.899117,
+     "tele_station_oldcode": "STN2023",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "97.50",
+    "id": 4189239,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ลำทะเมนชัย",
+      "en": "Lam Thamenchai District"
+     },
+     "tumbon_name": {
+      "th": "บ้านยาง",
+      "en": "Ban Yang"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123862,
+     "tele_station_name": {
+      "th": "บ้านหนองจานเหนือ"
+     },
+     "tele_station_lat": 15.294763,
+     "tele_station_long": 102.908641,
+     "tele_station_oldcode": "STN2024",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "0.00",
+    "id": 4189240,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "เสิงสาง",
+      "en": "Soeng Sang District"
+     },
+     "tumbon_name": {
+      "th": "กุดโบสถ์",
+      "en": "Kut Bot"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1123863,
+     "tele_station_name": {
+      "th": "บ้านโคกเตาเหล็ก"
+     },
+     "tele_station_lat": 14.418763,
+     "tele_station_long": 102.49256,
+     "tele_station_oldcode": "STN2025",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "131.30",
+    "id": 4184783,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "พพภ",
+      "en": "FOP",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ครบุรี",
+      "en": "Khon Buri District"
+     },
+     "tumbon_name": {
+      "th": "บ้านใหม่",
+      "en": "Ban Mai"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 8269975,
+     "tele_station_name": {
+      "en": "National Park Protection Unit at Highway 12 (Sap Sadao)",
+      "th": "หน่วยพิทักษ์อุทยานแห่งชาติที่ ทล.12 (ซับสะเดา)"
+     },
+     "tele_station_lat": 14.39858,
+     "tele_station_long": 102.16507,
+     "tele_station_oldcode": "MOU264",
+     "tele_station_type": "",
+     "basin_id": "5",
+     "sponsor_by": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "125.00",
+    "id": 4189444,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "โนนสูง",
+      "en": "Non Sung District"
+     },
+     "tumbon_name": {
+      "th": "เมืองปราสาท",
+      "en": "Mueang Prasat"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1459065,
+     "tele_station_name": {
+      "th": "บ้านหนองอ้อ"
+     },
+     "tele_station_lat": 15.178839,
+     "tele_station_long": 102.236208,
+     "tele_station_oldcode": "STN2200",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "228.50",
+    "id": 4189445,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong District"
+     },
+     "tumbon_name": {
+      "th": "ปากช่อง",
+      "en": "Pak Chong"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1459066,
+     "tele_station_name": {
+      "th": "ชุมชนหนองสาหร่าย (สะพานขาว)"
+     },
+     "tele_station_lat": 14.717627,
+     "tele_station_long": 101.430923,
+     "tele_station_oldcode": "STN2201",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "109.50",
+    "id": 4189446,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "สีคิ้ว",
+      "en": "Sikhio District"
+     },
+     "tumbon_name": {
+      "th": "หนองบัวน้อย",
+      "en": "Nong Bua Noi"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1459067,
+     "tele_station_name": {
+      "th": "บ้านสุมทุม"
+     },
+     "tele_station_lat": 14.988341,
+     "tele_station_long": 101.683315,
+     "tele_station_oldcode": "STN2202",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   },
+   {
+    "rainfall_start_date": "2026-09-21",
+    "rainfall_end_date": "2026-09-26",
+    "rainfall_datetime": "2026-09-27",
+    "rain_7d": "186.00",
+    "id": 4189447,
+    "station_type": "rainfall_7day",
+    "agency": {
+     "agency_name": {
+      "th": "กรมทรัพยากรน้ำ",
+      "en": "Department of Water Resources",
+      "jp": ""
+     },
+     "agency_shortname": {
+      "th": "ทน.",
+      "en": "DWR",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "จักราช",
+      "en": "Chakkarat District"
+     },
+     "tumbon_name": {
+      "th": "สีสุก",
+      "en": "Si Suk"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 1459068,
+     "tele_station_name": {
+      "th": "บ้านวังวารี"
+     },
+     "tele_station_lat": 14.859791,
+     "tele_station_long": 102.393737,
+     "tele_station_oldcode": "STN2203",
+     "tele_station_type": "",
+     "basin_id": "5"
+    },
+    "basin": null
+   }
+  ]
+ }
+}

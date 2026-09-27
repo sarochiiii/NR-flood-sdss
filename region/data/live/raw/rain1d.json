@@ -1,0 +1,55 @@
+{
+ "fetched_at": "2026-09-27T01:42:15+00:00",
+ "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain1d?province_code=30",
+ "status": "ok",
+ "http": 200,
+ "body": {
+  "result": "OK",
+  "data": [
+   {
+    "rainfall_start_date": "2026-09-27",
+    "rainfall_end_date": "2026-09-27",
+    "rainfall_date_calc": "2026-09-27",
+    "rain_1d": "78.40",
+    "agency": {
+     "agency_name": {
+      "th": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย",
+      "en": "Friend in Need (of “Pa”) Volunteers Foundation",
+      "jp": ""
+     }
+    },
+    "geocode": {
+     "area_code": "4",
+     "area_name": {
+      "th": "ภาคตะวันออกเฉียงเหนือ",
+      "en": "Northeast"
+     },
+     "amphoe_name": {
+      "th": "วังน้ำเขียว",
+      "en": "Wang Nam Khiao District"
+     },
+     "tumbon_name": {
+      "th": "วังหมี",
+      "en": "Wang Mi"
+     },
+     "province_code": "30",
+     "province_name": {
+      "th": "นครราชสีมา",
+      "en": "Nakhon Ratchasima"
+     }
+    },
+    "station": {
+     "id": 855501,
+     "tele_station_name": {
+      "en": "National Park Protection Unit of Ko Yo (Khlong Pla Kang)",
+      "th": "หน่วยพิทักษ์อุทยานแห่งชาติที่ ขญ.๔ (คลองปลากั้ง)"
+     },
+     "tele_station_lat": 14.356375,
+     "tele_station_long": 101.72591,
+     "tele_station_oldcode": "MOU111",
+     "tele_station_type": ""
+    }
+   }
+  ]
+ }
+}
