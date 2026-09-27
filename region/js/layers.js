@@ -202,9 +202,10 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'labels', icon: 'ti-map-pin', label: 'ชื่อตำบล + ขอบเขตอำเภอ', on: true,
+      id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ (สี เส้น ชื่อ)', on: true,
       async build() {
-        return { toggle: (on) => map.getContainer().classList.toggle('hide-labels', !on), sub: 'อำเภอ ตำบล' };
+        return { toggle: (on) => { map.getContainer().classList.toggle('hide-labels', !on); window.SDSS.setTambonVisible(on); },
+          sub: 'ปิดแล้วยังแตะแผนที่เพื่อดูข้อมูลตำบลได้' };
       }
     },
     {

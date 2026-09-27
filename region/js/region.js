@@ -108,7 +108,7 @@
     { id: 'r7', label: 'ฝนสะสม 7 วัน' },
     { id: 's', label: 'ความอ่อนไหวคงที่ (S)', need: () => hasS }
   ];
-  let mode = hasS ? 'risk' : 't', selected = null;
+  let mode = hasS ? 'risk' : 't', selected = null, showTambon = true;
 
   function colorFor(code) {
     const o = T[code];
@@ -137,7 +137,9 @@
     style: f => {
       const showHex = hexLayer && (mode === 'risk' || mode === 's');
       const sb = f.properties.tcode === cfg.sandbox.tcode, sel = f.properties.tcode === selected;
-      return { color: sel ? '#0F172A' : sb ? '#0E7C7B' : '#475569', weight: sel ? 3 : sb ? 2.2 : 0.8,
+      // ปิดชั้นเขตตำบล: โปร่งใสทั้งสีและเส้น แต่ยังแตะเลือกตำบลได้ (คงเส้นของตำบลที่เลือกไว้)
+      if (!showTambon) return { color: '#0F172A', weight: sel ? 2.5 : 0, opacity: sel ? 1 : 0, fillOpacity: 0 };
+      return { color: sel ? '#0F172A' : sb ? '#0E7C7B' : '#475569', weight: sel ? 3 : sb ? 2.2 : 0.8, opacity: 1,
         dashArray: sb && !sel ? '5 3' : null, fillColor: colorFor(f.properties.tcode),
         fillOpacity: showHex ? 0 : 0.6 };
     },
@@ -146,7 +148,14 @@
       l.on('click', () => select(f.properties.tcode));
     }
   }).addTo(map);
-  if (amphoe) L.geoJSON(amphoe, { interactive: false, style: { color: '#0A1628', weight: 2.2, fill: false } }).addTo(map);
+  const amLayer = amphoe ? L.geoJSON(amphoe, { interactive: false, style: { color: '#0A1628', weight: 2.2, fill: false } }).addTo(map) : null;
+  function setTambonVisible(on) {
+    showTambon = on;
+    if (amLayer) { if (on && !map.hasLayer(amLayer)) amLayer.addTo(map); if (!on && map.hasLayer(amLayer)) map.removeLayer(amLayer); }
+    $('legend').style.display = on ? '' : 'none';
+    $('modes').style.display = on ? '' : 'none';
+    redraw();
+  }
   map.fitBounds(tLayer.getBounds(), { padding: [10, 10] });
 
   function redraw() {
@@ -276,7 +285,7 @@
   }
 
   renderModes(); redraw(); renderWatch(); renderKpi(); renderStatus(); renderMethod();
-  window.SDSS = { map, cfg, tambon, amphoe, hex, select };
+  window.SDSS = { map, cfg, tambon, amphoe, hex, select, setTambonVisible };
   document.dispatchEvent(new CustomEvent('sdss:ready'));
   const m = location.hash.match(/t=(\d{6})/);
   if (m && T[m[1]]) select(m[1]);
