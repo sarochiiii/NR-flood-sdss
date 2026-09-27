@@ -1,7 +1,7 @@
 name: region-live
 on:
   schedule:
-    - cron: '15 */3 * * *'      # ทุก 3 ชม. (ฤดูน้ำหลากปรับเป็น '15 * * * *')
+    - cron: '15 * * * *'        # ทุกชั่วโมง (นาทีที่ 15) — เก็บประวัติระดับน้ำ
   workflow_dispatch:
 concurrency: { group: live-data, cancel-in-progress: false }
 jobs:
@@ -28,6 +28,8 @@ jobs:
           EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
           EE_PROJECT: ee-sarochineek
         run: python scripts/region/fetch_s1.py
+      - name: บันทึกประวัติระดับน้ำและอ่าง
+        run: python scripts/region/update_history.py
       - name: คำนวณระดับความเสี่ยง
         run: python scripts/region/compute_risk.py
       - name: commit ผลลัพธ์
