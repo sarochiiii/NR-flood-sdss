@@ -291,16 +291,42 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'bldg', icon: 'ti-building', label: 'บ้านเรือน (ความหนาแน่น)', on: false,
+      id: 'bldg', icon: 'ti-building', label: 'บ้านเรือน', on: false,
       async build() {
-        if (!hex || !hex.features.length || hex.features[0].properties.bldg === undefined) throw new Error('รอชั้น hexagon จาก GEE');
+        if (!hex || !hex.features.length || hex.features[0].properties.bldg === undefined) throw new Error('รอข้อมูลอาคารจาก GEE');
         const mx = Math.max(...hex.features.map(f => f.properties.bldg));
         const ramp = ['#F1F5F9', '#CBD5E1', '#94A3B8', '#475569', '#0F172A'];
-        const lyr = L.geoJSON(hex, { style: f => ({ stroke: false, fillOpacity: 0.7,
-          fillColor: ramp[Math.min(4, Math.floor(5 * f.properties.bldg / (mx + 1)))] }),
-          onEachFeature: (f, l) => l.bindPopup(`อาคาร ${f.properties.bldg} หลัง ต่อ hexagon`) });
-        const tot = hex.features.reduce((a, f) => a + f.properties.bldg, 0);
-        return { lyr, sub: `${tot.toLocaleString('th-TH')} หลัง · Open Buildings V3`, attr: 'อาคาร © Google Open Buildings' };
+        const dens = L.geoJSON(hex, { interactive: false, style: f => ({ stroke: false, fillOpacity: 0.55,
+          fillColor: ramp[Math.min(4, Math.floor(5 * f.properties.bldg / (mx + 1)))] }) });
+        // จุดรายหลัง: โหลดครั้งเดียว วาดเฉพาะในจอเมื่อซูม ≥ 14
+        let P = null;
+        try {
+          const b = await json('data/buildings.json');
+          P = new Float64Array(b.n * 2); const A = new Uint16Array(b.n);
+          let x = b.x0, y = b.y0;
+          for (let i = 0, k = 0; i < b.d.length; i += 3, k++) { x += b.d[i]; y += b.d[i + 1]; P[2 * k] = x / b.scale; P[2 * k + 1] = y / b.scale; A[k] = b.d[i + 2]; }
+          P.area = A;
+        } catch (e) { P = null; }
+        const rend = L.canvas({ padding: 0.2 }), pts = L.layerGroup();
+        const draw = () => {
+          pts.clearLayers();
+          if (!P || map.getZoom() < 14) { if (!map.hasLayer(dens) && grp.__active) dens.addTo(map); return; }
+          if (map.hasLayer(dens)) map.removeLayer(dens);
+          const bb = map.getBounds().pad(0.1), w = bb.getWest(), e = bb.getEast(), so = bb.getSouth(), no = bb.getNorth();
+          let n = 0;
+          for (let k = 0; k < P.length / 2 && n < 30000; k++) {
+            const lo = P[2 * k], la = P[2 * k + 1];
+            if (lo < w || lo > e || la < so || la > no) continue;
+            L.circleMarker([la, lo], { renderer: rend, radius: map.getZoom() >= 16 ? 3.5 : 2.2, weight: 0.6, color: '#7F1D1D',
+              fillColor: '#EF4444', fillOpacity: 0.8, interactive: false }).addTo(pts); n++;
+          }
+        };
+        const grp = L.layerGroup([pts]);
+        grp.on('add', () => { grp.__active = true; if (map.getZoom() < 14 || !P) dens.addTo(map); draw(); map.on('moveend', draw); });
+        grp.on('remove', () => { grp.__active = false; map.off('moveend', draw); map.removeLayer(dens); pts.clearLayers(); });
+        const tot = hex.features.reduce((s2, f) => s2 + f.properties.bldg, 0);
+        return { lyr: grp, sub: `${tot.toLocaleString('th-TH')} หลัง · ${P ? 'ซูมถึงระดับ 14 เพื่อดูรายหลัง' : 'ความหนาแน่นต่อ hexagon'} · Open Buildings V3`,
+          attr: 'อาคาร © Google Open Buildings (CC BY 4.0)' };
       }
     }
   ];
