@@ -102,16 +102,18 @@
   L.control.layers(base, null, { position: 'bottomright' }).addTo(map);
 
   const modes = [
+    { id: 'none', label: 'เส้นขอบเขตอย่างเดียว' },
     { id: 'risk', label: 'ความเสี่ยงตอนนี้ (S×T)', need: () => hasS },
     { id: 't', label: 'สภาวะกระตุ้น (T)' },
     { id: 'r24', label: 'ฝน 24 ชม. / คาดการณ์' },
     { id: 'r7', label: 'ฝนสะสม 7 วัน' },
     { id: 's', label: 'ความอ่อนไหวคงที่ (S)', need: () => hasS }
   ];
-  let mode = hasS ? 'risk' : 't', selected = null, showTambon = true;
+  let mode = 'none', selected = null, showTambon = true;   // ค่าเริ่มต้น: แสดงเฉพาะเส้นขอบเขต ไม่ระบายสี
 
   function colorFor(code) {
     const o = T[code];
+    if (mode === 'none') return NA_COLOR;
     if (mode === 'risk') return o.rank === null ? NA_COLOR : LEVEL_COLOR[o.rank];
     if (mode === 't') return o.t === null ? NA_COLOR : LEVEL_COLOR[o.t];
     if (mode === 's') return o.s ? S_COLOR[o.s - 1] : NA_COLOR;
@@ -141,7 +143,7 @@
       if (!showTambon) return { color: '#0F172A', weight: sel ? 2.5 : 0, opacity: sel ? 1 : 0, fillOpacity: 0 };
       return { color: sel ? '#0F172A' : sb ? '#0E7C7B' : '#475569', weight: sel ? 3 : sb ? 2.2 : 0.8, opacity: 1,
         dashArray: sb && !sel ? '5 3' : null, fillColor: colorFor(f.properties.tcode),
-        fillOpacity: showHex ? 0 : 0.6 };
+        fillOpacity: (showHex || mode === 'none') ? 0 : 0.6 };
     },
     onEachFeature: (f, l) => {
       l.bindTooltip(f.properties.name, { permanent: true, direction: 'center', className: 'tlabel' });
@@ -184,6 +186,8 @@
   function renderLegend() {
     const row = (c, t) => `<div class="row"><span class="sw" style="background:${c}"></span>${t}</div>`;
     let h = '';
+    if (mode === 'none') { $('legend').style.display = 'none'; return; }
+    $('legend').style.display = showTambon ? '' : 'none';
     if (mode === 'risk') h = '<b>ระดับความเสี่ยง</b>' + cfg.levels.map(l => row(LEVEL_COLOR[l.rank], `${l.label} · ${l.desc}`)).join('');
     else if (mode === 't') h = '<b>สภาวะกระตุ้น (T)</b>' + cfg.t_states.map((s, i) => row(LEVEL_COLOR[i], s)).join('')
 ;
