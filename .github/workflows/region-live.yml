@@ -20,6 +20,8 @@ jobs:
         run: python scripts/region/fetch_thaiwater.py
       - name: ฝนสะสม 1/3/7 วัน และอ่างเก็บน้ำ (ThaiWater จังหวัด)
         run: python scripts/region/fetch_tw_province.py
+      - name: อ่างเก็บน้ำ (กรมชลประทาน)
+        run: python scripts/region/fetch_rid_reservoir.py
       - name: น้ำท่วม 7 วัน (GISTDA)
         env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
         run: python scripts/region/fetch_gistda_flood.py
