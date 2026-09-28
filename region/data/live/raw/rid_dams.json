@@ -1,0 +1,18 @@
+{
+ "fetched_at": "2026-09-28T01:39:24+00:00",
+ "endpoint": "https://app.rid.go.th/reservoir/api/dams",
+ "status": "ok",
+ "date": "2026-09-28",
+ "top_level": [
+  "date_th",
+  "year_prev",
+  "year_curr",
+  "date_year_prev",
+  "date_jan_curr",
+  "date_jan_prev",
+  "regions",
+  "sum_all"
+ ],
+ "n": 0,
+ "items": []
+}
