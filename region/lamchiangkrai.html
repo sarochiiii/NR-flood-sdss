@@ -7,7 +7,7 @@
 <title>เฝ้าระวังลำเชียงไกร · SDSS โนนไทย–โนนสูง</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/region.css?v=15">
+<link rel="stylesheet" href="css/region.css?v=16">
 <style>
   body{display:block;background:var(--offwh)}
   .wrap{max-width:760px;margin:0 auto;padding:16px}
@@ -67,7 +67,7 @@
     { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนบน' },
     { t: 'dam', name: 'อ่างเก็บน้ำลำเชียงไกรตอนล่าง' },
     { t: 'wl', code: 'M.206' },
-    { t: 'place', name: 'ตำบลจันอัด', href: '../chanat/', note: 'ตำแหน่งโดยประมาณจากพิกัด อยู่ระหว่าง M.206 กับ M.188A · ลิงก์ไปหน้าต้นแบบ Sandbox (ข้อมูลสมมติ)' },
+    { t: 'place', name: 'ตำบลจันอัด', href: '../chanat/', note: 'ตำแหน่งโดยประมาณจากพิกัด อยู่ระหว่าง M.206 กับ M.188A' },
     { t: 'wl', code: 'M.188A', main: true },
     { t: 'conf', name: 'ไหลลงแม่น้ำมูล' }
   ];
@@ -85,7 +85,20 @@
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
   const get = (u) => fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
   const tparse = (t) => new Date(String(t).replace(' ', 'T').slice(0, 16) + (String(t).length <= 10 ? 'T00:00' : '') + ':00+07:00');
-  let BK = null;
+  let BK = null, SANDBOX = {}, RID = {};
+  function spark2(a, b, label) {   // a = ปีนี้ (เส้นทึบ), b = ปีก่อน (เส้นประ) · [[Date, value]]
+    const all = a.concat(b).filter(p => p[1] != null);
+    if (a.length < 2) return '';
+    const W = 300, H = 60, xs = a.map(p => +p[0]), x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const y0 = 0, y1 = Math.max(100, ...all.map(p => p[1]));
+    const pt = (p) => `${(4 + (W - 8) * ((+p[0] - x0) / ((x1 - x0) || 1))).toFixed(1)},${(H - 4 - (H - 8) * ((p[1] - y0) / (y1 - y0))).toFixed(1)}`;
+    const line = (s, dash, col) => `<polyline points="${s.filter(p => p[1] != null && +p[0] >= x0 && +p[0] <= x1).map(pt).join(' ')}" fill="none" stroke="${col}" stroke-width="1.8" ${dash ? 'stroke-dasharray="4 3"' : ''} vector-effect="non-scaling-stroke"/>`;
+    const full = `<line x1="4" x2="${W - 4}" y1="${(H - 4 - (H - 8) * (100 / y1)).toFixed(1)}" y2="${(H - 4 - (H - 8) * (100 / y1)).toFixed(1)}" stroke="#C0392B" stroke-width="0.8" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>`;
+    const d = (t) => new Date(t).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+    return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" role="img" aria-label="${label}">
+      ${full}${line(b, true, '#94A3B8')}${line(a, false, '#0E7C7B')}</svg>
+      <div class="spark-lab"><span>${d(x0)}</span><span>${label}</span><span>${d(x1)}</span></div></div>`;
+  }
   function status(pct, d) {
     if (!BK || pct == null) return null;
     const lv = BK.levels.find(l => pct >= l.min);
@@ -125,7 +138,24 @@
       get('data/live/tw_province.json').catch(() => ({ dams: [] })),
       get('config.json').catch(() => null)
     ]);
+    // ข้อมูลรายวันจากกรมชลประทาน (นำเข้าจากไฟล์ Excel) — มีประวัติทั้งปีและค่าปีก่อน
+    const ridIdx = await get('data/rid_rsv/index.json').catch(() => null);
+    RID = {};
+    if (ridIdx) await Promise.all(Object.entries(ridIdx).map(async ([name, v]) => {
+      const d = await get('data/rid_rsv/' + v.file).catch(() => null); if (d) RID[name] = d; }));
+    // ข้อมูลรายวันที่ Actions ดึงจากกรมชลประทาน ต่อท้ายประวัติจาก Excel (วันซ้ำใช้ค่าล่าสุด)
+    const live = await get('data/live/rid_reservoir.json').catch(() => null);
+    if (live && live.status === 'ok') (live.items || []).forEach(it => {
+      const lh = (live.hist || {})[it.code] || [];
+      if (!lh.length) return;
+      const R = RID[it.name] || (RID[it.name] = { name: it.name, capacity: it.cap, series: [] });
+      if (R.capacity == null) R.capacity = it.cap;
+      const m = new Map(R.series.map(r => [r[0], r]));
+      lh.forEach(x => m.set(x[0], [x[0], x[1], x[2], null, x[3], x[4], x[5], x[6]]));
+      R.series = [...m.values()].sort((a, b) => a[0] < b[0] ? -1 : 1);
+    });
     if (cfg && cfg.bank) BK = cfg.bank;
+    if (cfg && cfg.sandbox) SANDBOX = { url: cfg.sandbox.url, label: cfg.sandbox.label };
     let wl = {}, via = 'ThaiWater (สด)';
     try {
       const d = await get(TW);
@@ -147,17 +177,38 @@
   function node(x, rid, wl, dams, hist) {
     if (x.t === 'conf') return `<div class="node conf">↓ ${esc(x.name)}</div>`;
     if (x.t === 'place') return `<div class="node place" style="--c:#0E7C7B"><div class="n-top"><span class="n-name">${esc(x.name)}</span>
-        <a href="${x.href}" style="font-size:13px;color:var(--teal)">เปิด →</a></div><div class="n-meta">${esc(x.note)}</div></div>`;
+        <a href="${esc(SANDBOX.url || x.href)}" style="font-size:13px;color:var(--teal)">เปิด →</a></div><div class="n-meta">${esc(x.note)}${SANDBOX.label ? ' · ' + esc(SANDBOX.label) : ''}</div></div>`;
     if (x.t === 'dam') {
-      const d = dams[x.name];
+      let d = dams[x.name] ? Object.assign({}, dams[x.name]) : null;
+      const R = RID[x.name];
+      let src = 'ThaiWater';
+      if (R && R.series.length) {                       // ใช้ค่าจากกรมชลประทานถ้าใหม่กว่าหรือเท่ากัน
+        const L = R.series[R.series.length - 1];
+        if (!d || L[0] >= d.date) { d = Object.assign(d || { name: x.name, amphoe: '', kind: 'medium' }, { date: L[0], storage: L[1], pct: L[2], inflow: L[5], released: L[6], stale: false }); src = 'กรมชลประทาน'; }
+      }
       if (!d) return `<div class="node"><div class="n-name">${esc(x.name)}</div><div class="nodata">ไม่มีข้อมูล</div></div>`;
-      const h = (hist.dam[d.name] || []).filter(p => p[0] < d.date), prev = h[h.length - 1];
+      let extra = '', chart = '';
+      if (R && R.series.length >= 1) {
+        const S = R.series, L = S[S.length - 1], last3 = S.slice(-3), nd = last3.length;
+        const inf = last3.reduce((a, r) => a + (r[5] || 0), 0) / nd, out = last3.reduce((a, r) => a + (r[6] || 0), 0) / nd;
+        const net = inf - out, room = R.capacity - L[1];
+        const prev = S[S.length - 2], dd = prev ? L[2] - prev[2] : null;
+        extra = `<div class="n-row">ปีก่อนวันเดียวกัน ${fmt(L[4], 0)}% · เทียบเมื่อวาน ${arrow(dd, '%', 1, 0.05)}</div>
+          <div class="n-row">ไหลเข้าเฉลี่ย ${nd} วัน ${fmt(inf, 2)} · ระบาย ${fmt(out, 2)} ล้าน ลบ.ม./วัน · ใช้การได้ ${fmt(L[7], 2)} ล้าน ลบ.ม.</div>
+          ${room > 0 && net > 0.01 ? `<div class="eta">คาดเต็มความจุใน ~${Math.max(1, Math.round(room / net))} วัน ถ้าน้ำไหลเข้าและระบายเท่า ${nd} วันล่าสุด (เหลือ ${fmt(room, 2)} ล้าน ลบ.ม.)</div>` : ''}
+          ${room <= 0 ? `<div class="eta">เกินความจุแล้ว ${fmt(-room, 2)} ล้าน ลบ.ม.</div>` : ''}`;
+        chart = S.length < 2 ? '<div class="spark-empty">กราฟ: กำลังเก็บประวัติรายวันจากกรมชลประทาน</div>' : spark2(S.map(r => [tparse(r[0]), r[2]]), S.map(r => [tparse(r[0]), r[4]]), `% ความจุ · เส้นประ = ปีก่อน · ข้อมูลกรมชลประทาน ถึง ${esc(L[0])}`);
+      } else {
+        const h = (hist.dam[d.name] || []).filter(p => p[0] < d.date), prev = h[h.length - 1];
+        extra = `<div class="n-row">เทียบวันก่อน ${arrow(prev ? d.pct - prev[1] : null, '%', 1, 0.05)}</div>`;
+        chart = spark([...h, [d.date, d.pct]].map(p => [tparse(p[0]), p[1]]), 'ปริมาณน้ำ %');
+      }
       return `<div class="node" style="--c:${pctColor(d.pct)}"><div class="n-top">
-          <span><span class="n-name">${esc(d.name)}</span><div class="n-meta">อ.${esc(d.amphoe)} · ${d.kind === 'large' ? 'ขนาดใหญ่' : 'ขนาดกลาง'}</div></span>
+          <span><span class="n-name">${esc(d.name)}</span><div class="n-meta">${d.amphoe ? 'อ.' + esc(d.amphoe) + ' · ' : ''}${d.kind === 'large' ? 'ขนาดใหญ่' : 'ขนาดกลาง'} · ${src}</div></span>
           <span class="n-big" style="color:${pctColor(d.pct)}">${fmt(d.pct, 0)}%</span></div>
-        <div class="n-row">ปริมาณน้ำ ${fmt(d.storage, 2)} ล้าน ลบ.ม. · ไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน</div>
-        <div class="n-row">เทียบวันก่อน ${arrow(prev ? d.pct - prev[1] : null, '%', 1, 0.05)} <span class="muted">· ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' (เก่า)' : ''}</span></div>
-        ${spark([...h, [d.date, d.pct]].map(p => [tparse(p[0]), p[1]]), 'ปริมาณน้ำ %')}</div>`;
+        <div class="n-row">ปริมาณน้ำ ${fmt(d.storage, 2)} ล้าน ลบ.ม. · ไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน
+          <span class="muted">· ข้อมูลวันที่ ${esc(d.date)}</span></div>
+        ${extra}${chart}</div>`;
     }
     const r = rid[x.code] || {}, s = wl[x.code];
     const head = `<span><span class="n-name">${esc(r.river || '')} · ${esc(r.village || '')}</span> <span class="n-code">${esc(x.code)}</span>

@@ -60,3 +60,16 @@
 | ONE022 | คลองสามบาท | บ.กุดพิมาน อ.ด่านขุนทด | — | — | มี (มักเกินตลิ่ง) |
 อ่างลำเชียงไกรตอนบน (อ.ด่านขุนทด, 101.64°E) → ตอนล่าง (อ.โนนไทย, 101.90°E) → M.206 → จันอัด → M.188A → มูล
 (จุดบรรจบอยู่ระหว่าง M.2A กับ M.194 เพราะ 4,724 + 2,811 < 8,467)
+
+## 8. กรมชลประทาน ระบบฐานข้อมูลน้ำในอ่างเก็บน้ำ (app.rid.go.th/reservoir)
+- หน้า `rsvmiddle/detail/<รหัส>/<เริ่ม>/<สิ้นสุด>` · `rsv292` = อ่างลำเชียงไกรตอนล่าง (ความจุ รนก. 27.7 ล้าน ลบ.ม.)
+- **API (ตรวจแล้ว 28 ก.ย. 69, CORS `*`):** `POST https://app.rid.go.th/reservoir/api/rsvmiddles`
+  form `date=YYYY-MM-DD&region=ne&percent=&percent_from=&percent_to=&status=1` → `region[].reservoir[]`
+  field: `cresv` (rsv300 ตอนบน, rsv292 ตอนล่าง), `date` (null = วันนั้นยังไม่บันทึก), `nresv`, `cresv_lat/lng`, `tprov`,
+  `cap_resv`, `low_qdisc`, `qdisc_curr`, `percent_resv_curr`, `qdisc_prev`, `percent_resv_prev`, `q_info`, `jan_info`, `q_outfo`, `water_workable`
+  ตัวเลขเป็นข้อความมีจุลภาค · `" - "` = ไม่มีข้อมูล · อ่างขนาดใหญ่ `api/dams` โครงสร้างต่างกัน (ยังไม่ได้ใช้)
+- `scripts/region/fetch_rid_reservoir.py` → `region/data/live/rid_reservoir.json` (24 อ่างขนาดกลางใน จ.นครราชสีมา + ประวัติ 400 วัน) ดึงไม่เกินทุก 3 ชม.
+- ประวัติย้อนหลังก่อนเริ่มดึง: **Export To Excel** จากหน้า `rsvmiddle/detail/<รหัส>/<เริ่ม>/<สิ้นสุด>` แล้ว `import_rid_rsv.py`
+- คอลัมน์: วันที่ (ไทย พ.ศ.), ความจุ รนก., ต่ำสุด, ปริมาณน้ำปีก่อน + %, ปัจจุบัน + %, ไหลลง/สะสม, ระบาย/สะสม, ใช้การได้
+- ตรงกับ ThaiWater (27 ก.ย. 69: 15.82 ล้าน ลบ.ม. 57.11% ทั้งสองแหล่ง) แต่**กรมชลประทานอัปเดตเร็วกว่า 1 วัน**
+- ผลลัพธ์: `region/data/rid_rsv/index.json` + `rsv_<hash>.json` → หน้าลำเชียงไกรใช้แสดงกราฟทั้งปี เทียบปีก่อน และวันคาดเต็มความจุ

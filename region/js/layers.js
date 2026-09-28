@@ -83,11 +83,27 @@ document.addEventListener('sdss:ready', () => {
   /* ---------- ThaiWater จังหวัด (ฝนสะสม 3/7 วัน, อ่างเก็บน้ำ) — มาจาก Actions เท่านั้น เพราะ CORS ---------- */
   let provCache = null;
   function province() {
-    if (!provCache) provCache = json('data/live/tw_province.json').then(d => {
+    if (!provCache) provCache = Promise.all([json('data/live/tw_province.json'), json('data/live/rid_reservoir.json').catch(() => null)]).then(([d, rid]) => {
       if (!d.updated_at) throw new Error('รอ workflow รันรอบแรก');
+      d.dams = mergeRid(d.dams || [], rid);
       return d;
     }).catch(e => { provCache = null; throw e; });
     return provCache;
+  }
+  // ใช้ค่าจากกรมชลประทาน (อัปเดตเร็วกว่า ThaiWater ~1 วัน) เมื่อใหม่กว่าหรือเท่ากัน และเพิ่มอ่างที่ ThaiWater ไม่มี
+  function mergeRid(dams, rid) {
+    if (!rid || rid.status !== 'ok') return dams;
+    const byName = new Map(dams.map(d => [d.name, d]));
+    (rid.items || []).forEach(r => {
+      if (!r.date || r.pct == null) return;
+      let d = byName.get(r.name);
+      if (!d) { d = { name: r.name, kind: 'medium', lat: r.lat, lon: r.lon, amphoe: null }; dams.push(d); byName.set(r.name, d); }
+      if (!d.date || r.date >= d.date) Object.assign(d, { pct: r.pct, storage: r.storage, inflow: r.inflow, released: r.release,
+        date: r.date, stale: false, src: 'กรมชลประทาน', pct_prev: r.pct_prev });
+      const h = (rid.hist || {})[r.code];
+      if (h) d.ridHist = h.map(x => [x[0], x[2]]);
+    });
+    return dams;
   }
   const hhmm = (iso) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -113,7 +129,7 @@ document.addEventListener('sdss:ready', () => {
       d24: d24 ? (cur[2] - d24[2]) * 100 : null, series: [...before, cur].map(x => [tparse(x[0]), x[2]]) };
   }
   function trendDam(h, d) {
-    const arr = (h.dam[d.name] || []).filter(x => x[0] < d.date);
+    const arr = (d.ridHist && d.ridHist.length > 1 ? d.ridHist : (h.dam[d.name] || [])).filter(x => x[0] < d.date);
     const prev = arr[arr.length - 1];
     return { d: prev ? d.pct - prev[1] : null, prevT: prev && prev[0],
       series: [...arr, [d.date, d.pct]].map(x => [tparse(x[0]), x[1]]) };
@@ -284,11 +300,12 @@ document.addEventListener('sdss:ready', () => {
         }).bindPopup(`<b>${esc(d.name)}</b> ${tag(d)}<br>${d.kind === 'large' ? 'เขื่อน/อ่างขนาดใหญ่' : 'อ่างขนาดกลาง'} · อ.${esc(d.amphoe)}<br>
             ปริมาณน้ำ <b>${fmt(d.pct, 1)}%</b> (${fmt(d.storage, 2)} ล้าน ลบ.ม.)<br>
             น้ำไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน<br>
-            <span class="muted">ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' — ข้อมูลเก่า' : ''}</span>
+            ${d.pct_prev != null ? `ปีก่อนวันเดียวกัน ${fmt(d.pct_prev, 0)}%<br>` : ''}
+            <span class="muted">ข้อมูลวันที่ ${esc(d.date)}${d.stale ? ' — ข้อมูลเก่า' : ''} · ${d.src || 'ThaiWater'}</span>
             ${d.stale ? '' : (() => { const t = trendDam(h, d); return `<div class="trend">เทียบวันก่อน ${arrow(t.d, '%', 1)}</div>${spark(t.series, 'ปริมาณน้ำ %')}`; })()}`)
           .on('add', function () { MARK['d:' + d.name] = this; })));
         const n = rows.filter(d => !d.stale && d.pct != null).length;
-        return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater)' };
+        return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater), กรมชลประทาน' };
       }
     },
     {
