@@ -218,7 +218,7 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ (สี เส้น ชื่อ)', on: true,
+      id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ', on: true,
       async build() {
         return { toggle: (on) => { map.getContainer().classList.toggle('hide-labels', !on); window.SDSS.setTambonVisible(on); },
           sub: 'ปิดแล้วยังแตะแผนที่เพื่อดูข้อมูลตำบลได้' };
@@ -309,7 +309,7 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'bldg', icon: 'ti-building', label: 'บ้านเรือน', on: false,
+      id: 'bldg', icon: 'ti-building', label: 'อาคาร/สิ่งปลูกสร้าง', on: false,
       async build() {
         // ซูม 13–14: จุดอาคาร (buildings.json) · ซูม ≥ 15: รูปอาคาร polygon จาก tile รายตำบล (data/bldg/<tcode>.json)
         const Z_PT = 13, Z_POLY = 15, CAP = 25000;
@@ -546,6 +546,11 @@ document.addEventListener('sdss:ready', () => {
   }
   setInterval(refreshAll, 10 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastRun > 10 * 60 * 1000) refreshAll(); });
+
+  // ซ่อน/แสดงแผงชั้นข้อมูลด้านซ้าย (แผนที่ต้องคำนวณขนาดใหม่หลังเปลี่ยน layout)
+  const lp = (hide) => { $('body').classList.toggle('lp-hidden', hide); setTimeout(() => map.invalidateSize(), 60); };
+  if ($('lp-hide')) $('lp-hide').onclick = () => lp(true);
+  if ($('lp-show')) $('lp-show').onclick = () => lp(false);
 
   defs.forEach(d => state[d.id] = { on: false });
   render();

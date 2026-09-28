@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/region.css?v=17">
+<link rel="stylesheet" href="css/region.css?v=18">
 </head>
 <body>
 <header class="hdr">
@@ -34,8 +34,14 @@
   <div class="kpi-card"><div class="kpi-lab">คาดการณ์ฝน 24 ชม. สูงสุด</div><div class="kpi-val mono" id="k-fcst">—</div><div class="kpi-sub">Open-Meteo รายตำบล</div></div>
 </section>
 
-<main class="body">
+<main class="body" id="body">
+  <aside class="lpanel" id="lpanel" aria-label="ชั้นข้อมูล">
+    <div class="lpanel-h"><h2 class="rail-h" style="margin:0">ชั้นข้อมูล</h2>
+      <button class="lp-btn" id="lp-hide" title="ซ่อนแผงชั้นข้อมูล" aria-label="ซ่อนแผงชั้นข้อมูล">‹</button></div>
+    <div id="layers" class="layers"></div>
+  </aside>
   <div class="mapwrap">
+    <button class="lp-btn lp-show" id="lp-show" title="แสดงแผงชั้นข้อมูล" aria-label="แสดงแผงชั้นข้อมูล">ชั้นข้อมูล ›</button>
     <div id="map"></div>
     <div class="modes" id="modes" role="group" aria-label="เลือกชั้นแสดงผล"></div>
     <div class="legend" id="legend"></div>
@@ -52,10 +58,6 @@
     <section>
       <h2 class="rail-h">สถานีที่ควรจับตา <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
       <div id="now"></div>
-    </section>
-    <section>
-      <h2 class="rail-h">เลเยอร์ข้อมูล</h2>
-      <div id="layers" class="layers"></div>
     </section>
     <section>
       <h2 class="rail-h">ตำบลเรียงตามฝน (แบบจำลอง)</h2>
@@ -82,7 +84,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="js/layers.js?v=17"></script>
-<script src="js/region.js?v=17"></script>
+<script src="js/layers.js?v=18"></script>
+<script src="js/region.js?v=18"></script>
 </body>
 </html>

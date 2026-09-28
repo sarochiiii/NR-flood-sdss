@@ -14,8 +14,8 @@
 | `css/region.css` | สไตล์ (IBM Plex Sans Thai, navy/teal) |
 | `config.json` | เกณฑ์ทั้งหมด (ดู config-logic.md) |
 
-เลเยอร์ใน `layers.js` (id): `gistda` น้ำท่วมตรวจพบ · `s1` Sentinel-1 · `labels` เขตตำบล/อำเภอ · `radar` เรดาร์ฝน ·
-`rainsta` ฝนสถานี (24 ชม./1 ชม.) · `wlsta` ระดับน้ำสถานี · `rainacc` ฝนสะสม 7/3 วัน · `dams` อ่างเก็บน้ำ · `bldg` บ้านเรือน
+เลเยอร์ใน `layers.js` (id): `gistda` น้ำท่วมตรวจพบ · `s1` Sentinel-1 · `labels` เขตตำบล/อำเภอ (แผงชั้นข้อมูลอยู่ด้านซ้ายของแผนที่ ซ่อนได้) · `radar` เรดาร์ฝน ·
+`rainsta` ฝนสถานี (24 ชม./1 ชม.) · `wlsta` ระดับน้ำสถานี · `rainacc` ฝนสะสม 7/3 วัน · `dams` อ่างเก็บน้ำ · `bldg` อาคาร/สิ่งปลูกสร้าง
 (ซูม 13–14 จุด, ≥15 polygon รายตำบล)
 
 ## ไฟล์ข้อมูลคงที่ (`region/data/`)
@@ -67,3 +67,22 @@ Settings → Actions → General → Workflow permissions = **Read and write**
 | `GISTDA_API_KEY` | GitHub Secret · สมัคร/หมุนเวียนที่ api-gateway.gistda.or.th (หมุนเวียน key เมื่อสงสัยว่าหลุด) |
 | `EE_SERVICE_ACCOUNT_KEY` | GitHub Secret · service account `github-actions-ee@ee-sarochineek.iam.gserviceaccount.com` roles: Earth Engine Resource Writer + Service Usage Consumer |
 | `EE_PROJECT` | ตั้งตรงใน workflow = ee-sarochineek |
+
+## LINE OA (ระยะ P1 · 27 ก.ย. 69)
+| ส่วน | ที่อยู่ |
+|---|---|
+| โค้ด Worker `line-hub` | `line/worker.js` (คัดลอกไปวางใน Cloudflare → Edit code) |
+| ฐานข้อมูลผู้ใช้ | Cloudflare D1 `line-hub-db` ตาม `line/schema.sql` — **ข้อมูลส่วนบุคคล ห้ามนำขึ้น repo** |
+| หน้าลงทะเบียน LIFF | `region/liff/register.html` (ต้องใส่ LIFF_ID และ URL Worker) |
+| ภาพ rich menu | `line/richmenu_2500x1686.png` (6 ช่อง ตั้งค่าใน OA Manager) |
+| คู่มือตั้งค่า | `line/SETUP.md` |
+Worker อ่านข้อมูลสถานการณ์จากเว็บสาธารณะ (config.json, tambon, rain, thaiwater, tw_province, gistda) · cron 00:00 UTC ส่งสรุป D1 ให้ role adm/staff
+
+## Sandbox จันอัด แบบจำกัดสิทธิ์ (ข้อมูลครัวเรือน)
+| ส่วน | ที่อยู่ |
+|---|---|
+| หน้าเว็บ + `households.geojson` | Cloudflare Pages (Direct Upload) ชื่อ project ที่เดายาก — **ไม่อยู่ใน GitHub** |
+| การยืนยันตัวตน | Cloudflare Access (Zero Trust Free) · One-time PIN ทางอีเมล · ผู้มีสิทธิ์ ≤ 5 อีเมล · 2 application (URL หลัก + `*.project.pages.dev`) |
+| ข้อมูลที่หน้า Sandbox อ่านจากเว็บสาธารณะ | tambon, bldg/301010, thaiwater_region, tw_province, config |
+| ปุ่มจากเว็บสาธารณะ | `region/config.json` → `sandbox.url`, `sandbox.label` |
+คู่มือ: `README-SETUP.md` ในชุดไฟล์ sandbox-private (เก็บในไดรฟ์ของโครงการ ไม่ใช่ repo)
