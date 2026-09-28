@@ -232,16 +232,6 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 's1', icon: 'ti-radar-2', label: 'ภาพเรดาร์ Sentinel-1', on: false,
-      async build() {
-        const m = await json('data/live/s1_latest.json');
-        if (m.status === 'not_configured') throw new Error('ยังไม่ตั้ง Earth Engine service account');
-        if (!m.date) throw new Error(m.status === 'no_image' ? 'ไม่มีภาพในรอบ 14 วัน' : 'ยังไม่มีภาพ');
-        const lyr = L.imageOverlay('data/live/s1_latest.png?d=' + m.date, m.bounds, { opacity: 0.8 });
-        return { lyr, sub: `VV ${m.date} · ผิวน้ำเรียบเป็นสีเข้ม`, attr: 'Contains Copernicus Sentinel data' };
-      }
-    },
-    {
       id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ', on: true,
       async build() {
         return { toggle: (on) => { map.getContainer().classList.toggle('hide-labels', !on); window.SDSS.setTambonVisible(on); },
@@ -249,7 +239,7 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'radar', icon: 'ti-cloud-rain', label: 'เรดาร์ฝน', on: true,
+      id: 'radar', icon: 'ti-cloud-rain', label: 'เรดาร์ฝน (2 ชม. ล่าสุด)', on: false,
       async build() {
         // RainViewer: ย้อนหลัง 2 ชม. ทุก 10 นาที → ภาพเคลื่อนไหว · หน้ากากพื้นที่ครอบคลุม (ดำ = เรดาร์ไม่ครอบคลุม)
         const d = await json(L_.rainviewer);
@@ -284,7 +274,7 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'glofas', icon: 'ti-chart-line', label: 'พยากรณ์ปริมาณน้ำ 30 วัน (GloFAS)', on: false,
+      id: 'glofas', icon: 'ti-chart-line', label: 'พยากรณ์ปริมาณน้ำ 30 วัน (ทดลอง)', on: false,
       async build() {
         const g = await json('data/live/glofas.json');
         if (!g.points || !g.points.length) throw new Error(g.status === 'error' ? 'ดึงไม่สำเร็จ' : 'รอ workflow รันรอบแรก');
@@ -300,7 +290,7 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'rainsta', icon: 'ti-droplet', label: 'ฝนสถานีตรวจวัด', on: true, sw: ['rain_24h', 'rain_1h'],
+      id: 'rainsta', icon: 'ti-droplet', label: 'ฝนสถานีตรวจวัด', on: false, sw: ['rain_24h', 'rain_1h'],
       swLabels: ['สะสม 24 ชม.', 'ความเข้มตอนนี้'],
       async build(state) {
         const tw = await thaiwater(), key = state.sw || 'rain_24h';
@@ -338,10 +328,12 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
-      id: 'rainacc', icon: 'ti-cloud-storm', label: 'ฝนสะสมหลายวัน (สถานีจังหวัด)', on: false, sw: ['rain7d', 'rain3d'],
+      id: 'rainacc', icon: 'ti-cloud-storm', label: 'ฝนสะสม 7/3 วัน (สถานี)', on: false, sw: ['rain7d', 'rain3d'],
       swLabels: ['สะสม 7 วัน', 'สะสม 3 วัน'],
       async build(state) {
-        const p = await province(), key = state.sw || 'rain7d', rows = p[key] || [];
+        const p = await province(), key = state.sw || 'rain7d', bb = bbox();
+        // ชั่วคราว: เฉพาะสถานีในพื้นที่ศึกษา + buffer (รอบถัดไปกรองตามขอบเขตลุ่มน้ำ)
+        const rows = (p[key] || []).filter(s => inBox(s.lat, s.lon, bb));
         const lyr = L.layerGroup(rows.map(s => L.circleMarker([s.lat, s.lon], {
           bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
@@ -350,7 +342,7 @@ document.addEventListener('sdss:ready', () => {
         }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)}<br>ต.${esc(s.tambon)} อ.${esc(s.amphoe)}<br>
             ฝนสะสม ${key === 'rain7d' ? '7' : '3'} วัน <b>${fmt(s.v)}</b> มม.<br>
             <span class="muted">${esc(s.start)} ถึง ${esc(s.end)} · ${esc(s.agency)}</span>`)));
-        return { lyr, sub: `ThaiWater จังหวัด · ${rows.length} สถานี · ${hhmm(p.updated_at)}`, attr: 'สถานี © สสน. (ThaiWater)' };
+        return { lyr, sub: `ThaiWater · ${rows.length} สถานีในและรอบพื้นที่ · ${hhmm(p.updated_at)}`, attr: 'สถานี © สสน. (ThaiWater)' };
       }
     },
     {
@@ -440,8 +432,14 @@ document.addEventListener('sdss:ready', () => {
       <label class="tog"><input type="checkbox" ${s.on ? 'checked' : ''} aria-label="${d.label}"><span></span></label>
     </div>${swHtml}`;
   }
+  // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
+  const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'glofas']],
+    ['③ น้ำท่วม', ['gistda']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels']]];
   function render() {
-    $('layers').innerHTML = defs.map(row).join('');
+    $('layers').innerHTML = GROUPS.map(([g, ids]) => {
+      const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);
+      return rows.length ? `<div class="lgrp">${g}</div>` + rows.map(row).join('') : '';
+    }).join('');
     $('layers').querySelectorAll('.lrow input').forEach(cb => cb.onchange = () => setOn(cb.closest('.lrow').dataset.id, cb.checked));
     $('layers').querySelectorAll('.lsw button').forEach(b => b.onclick = () => {
       const id = b.closest('.lsw').previousElementSibling.dataset.id;

@@ -74,7 +74,7 @@ Sandbox จริง, ชั้น S ที่พักไว้, หนัง�
 
 - ถามก่อนเสมอว่าผู้ใช้กำลังทำงานส่วนใด และตรวจไฟล์จริงใน repo ก่อนแก้ (clone ได้จาก github.com ซึ่งเปิดใน sandbox)
 - แก้ไขแบบ "update-N.zip" ที่มีเฉพาะไฟล์ที่เปลี่ยน ตาม path เดิม ให้ผู้ใช้อัปโหลดผ่านหน้าเว็บ GitHub
-- เมื่อแก้ JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` เสมอ (ปัจจุบัน v=19)
+- เมื่อแก้ JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` เสมอ (ปัจจุบัน v=20)
 - ทดสอบ JS ด้วย `node --check` และ jsdom + leaflet (mock fetch) ก่อนส่ง · ทดสอบ Python กับข้อมูลจริงถ้ามี
 - ตรรกะ T และสถานะตลิ่งมีทั้งใน `js/region.js`/`js/layers.js` และ `scripts/region/compute_risk.py` แก้ที่หนึ่งต้องแก้อีกที่
 - ผู้ใช้หลักทำงานผ่านหน้าเว็บ GitHub ไม่ใช้ git บน command line อธิบายขั้นตอนเป็นการคลิกทีละขั้น

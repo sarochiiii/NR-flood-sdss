@@ -114,8 +114,7 @@
     { id: 'none', label: 'เส้นขอบเขตอย่างเดียว' },
     { id: 'risk', label: 'ความเสี่ยงตอนนี้ (S×T)', need: () => hasS },
     { id: 't', label: 'สภาวะกระตุ้น (T)' },
-    { id: 'r24', label: 'ฝน 24 ชม. / คาดการณ์' },
-    { id: 'r7', label: 'ฝนสะสม 7 วัน' },
+    { id: 'r24', label: 'ฝนคาดการณ์ 24 ชม.' },
     { id: 's', label: 'ความอ่อนไหวคงที่ (S)', need: () => hasS }
   ];
   let mode = 'none', selected = null, showTambon = true;   // ค่าเริ่มต้น: แสดงเฉพาะเส้นขอบเขต ไม่ระบายสี
@@ -128,7 +127,7 @@
     if (mode === 's') return o.s ? S_COLOR[o.s - 1] : NA_COLOR;
     const sc = mode === 'r24' ? RAIN24 : RAIN7;
     if (!o.r) return NA_COLOR;
-    const v = mode === 'r24' ? Math.max(o.r.rain_24h_mm, o.r.rain_next24h_mm) : o.r.rain_7d_mm;
+    const v = mode === 'r24' ? o.r.rain_next24h_mm : o.r.rain_7d_mm;   // ฝนที่ผ่านมาดูจากชั้นสถานี (ค่าจริง)
     let i = 0; while (i < sc.breaks.length && v >= sc.breaks[i]) i++;
     return sc.colors[i];
   }
@@ -204,7 +203,7 @@
     else if (mode === 's') h = '<b>ความอ่อนไหว (S) เชิงสัมพัทธ์</b>' + cfg.s_classes.map((s, i) => row(S_COLOR[i], s)).join('');
     else {
       const sc = mode === 'r24' ? RAIN24 : RAIN7;
-      h = `<b>${mode === 'r24' ? 'ฝนสูงสุดระหว่าง 24 ชม. ที่ผ่านมา/ข้างหน้า (มม.)' : 'ฝนสะสม 7 วัน (มม.)'}</b>`
+      h = `<b>${mode === 'r24' ? 'ฝนคาดการณ์ 24 ชม. ข้างหน้า (มม.) · แบบจำลอง Open-Meteo' : 'ฝนสะสม 7 วัน (มม.)'}</b>`
         + sc.colors.map((c, i) => row(c, sc.labels[i])).join('')
         + (mode === 'r7' ? '<div class="muted">ช่วงสีเพื่อการแสดงผล ไม่ใช่เกณฑ์ตัดสินใจ</div>' : '<div class="muted">เกณฑ์ กรมอุตุนิยมวิทยา</div>');
     }
@@ -230,7 +229,7 @@
         ${p.bldg != null ? `<dt>อาคาร (Open Buildings)</dt><dd class="mono">${Number(p.bldg).toLocaleString('th-TH')} หลัง</dd>` : ''}
         <dt>ฝน 24 ชม. ที่ผ่านมา</dt><dd class="mono">${fmt(o.r && o.r.rain_24h_mm)} มม.</dd>
         <dt>คาดการณ์ 24 ชม.</dt><dd class="mono">${fmt(o.r && o.r.rain_next24h_mm)} มม.</dd>
-        <dt>ฝนสะสม 7 วัน</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
+        <dt>ฝนสะสม 7 วัน (แบบจำลอง)</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
         <dt>ระดับน้ำสถานีตัวแทน</dt><dd class="mono">${st}</dd>
       </dl>
       ${code === cfg.sandbox.tcode ? `<a class="btn" href="${cfg.sandbox.url}">เปิด ${cfg.sandbox.label} →</a>` : ''}`;
