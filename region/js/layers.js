@@ -186,6 +186,30 @@ document.addEventListener('sdss:ready', () => {
   // ช่วงสีอ่าง: > 100 เกินความจุ · 80–100 น้ำมาก · 50–80 ปานกลาง · 30–50 น้อย · < 30 น้อยวิกฤต
   const DAM_BR = [[100, '#7F1D1D'], [80, '#C0392B'], [50, '#1E8449'], [30, '#D68910'], [-1e9, '#92400E']];
   const damColor = (d) => d.stale || d.pct == null ? '#94A3B8' : DAM_BR.find(([b]) => d.pct > b || (b === 80 && d.pct >= 80))[1];
+  // GloFAS: สถานะจากค่ามัธยฐานพยากรณ์เทียบเกณฑ์ค่าสูงสุดรายปี (≈ รอบ 2/5/20 ปี)
+  function glofasStatus(p) {
+    const t = p.thresholds || {}, fc = p.fcst || [];
+    const med = Math.max(...fc.map(r => r[1] ?? 0)), mx = Math.max(...fc.map(r => r[2] ?? r[1] ?? 0));
+    if (t.q20 && med >= t.q20) return { rank: 3, label: 'คาดเกินรอบ 20 ปี', color: '#7F1D1D' };
+    if (t.q5 && med >= t.q5) return { rank: 2, label: 'คาดเกินรอบ 5 ปี', color: '#C0392B' };
+    if (t.q2 && med >= t.q2) return { rank: 1, label: 'คาดเกินรอบ 2 ปี', color: '#E67E22' };
+    if (t.q2 && mx >= t.q2) return { rank: 0.5, label: 'บางชุดพยากรณ์เกินรอบ 2 ปี', color: '#F4D03F' };
+    return { rank: 0, label: 'ต่ำกว่ารอบ 2 ปี', color: '#1E8449' };
+  }
+  function glofasChart(p, W) {
+    const H = 90, past = p.past || [], fc = p.fcst || [], t = p.thresholds || {};
+    const all = past.map(r => r[0]).concat(fc.map(r => r[0])); if (all.length < 2) return '';
+    const ys = past.map(r => r[1]).concat(fc.flatMap(r => [r[1], r[2], r[3]])).filter(v => v != null).concat([t.q2 || 0, t.q5 || 0]);
+    const y1 = Math.max(...ys) * 1.08 || 1, X = (d) => 4 + (W - 8) * all.indexOf(d) / (all.length - 1), Y = (v) => H - 4 - (H - 8) * v / y1;
+    const line = (rows, k, col, dash) => `<polyline points="${rows.filter(r => r[k] != null).map(r => X(r[0]).toFixed(1) + ',' + Y(r[k]).toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="1.6" ${dash ? 'stroke-dasharray="4 3"' : ''}/>`;
+    const band = fc.filter(r => r[2] != null && r[3] != null);
+    const poly = band.length ? `<polygon points="${band.map(r => X(r[0]).toFixed(1) + ',' + Y(r[2]).toFixed(1)).concat(band.slice().reverse().map(r => X(r[0]).toFixed(1) + ',' + Y(r[3]).toFixed(1))).join(' ')}" fill="#93C5FD" opacity="0.45"/>` : '';
+    const hl = (v, col, lab) => v && v < y1 ? `<line x1="4" x2="${W - 4}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="${col}" stroke-width="1" stroke-dasharray="3 2"/><text x="${W - 6}" y="${(Y(v) - 2).toFixed(1)}" text-anchor="end" font-size="9" fill="${col}">${lab}</text>` : '';
+    const today = fc.length ? `<line x1="${X(fc[0][0]).toFixed(1)}" x2="${X(fc[0][0]).toFixed(1)}" y1="2" y2="${H - 2}" stroke="#64748B" stroke-width="0.8"/>` : '';
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="ปริมาณน้ำย้อนหลัง 60 วันและพยากรณ์ 30 วัน" style="display:block;background:#F8FAFC;border-radius:4px;margin-top:4px">
+      ${poly}${hl(t.q2, '#D68910', 'รอบ 2 ปี')}${hl(t.q5, '#C0392B', 'รอบ 5 ปี')}${hl(t.q20, '#7F1D1D', 'รอบ 20 ปี')}${today}${line(past, 1, '#0A1628')}${line(fc, 1, '#0E7C7B', true)}</svg>
+      <div class="spark-lab"><span>60 วันก่อน</span><span>วันนี้ │ พยากรณ์ 30 วัน (แถบ = ช่วงชุดพยากรณ์)</span></div>`;
+  }
   const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
 
   /* ---------- นิยามเลเยอร์ ---------- */
@@ -227,13 +251,52 @@ document.addEventListener('sdss:ready', () => {
     {
       id: 'radar', icon: 'ti-cloud-rain', label: 'เรดาร์ฝน', on: true,
       async build() {
+        // RainViewer: ย้อนหลัง 2 ชม. ทุก 10 นาที → ภาพเคลื่อนไหว · หน้ากากพื้นที่ครอบคลุม (ดำ = เรดาร์ไม่ครอบคลุม)
         const d = await json(L_.rainviewer);
-        const f = d.radar && d.radar.past && d.radar.past[d.radar.past.length - 1];
-        if (!f) throw new Error('ไม่มีภาพเรดาร์');
-        const lyr = L.tileLayer(d.host + f.path + '/256/{z}/{x}/{y}/2/1_1.png',
-          { opacity: 0.6, maxNativeZoom: L_.rainviewer_max_native_zoom, maxZoom: 18, zIndex: 400,
-            attribution: 'Weather data by <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>' });
-        return { lyr, sub: 'RainViewer · ' + new Date(f.time * 1000).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) };
+        const frames = (d.radar && d.radar.past) || [];
+        if (!frames.length) throw new Error('ไม่มีภาพเรดาร์');
+        const opt = { maxNativeZoom: L_.rainviewer_max_native_zoom, maxZoom: 18, zIndex: 400 };
+        const tiles = frames.map(f => L.tileLayer(d.host + f.path + '/256/{z}/{x}/{y}/2/1_1.png', Object.assign({ opacity: 0 }, opt)));
+        const cover = L.tileLayer(d.host + '/v2/coverage/0/256/{z}/{x}/{y}/0/0_0.png', Object.assign({ opacity: 0.35 }, opt, { zIndex: 399 }));
+        const grp = L.layerGroup(tiles);
+        let idx = frames.length - 1, timer = null, ctl = null;
+        const tm = (i) => new Date(frames[i].time * 1000).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        const show = (i) => { idx = i; tiles.forEach((t, j) => t.setOpacity(j === i ? 0.65 : 0));
+          if (ctl) { ctl.querySelector('.rv-t').textContent = tm(i) + (i === frames.length - 1 ? ' (ล่าสุด)' : ''); ctl.querySelector('input[type=range]').value = i; } };
+        const stop = () => { clearInterval(timer); timer = null; if (ctl) ctl.querySelector('.rv-play').textContent = '▶'; };
+        const play = () => { if (timer) return stop(); ctl.querySelector('.rv-play').textContent = '⏸';
+          timer = setInterval(() => show(idx >= frames.length - 1 ? 0 : idx + 1), 700); };
+        grp.on('add', () => {
+          ctl = document.createElement('div'); ctl.className = 'rv-ctl';
+          ctl.innerHTML = `<button class="rv-play" aria-label="เล่น/หยุดภาพเคลื่อนไหวเรดาร์">▶</button>
+            <input type="range" min="0" max="${frames.length - 1}" value="${idx}" aria-label="เลือกเวลาภาพเรดาร์">
+            <span class="rv-t mono"></span><label class="rv-cov"><input type="checkbox"> พื้นที่ครอบคลุม</label>`;
+          map.getContainer().parentElement.appendChild(ctl);
+          L.DomEvent.disableClickPropagation(ctl);
+          ctl.querySelector('.rv-play').onclick = play;
+          ctl.querySelector('input[type=range]').oninput = (e) => { stop(); show(+e.target.value); };
+          ctl.querySelector('.rv-cov input').onchange = (e) => e.target.checked ? cover.addTo(map) : map.removeLayer(cover);
+          show(frames.length - 1);
+        });
+        grp.on('remove', () => { stop(); if (map.hasLayer(cover)) map.removeLayer(cover); if (ctl) ctl.remove(); ctl = null; });
+        return { lyr: grp, sub: `RainViewer · ${frames.length} ภาพย้อนหลัง 2 ชม. · ล่าสุด ${tm(frames.length - 1)}`,
+          attr: 'Weather data by <a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a>' };
+      }
+    },
+    {
+      id: 'glofas', icon: 'ti-chart-line', label: 'พยากรณ์ปริมาณน้ำ 30 วัน (GloFAS)', on: false,
+      async build() {
+        const g = await json('data/live/glofas.json');
+        if (!g.points || !g.points.length) throw new Error(g.status === 'error' ? 'ดึงไม่สำเร็จ' : 'รอ workflow รันรอบแรก');
+        const lyr = L.layerGroup(g.points.map(p => {
+          const st = glofasStatus(p);
+          return L.circleMarker([p.lat, p.lon], { bubblingMouseEvents: false, radius: 9, weight: 2, color: '#FFFFFF', fillColor: st.color, fillOpacity: 0.95 })
+            .bindPopup(`<b>${esc(p.name)}</b><br><span class="bk" style="background:${st.color}">${st.label}</span>
+              <div class="trend">ล่าสุด ${fmt((p.past.slice(-1)[0] || [])[1], 1)} ลบ.ม./วิ · คาดสูงสุด ${fmt(p.peak && p.peak.median, 1)} (สูงสุดของชุดพยากรณ์ ${fmt(p.peak && p.peak.max, 1)}) วันที่ ${esc(p.peak && p.peak.date)}</div>
+              ${glofasChart(p, 250)}<div class="muted" style="font-size:11px">แบบจำลอง GloFAS กริด ~5 กม. · ยังไม่ได้ตรวจเทียบกับสถานีจริง · ไม่ใช่ประกาศเตือนภัย</div>`, { maxWidth: 280 });
+        }));
+        const warn = g.points.filter(p => glofasStatus(p).rank >= 1).length;
+        return { lyr, sub: `${g.points.length} จุด · ${warn ? `เกินเกณฑ์ ${warn} จุด` : 'ไม่เกินรอบ 2 ปี'} · ${hhmm(g.updated_at)}`, attr: 'GloFAS © Copernicus EMS (CC BY 4.0) · Open-Meteo' };
       }
     },
     {

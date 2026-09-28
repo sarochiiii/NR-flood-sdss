@@ -7,7 +7,7 @@
 <title>เฝ้าระวังลำเชียงไกร · SDSS โนนไทย–โนนสูง</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/region.css?v=18">
+<link rel="stylesheet" href="css/region.css?v=19">
 <style>
   body{display:block;background:var(--offwh)}
   .wrap{max-width:760px;margin:0 auto;padding:16px}
@@ -51,6 +51,11 @@
   <p class="sec-note">M.2A (D.A 4,724) + ลำเชียงไกรที่ M.188A (2,811) = 7,535 ตร.กม. ซึ่งน้อยกว่า M.194 (8,467) จุดบรรจบจึงอยู่ระหว่าง M.2A กับ M.194 · ถ้าน้ำมูลสูง น้ำจากลำเชียงไกรจะระบายลงมูลได้ช้า</p>
   <div class="chain" id="mun"></div>
 
+  <h2 class="sec">พยากรณ์ปริมาณน้ำ 30 วัน · GloFAS</h2>
+  <p class="sec-note">แบบจำลองอุทกวิทยา GloFAS v4 (Copernicus) กริด ~5 กม. · เส้นทึบ = 60 วันที่ผ่านมา · เส้นประ = ค่ามัธยฐานพยากรณ์ · แถบ = ช่วงของชุดพยากรณ์ ·
+    เส้นเกณฑ์ = ค่าสูงสุดรายปี 1984–ปีที่แล้ว (≈ รอบ 2/5/20 ปี) · <b>ยังไม่ได้ตรวจเทียบกับสถานีจริง</b> จึงใช้ดูแนวโน้ม ไม่ใช้เป็นเกณฑ์เตือน</p>
+  <div id="glofas"></div>
+
   <div class="foot">
     <b>%ความจุ</b> คือระดับน้ำเทียบตลิ่งต่ำสุดของสถานี (ค่าจาก ThaiWater) ถึง 100% = น้ำเสมอตลิ่ง ·
     <b>ความลึกน้ำ</b> = ระดับน้ำ ม.รทก. − ราคาศูนย์เสา (กรมชลประทาน ปีน้ำ 2569) ·
@@ -86,6 +91,31 @@
   const get = (u) => fetch(u, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
   const tparse = (t) => new Date(String(t).replace(' ', 'T').slice(0, 16) + (String(t).length <= 10 ? 'T00:00' : '') + ':00+07:00');
   let BK = null, SANDBOX = {}, RID = {};
+  const fmt1 = (v) => v == null ? '—' : Number(v).toFixed(1);
+  function glofasStatus(p) {
+    const t = p.thresholds || {}, fc = p.fcst || [];
+    const med = Math.max(...fc.map(r => r[1] ?? 0)), mx = Math.max(...fc.map(r => r[2] ?? r[1] ?? 0));
+    if (t.q20 && med >= t.q20) return { rank: 3, label: 'คาดเกินรอบ 20 ปี', color: '#7F1D1D' };
+    if (t.q5 && med >= t.q5) return { rank: 2, label: 'คาดเกินรอบ 5 ปี', color: '#C0392B' };
+    if (t.q2 && med >= t.q2) return { rank: 1, label: 'คาดเกินรอบ 2 ปี', color: '#E67E22' };
+    if (t.q2 && mx >= t.q2) return { rank: 0.5, label: 'บางชุดพยากรณ์เกินรอบ 2 ปี', color: '#F4D03F' };
+    return { rank: 0, label: 'ต่ำกว่ารอบ 2 ปี', color: '#1E8449' };
+  }
+  function glofasChart(p, W) {
+    const H = 90, past = p.past || [], fc = p.fcst || [], t = p.thresholds || {};
+    const all = past.map(r => r[0]).concat(fc.map(r => r[0])); if (all.length < 2) return '';
+    const ys = past.map(r => r[1]).concat(fc.flatMap(r => [r[1], r[2], r[3]])).filter(v => v != null).concat([t.q2 || 0, t.q5 || 0]);
+    const y1 = Math.max(...ys) * 1.08 || 1, X = (d) => 4 + (W - 8) * all.indexOf(d) / (all.length - 1), Y = (v) => H - 4 - (H - 8) * v / y1;
+    const line = (rows, k, col, dash) => `<polyline points="${rows.filter(r => r[k] != null).map(r => X(r[0]).toFixed(1) + ',' + Y(r[k]).toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="1.6" ${dash ? 'stroke-dasharray="4 3"' : ''}/>`;
+    const band = fc.filter(r => r[2] != null && r[3] != null);
+    const poly = band.length ? `<polygon points="${band.map(r => X(r[0]).toFixed(1) + ',' + Y(r[2]).toFixed(1)).concat(band.slice().reverse().map(r => X(r[0]).toFixed(1) + ',' + Y(r[3]).toFixed(1))).join(' ')}" fill="#93C5FD" opacity="0.45"/>` : '';
+    const hl = (v, col, lab) => v && v < y1 ? `<line x1="4" x2="${W - 4}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="${col}" stroke-width="1" stroke-dasharray="3 2"/><text x="${W - 6}" y="${(Y(v) - 2).toFixed(1)}" text-anchor="end" font-size="9" fill="${col}">${lab}</text>` : '';
+    const today = fc.length ? `<line x1="${X(fc[0][0]).toFixed(1)}" x2="${X(fc[0][0]).toFixed(1)}" y1="2" y2="${H - 2}" stroke="#64748B" stroke-width="0.8"/>` : '';
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="ปริมาณน้ำย้อนหลัง 60 วันและพยากรณ์ 30 วัน" style="display:block;background:#F8FAFC;border-radius:4px;margin-top:4px">
+      ${poly}${hl(t.q2, '#D68910', 'รอบ 2 ปี')}${hl(t.q5, '#C0392B', 'รอบ 5 ปี')}${hl(t.q20, '#7F1D1D', 'รอบ 20 ปี')}${today}${line(past, 1, '#0A1628')}${line(fc, 1, '#0E7C7B', true)}</svg>
+      <div class="spark-lab"><span>60 วันก่อน</span><span>วันนี้ │ พยากรณ์ 30 วัน (แถบ = ช่วงชุดพยากรณ์)</span></div>`;
+  }
+
   function spark2(a, b, label) {   // a = ปีนี้ (เส้นทึบ), b = ปีก่อน (เส้นประ) · [[Date, value]]
     const all = a.concat(b).filter(p => p[1] != null);
     if (a.length < 2) return '';
@@ -171,6 +201,16 @@
     const dams = {}; (prov.dams || []).forEach(d => { if (!dams[d.name] || !d.stale) dams[d.name] = d; });
     $('ts').textContent = `${via} · ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
     $('lck').innerHTML = LCK.map(x => node(x, rid, wl, dams, hist)).join('');
+    const g = await get('data/live/glofas.json').catch(() => null);
+    $('glofas').innerHTML = g && g.points && g.points.length ? g.points.map(p => {
+      const st = glofasStatus(p), code = (p.id.split('_')[1] || '').replace(/^M/, 'M.').replace('M.188A', 'M.188A');
+      const obs = wl[code] && wl[code].q != null ? ` · สถานีวัดจริง ${fmt1(wl[code].q)} ลบ.ม./วิ` : '';
+      return `<div class="node" style="--c:${st.color}"><div class="n-top"><span class="n-name">${esc(p.name)}</span>
+        <span class="bk" style="background:${st.color}">${st.label}</span></div>
+        <div class="n-row">แบบจำลองล่าสุด ${fmt1((p.past.slice(-1)[0] || [])[1])} ลบ.ม./วิ${obs}</div>
+        <div class="n-row">คาดสูงสุด ${fmt1(p.peak && p.peak.median)} (ชุดพยากรณ์สูงสุด ${fmt1(p.peak && p.peak.max)}) วันที่ ${esc(p.peak && p.peak.date)} · เกณฑ์รอบ 2 ปี ${fmt1(p.thresholds && p.thresholds.q2)}</div>
+        ${glofasChart(p, 320)}</div>`; }).join('') + `<div class="muted" style="font-size:12px">อัปเดต ${new Date(g.updated_at).toLocaleString('th-TH')} · GloFAS © Copernicus EMS (CC BY 4.0) ผ่าน Open-Meteo</div>`
+      : '<div class="nodata">รอข้อมูล GloFAS (workflow)</div>';
     $('mun').innerHTML = MUN.map(x => node(x, rid, wl, dams, hist)).join('');
   }
 
