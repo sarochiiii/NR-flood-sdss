@@ -107,3 +107,6 @@ body{font-family:var(--font);color:var(--text);background:var(--white);font-size
 .bank-legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .bank-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 @media (max-width:820px){.bank-legend{display:none}}
+
+/* บนภาพดาวเทียม: ชื่อตำบลสีขาวขอบเข้ม */
+.sat .tlabel{color:#FFFFFF;text-shadow:0 0 3px #000,0 0 3px #000,0 0 2px #000}

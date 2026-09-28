@@ -98,7 +98,16 @@
     'OSM': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }),
     'ภาพดาวเทียม': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Esri World Imagery' })
   };
-  base.OSM.addTo(map);
+  // ค่าเริ่มต้น: ภาพดาวเทียม (เปลี่ยนเป็น OSM ได้ที่ปุ่มชั้นแผนที่มุมขวาล่าง)
+  base['ภาพดาวเทียม'].addTo(map);
+  let onSat = true;
+  map.getContainer().classList.add('sat');
+  map.on('baselayerchange', (e) => {
+    onSat = e.name === 'ภาพดาวเทียม';
+    map.getContainer().classList.toggle('sat', onSat);
+    if (typeof redraw === 'function') redraw();
+    if (amLayer) amLayer.setStyle({ color: onSat ? '#FDE68A' : '#0A1628' });
+  });
   L.control.layers(base, null, { position: 'bottomright' }).addTo(map);
 
   const modes = [
@@ -140,8 +149,9 @@
       const showHex = hexLayer && (mode === 'risk' || mode === 's');
       const sb = f.properties.tcode === cfg.sandbox.tcode, sel = f.properties.tcode === selected;
       // ปิดชั้นเขตตำบล: โปร่งใสทั้งสีและเส้น แต่ยังแตะเลือกตำบลได้ (คงเส้นของตำบลที่เลือกไว้)
-      if (!showTambon) return { color: '#0F172A', weight: sel ? 2.5 : 0, opacity: sel ? 1 : 0, fillOpacity: 0 };
-      return { color: sel ? '#0F172A' : sb ? '#0E7C7B' : '#475569', weight: sel ? 3 : sb ? 2.2 : 0.8, opacity: 1,
+      if (!showTambon) return { color: onSat ? '#FFFFFF' : '#0F172A', weight: sel ? 2.5 : 0, opacity: sel ? 1 : 0, fillOpacity: 0 };
+      return { color: sel ? (onSat ? '#FFFFFF' : '#0F172A') : sb ? (onSat ? '#5EEAD4' : '#0E7C7B') : (onSat ? '#F8FAFC' : '#475569'),
+        weight: sel ? 3 : sb ? 2.2 : (onSat ? 1 : 0.8), opacity: onSat ? 0.9 : 1,
         dashArray: sb && !sel ? '5 3' : null, fillColor: colorFor(f.properties.tcode),
         fillOpacity: (showHex || mode === 'none') ? 0 : 0.6 };
     },
@@ -150,7 +160,7 @@
       l.on('click', () => select(f.properties.tcode));
     }
   }).addTo(map);
-  const amLayer = amphoe ? L.geoJSON(amphoe, { interactive: false, style: { color: '#0A1628', weight: 2.2, fill: false } }).addTo(map) : null;
+  const amLayer = amphoe ? L.geoJSON(amphoe, { interactive: false, style: { color: onSat ? '#FDE68A' : '#0A1628', weight: 2.2, fill: false } }).addTo(map) : null;
   function setTambonVisible(on) {
     showTambon = on;
     if (amLayer) { if (on && !map.hasLayer(amLayer)) amLayer.addTo(map); if (!on && map.hasLayer(amLayer)) map.removeLayer(amLayer); }
