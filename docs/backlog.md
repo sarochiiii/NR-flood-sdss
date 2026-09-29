@@ -8,13 +8,13 @@
 2. **รายงานสถานการณ์น้ำโดย ADM** (อ้างอิงแนวคิด pbwatch.net PattaniWaterGIS flood_report)
    - ต้องออกแบบ: ฟอร์มรายงาน (ตำแหน่ง ระดับน้ำ ภาพ เวลา) · การยืนยันตัวตน ADM · ที่เก็บข้อมูล (ห้ามใน repo สาธารณะถ้ามีข้อมูลบุคคล)
    - แยกชั้น "รายงานจากชุมชน" ออกจากข้อมูลทางการเสมอ
-3. **LINE OA รายงานสถานการณ์น้ำประจำวัน**
+3. **LINE OA** — P1 โค้ดพร้อม รอตั้งค่าตาม line/SETUP.md (ลงทะเบียน LIFF, เมนูตอบกลับ, สรุปประจำวัน ADM) ต่อไป P2 เตือนอัตโนมัติ A1–A4 ต้องมีตาราง ตำบล↔สถานีอ้างอิง
    - ต้องมี: LINE OA ของโครงการ + Messaging API channel access token (Secret) + กลุ่มเป้าหมาย
    - ข้อมูลตั้งต้นพร้อมแล้ว: `risk_now.json`, `water_region.json` (storage_pct), `tw_province.json` (อ่าง), `gistda_flood_7d.geojson`
    - ต้องมี state กันส่งซ้ำ และ disclaimer ใน Flex Message
 
 ## งานค้างอื่น
-- แผนที่ 100 ครัวเรือน บ.ด่านติง ต.จันอัด → เลือกระบบจำกัดสิทธิ์ (governance.md)
+- แผนที่ 100 ครัวเรือน บ.ด่านติง ต.จันอัด → หน้าและคู่มือพร้อม (sandbox-private) รอตั้ง Cloudflare Access และอัปโหลดไฟล์จริง
 - Sandbox จันอัดจริงแทน mockup: GEE Phase 1 (multi-ring buffer 100–500 ม. จาก `ChiangKriFull` ก่อน clip, อาคารรายวง, น้ำท่วมซ้ำซาก `Repeatarea`, สรุปรายหมู่บ้าน)
 - กำหนด `station_code` ตัวแทนรายตำบล (ยืนยันกับโครงการชลประทานนครราชสีมา) และยืนยันเกณฑ์ 70/90 → ตั้ง `verified: true`
 - ชั้น S (ความอ่อนไหว) พักไว้: สคริปต์ `region_susceptibility.js` + `merge_susceptibility.py` พร้อม ใช้ `NR_FloodFreq`/`Repeating`

@@ -12,10 +12,12 @@ from shapely.geometry import shape, mapping, Point
 from shapely.ops import unary_union
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-OUTLETS = [  # (id, ชื่อ, รหัสสถานี กรมชลประทาน)
+OUTLETS = [  # (id, ชื่อ, รหัสสถานี กรมชลประทาน) — โทโพโลยีตรวจจาก NEXT_DOWN ของ HydroBASINS:
+    # มูล (M.2A) + ลำตะคอง (M.164) บรรจบกันก่อน M.194 · ลำเชียงไกร (M.188A) บรรจบมูลระหว่าง M.194 กับ M.195
     ("LCK", "ลุ่มลำเชียงไกรเหนือ M.188A", "M.188A"),
     ("MUN_UP", "ลุ่มมูลตอนบนเหนือ M.2A", "M.2A"),
-    ("STUDY", "ลุ่มน้ำเหนือ M.194 (รวมลำเชียงไกร + มูลตอนบน)", "M.194"),
+    ("TAK", "ลุ่มลำตะคองเหนือ M.164", "M.164"),
+    ("STUDY", "ลุ่มน้ำเหนือ M.195 (มูล + ลำตะคอง + ลำเชียงไกร)", "M.195"),
 ]
 
 

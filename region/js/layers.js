@@ -37,17 +37,20 @@ document.addEventListener('sdss:ready', async () => {
   }
   const inArea = (la, lo) => AREA.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
   // ในพื้นที่ = อยู่ในสองอำเภอ · ใกล้เคียง = อยู่ใน buffer รอบพื้นที่ · นอกพื้นที่ = ไกลกว่านั้น (ข้อมูลระดับจังหวัด)
-  // ลุ่มน้ำต้นทาง (HydroBASINS L12 ตรวจกับ D.A กรมชลประทานแล้ว): LCK = ลำเชียงไกรเหนือ M.188A · MUN_UP = มูลเหนือ M.2A · STUDY = เหนือ M.194
+  // ลุ่มน้ำต้นทาง (HydroBASINS L12 ตรวจกับ D.A กรมชลประทานแล้ว): LCK = ลำเชียงไกรเหนือ M.188A · MUN_UP = มูลเหนือ M.2A
+  // TAK = ลำตะคองเหนือ M.164 · STUDY = ทั้งหมดเหนือ M.195 (ลำเชียงไกรบรรจบมูลระหว่าง M.194 กับ M.195)
   const BAS = await fetch('data/basins.geojson', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
   const BP = {}; (BAS ? BAS.features : []).forEach(f => BP[f.properties.id] = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates);
   const inPolys = (la, lo, P) => (P || []).some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
-  const basinOf = (la, lo) => inPolys(la, lo, BP.LCK) ? 'LCK' : inPolys(la, lo, BP.MUN_UP) ? 'MUN_UP' : inPolys(la, lo, BP.STUDY) ? 'STUDY' : null;
+  const basinOf = (la, lo) => inPolys(la, lo, BP.LCK) ? 'LCK' : inPolys(la, lo, BP.MUN_UP) ? 'MUN_UP' : inPolys(la, lo, BP.TAK) ? 'TAK'
+    : inPolys(la, lo, BP.STUDY) ? 'STUDY' : null;
   // เกี่ยวข้อง = อยู่ในสองอำเภอ หรืออยู่ในลุ่มน้ำที่ไหลเข้าพื้นที่ (ถ้ายังไม่มีไฟล์ลุ่มน้ำ ถือว่าเกี่ยวข้องทั้งหมด)
   const rel = (s) => !BAS || inArea(s.lat, s.lon) || basinOf(s.lat, s.lon) !== null;
   const tag = (s) => { if (inArea(s.lat, s.lon)) return '<span class="tag-in">ในพื้นที่</span>';
     if (!BAS) return '<span class="tag-out">นอกพื้นที่</span>';
     const b = basinOf(s.lat, s.lon);
     return b === 'LCK' ? '<span class="tag-up">ต้นน้ำลำเชียงไกร</span>' : b === 'MUN_UP' ? '<span class="tag-up">ต้นน้ำมูล</span>'
+      : b === 'TAK' ? '<span class="tag-up">ต้นน้ำลำตะคอง</span>'
       : b === 'STUDY' ? '<span class="tag-up">ในลุ่มน้ำ</span>' : '<span class="tag-out">นอกลุ่มน้ำ</span>'; };
   const inBox = (la, lo, bb) => la != null && lo != null && lo >= bb[0] && lo <= bb[2] && la >= bb[1] && la <= bb[3];
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
@@ -245,11 +248,11 @@ document.addEventListener('sdss:ready', async () => {
       id: 'basins', icon: 'ti-topology-star-3', label: 'ขอบเขตลุ่มน้ำ (HydroBASINS)', on: true,
       async build() {
         if (!BAS) throw new Error('ยังไม่มีไฟล์ขอบเขตลุ่มน้ำ');
-        const col = { LCK: '#38BDF8', MUN_UP: '#A78BFA', STUDY: '#94A3B8' };
+        const col = { LCK: '#38BDF8', MUN_UP: '#A78BFA', TAK: '#FB923C', STUDY: '#94A3B8' };
         const lyr = L.geoJSON({ type: 'FeatureCollection', features: BAS.features.filter(f => f.properties.id !== 'STUDY') }, {
           style: f => ({ color: col[f.properties.id], weight: 2, dashArray: '6 4', fill: false }),
           onEachFeature: (f, l) => l.bindTooltip(`${f.properties.name} · ${Number(f.properties.area_km2).toLocaleString('th-TH')} ตร.กม. (D.A กรมชลประทาน ${Number(f.properties.da_rid).toLocaleString('th-TH')})`, { sticky: true }) });
-        return { lyr, sub: 'ลำเชียงไกร (ฟ้า) · มูลตอนบน (ม่วง) · ตรวจกับ D.A กรมชลประทานแล้ว', attr: 'HydroBASINS © WWF (HydroSHEDS)' };
+        return { lyr, sub: 'ลำเชียงไกร (ฟ้า) · มูลตอนบน (ม่วง) · ลำตะคอง (ส้ม) · ตรวจกับ D.A กรมชลประทานแล้ว', attr: 'HydroBASINS © WWF (HydroSHEDS)' };
       }
     },
     {
@@ -536,7 +539,7 @@ document.addEventListener('sdss:ready', async () => {
     try {
       const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null && rel(d)).sort((a, b) => b.pct - a.pct);
       // ลำดับความสำคัญ: ในพื้นที่/ต้นน้ำลำเชียงไกร → ในลุ่มน้ำ → ต้นน้ำมูล (ไกลกว่า ผลต่อพื้นที่อ่อนกว่า)
-      const pr = (d) => inArea(d.lat, d.lon) ? 0 : ({ LCK: 0, STUDY: 1, MUN_UP: 2 }[basinOf(d.lat, d.lon)] ?? 3);
+      const pr = (d) => inArea(d.lat, d.lon) ? 0 : ({ LCK: 0, STUDY: 1, TAK: 2, MUN_UP: 2 }[basinOf(d.lat, d.lon)] ?? 3);
       const hi = dams.filter(d => d.pct >= 80).sort((a, b) => pr(a) - pr(b) || b.pct - a.pct), over = dams.filter(d => d.pct > 100);
       setK('k-dam', `${hi.length}`, `เกินความจุ ${over.length} · จาก ${dams.length} อ่าง`);
       const rows = hi.slice(0, 6).map(d => `<div class="wrow" data-k="d:${esc(d.name)}" data-l="dams">

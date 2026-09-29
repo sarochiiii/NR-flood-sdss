@@ -7,7 +7,7 @@
 <title>เฝ้าระวังลำเชียงไกร · SDSS โนนไทย–โนนสูง</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/region.css?v=21">
+<link rel="stylesheet" href="css/region.css?v=22">
 <style>
   body{display:block;background:var(--offwh)}
   .wrap{max-width:760px;margin:0 auto;padding:16px}
@@ -47,8 +47,10 @@
   <p class="sec-note">เรียงจากต้นน้ำตามพื้นที่รับน้ำ (D.A) ของกรมชลประทาน สถานีที่ D.A มากกว่าอยู่ท้ายน้ำ · อ่างตอนบนและตอนล่างเรียงตามชื่อและตำแหน่ง</p>
   <div class="chain" id="lck"></div>
 
-  <h2 class="sec">แม่น้ำมูล · เหนือ → ใต้จุดบรรจบ</h2>
-  <p class="sec-note">M.2A (D.A 4,724) + ลำเชียงไกรที่ M.188A (2,811) = 7,535 ตร.กม. ซึ่งน้อยกว่า M.194 (8,467) จุดบรรจบจึงอยู่ระหว่าง M.2A กับ M.194 · ถ้าน้ำมูลสูง น้ำจากลำเชียงไกรจะระบายลงมูลได้ช้า</p>
+  <h2 class="sec">แม่น้ำมูล · มูลตอนบน + ลำตะคอง → จุดบรรจบลำเชียงไกร</h2>
+  <p class="sec-note">โทโพโลยีจาก HydroBASINS ตรวจกับพื้นที่รับน้ำของกรมชลประทาน: มูลที่ M.2A (4,724) + ลำตะคองที่ M.164 (3,033) ≈ M.194 (8,467) ·
+    M.194 + ลำเชียงไกรที่ M.188A (2,811) ≈ M.195 (11,458) → <b>ลำเชียงไกรบรรจบแม่น้ำมูลระหว่าง M.194 กับ M.195</b> ·
+    ถ้าน้ำมูล (รวมลำตะคอง) สูง น้ำจากลำเชียงไกรจะระบายลงมูลได้ช้า</p>
   <div class="chain" id="mun"></div>
 
   <h2 class="sec">พยากรณ์ปริมาณน้ำ 30 วัน · GloFAS</h2>
@@ -78,8 +80,10 @@
   ];
   const MUN = [
     { t: 'wl', code: 'M.2A' },
-    { t: 'conf', name: 'ลำเชียงไกรบรรจบ' },
+    { t: 'wl', code: 'M.164' },
+    { t: 'conf', name: 'ลำตะคองบรรจบ' },
     { t: 'wl', code: 'M.194' },
+    { t: 'conf', name: 'ลำเชียงไกรบรรจบ' },
     { t: 'wl', code: 'M.195' },
     { t: 'wl', code: 'M.184' }
   ];

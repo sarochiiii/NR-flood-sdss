@@ -36,13 +36,15 @@ def basin_t(cfg, key, smap, ridmap):
     if not b:
         return None
     t = None
-    st = smap.get(b.get("river_station"))
-    if st and st.get("storage_pct") is not None:
-        v = 0
-        for lim, tv in sorted(cfg["t_rules"]["bank_to_t"].items(), key=lambda x: -float(x[0])):
-            if st["storage_pct"] >= float(lim):
-                v = tv; break
-        t = max(t or 0, v)
+    rs = b.get("river_station")
+    for code in (rs if isinstance(rs, list) else [rs]):
+        st = smap.get(code)
+        if st and st.get("storage_pct") is not None:
+            v = 0
+            for lim, tv in sorted(cfg["t_rules"]["bank_to_t"].items(), key=lambda x: -float(x[0])):
+                if st["storage_pct"] >= float(lim):
+                    v = tv; break
+            t = max(t or 0, v)
     for d in b.get("dams", []):
         r = ridmap.get(d["code"])
         if not r or r.get("pct") is None:

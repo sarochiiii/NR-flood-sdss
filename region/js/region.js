@@ -91,8 +91,8 @@
   function basinT(key) {
     const b = TR.basins[key]; if (!b) return { t: null, why: [] };
     const why = []; let t = null;
-    const st = staMap.get(b.river_station);
-    if (st && st.storage_pct != null) { const v = bankT(st.storage_pct); t = Math.max(t ?? 0, v); why.push([`${b.river_station} ${Math.round(st.storage_pct)}% ตลิ่ง`, v]); }
+    [].concat(b.river_station || []).forEach(code => { const st = staMap.get(code);
+      if (st && st.storage_pct != null) { const v = bankT(st.storage_pct); t = Math.max(t ?? 0, v); why.push([`${code} ${Math.round(st.storage_pct)}% ตลิ่ง`, v]); } });
     (b.dams || []).forEach(d => { const r = ridMap.get(d.code); if (!r || r.pct == null) return;
       const v = d.t2 && r.pct >= d.t2 ? 2 : r.pct >= d.t1 ? 1 : 0; t = Math.max(t ?? 0, v); why.push([`${d.name.replace('อ่างเก็บน้ำ', 'อ่าง')} ${Math.round(r.pct)}%`, v]); });
     return { t, why };
@@ -311,8 +311,8 @@
     $('method').innerHTML = `<table><tr><th>S \\ T</th>${hdr}</tr>${rows}</table>
       <p><b>T จากฝน:</b> ใช้ค่าที่มากกว่าระหว่างฝน 24 ชม. ที่ผ่านมาและคาดการณ์ 24 ชม. ข้างหน้า เทียบ${cfg.rain.tmd_ref}
       ${cfg.rain.wet_7d_mm === null ? 'เงื่อนไขดินอิ่มน้ำจากฝนสะสม 7 วันยังไม่เปิดใช้' : `ฝนสะสม 7 วัน ≥ ${cfg.rain.wet_7d_mm} มม. เพิ่ม T หนึ่งขั้น`}</p>
-      <p><b>T จากลุ่มน้ำ:</b> ตำบลจัดเข้าลุ่มตามขอบเขต HydroBASINS (ลำเชียงไกร 16 ตำบล · แม่น้ำมูล 5 ตำบล) ·
-      สถานีลำน้ำของลุ่ม (ลำเชียงไกร M.188A · มูล M.2A) เทียบตลิ่ง ≥70% → เฝ้าระวัง · ≥90% → เตือน · ≥100% → วิกฤต ·
+      <p><b>T จากลุ่มน้ำ:</b> ตำบลจัดเข้าลุ่มตามขอบเขต HydroBASINS (ลำเชียงไกร 16 ตำบล · แม่น้ำมูลเหนือจุดบรรจบ 5 ตำบล · อีก 5 ตำบลอยู่นอกลุ่มที่ติดตาม ใช้ฝนในตำบลอย่างเดียว) ·
+      สถานีลำน้ำของลุ่ม (ลำเชียงไกร M.188A · มูล ค่าสูงสุดของ M.2A และลำตะคอง M.164) เทียบตลิ่ง ≥70% → เฝ้าระวัง · ≥90% → เตือน · ≥100% → วิกฤต ·
       อ่างลำเชียงไกรตอนบน ≥100% → เฝ้าระวัง · ตอนล่าง ≥90% → เฝ้าระวัง, ≥100% → เตือน
       ${TR.verified ? '' : '(ข้อเสนอ ยังไม่ยืนยันกับชลประทาน)'}</p>
       <p><b>S:</b> ความอ่อนไหวเชิงสัมพัทธ์ภายในพื้นที่ศึกษา จากความถี่น้ำท่วมซ้ำ (GISTDA) ค่า HAND และระยะห่างจากทางน้ำ (MERIT Hydro) ต่อ hexagon H3 res 8</p>

@@ -17,9 +17,17 @@ API = "https://flood-api.open-meteo.com/v1/flood"
 POINTS = [   # พิกัดสถานีกรมชลประทาน (rid_stations.json) — วางจุดบนลำน้ำ
     {"id": "LCK_M206", "name": "ลำเชียงไกร · M.206 ต.ด่านจาก", "river": "ลำเชียงไกร", "lat": 15.13544, "lon": 102.10466},
     {"id": "LCK_M188A", "name": "ลำเชียงไกร · M.188A บ้านเพิ่ม", "river": "ลำเชียงไกร", "lat": 15.18167, "lon": 102.24278},
-    {"id": "MUN_M2A", "name": "มูล · M.2A บ้านด่านกะตา (เหนือจุดบรรจบ)", "river": "มูล", "lat": 14.96806, "lon": 102.23806},
-    {"id": "MUN_M194", "name": "มูล · M.194 บ้านเมืองที (ใต้จุดบรรจบ)", "river": "มูล", "lat": 15.15972, "lon": 102.36861},
+    {"id": "MUN_M2A", "name": "มูล · M.2A บ้านด่านกะตา (มูลตอนบน)", "river": "มูล", "lat": 14.96806, "lon": 102.23806},
+    {"id": "MUN_M194", "name": "มูล · M.194 (รวมลำตะคอง · เหนือจุดบรรจบลำเชียงไกร)", "river": "มูล", "lat": 15.15972, "lon": 102.36861},
+    {"id": "MUN_M195", "name": "มูล · M.195 บ้านสัมฤทธิ์ (ใต้จุดบรรจบลำเชียงไกร)", "river": "มูล", "lat": None, "lon": None},
 ]
+# เติมพิกัดจาก rid_stations.json ถ้าไม่ได้ระบุ
+_RID = json.loads((__import__("pathlib").Path(__file__).resolve().parents[2] / "region/data/rid_stations.json").read_text(encoding="utf-8"))["stations"]
+for _p in POINTS:
+    if _p["lat"] is None:
+        _s = _RID.get(_p["id"].split("_")[1].replace("M", "M.", 1)) or {}
+        _p["lat"], _p["lon"] = _s.get("lat"), _s.get("lon")
+POINTS = [p for p in POINTS if p["lat"] is not None]
 FCST_GAP_H, THR_GAP_D = 12, 30
 OUT = "glofas.json"
 
