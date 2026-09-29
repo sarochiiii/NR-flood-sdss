@@ -16,6 +16,8 @@ jobs:
         run: pip install --quiet shapely pyproj earthengine-api
       - name: ฝนรายตำบล (Open-Meteo)
         run: python scripts/region/fetch_rain.py
+      - name: ฝนเฉลี่ยลุ่มน้ำ (Open-Meteo × HydroBASINS)
+        run: python scripts/region/fetch_basin_rain.py
       - name: สถานีฝนและระดับน้ำ (ThaiWater)
         run: python scripts/region/fetch_thaiwater.py
       - name: ฝนสะสม 1/3/7 วัน และอ่างเก็บน้ำ (ThaiWater จังหวัด)
