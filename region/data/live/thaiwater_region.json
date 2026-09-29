@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-09-29T14:45:05+00:00",
+"updated_at":"2026-09-29T15:09:53+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -293,7 +293,7 @@
 "bank_msl":201.97,
 "storage_pct":106.84,
 "discharge":null,
-"measured_at":"2026-09-29 21:30",
+"measured_at":"2026-09-29 22:00",
 "amphoe":"ด่านขุนทด"
 },
 {
@@ -305,7 +305,7 @@
 "bank_msl":203.9,
 "storage_pct":94.21,
 "discharge":21.57,
-"measured_at":"2026-09-29 20:00",
+"measured_at":"2026-09-29 21:00",
 "amphoe":"สูงเนิน"
 },
 {
@@ -317,7 +317,7 @@
 "bank_msl":155.3,
 "storage_pct":85.44,
 "discharge":74.85,
-"measured_at":"2026-09-29 20:00",
+"measured_at":"2026-09-29 21:00",
 "amphoe":"พิมาย"
 },
 {
@@ -329,7 +329,7 @@
 "bank_msl":167.83,
 "storage_pct":81.06,
 "discharge":null,
-"measured_at":"2026-09-29 21:30",
+"measured_at":"2026-09-29 22:00",
 "amphoe":"เฉลิมพระเกียรติ"
 },
 {
@@ -337,11 +337,11 @@
 "name":"บ้านด่านกะตา",
 "lat":14.96803,
 "lon":102.237831,
-"level_msl":165.34,
+"level_msl":165.35,
 "bank_msl":167.7,
-"storage_pct":71.39,
-"discharge":83.2,
-"measured_at":"2026-09-29 20:00",
+"storage_pct":71.52,
+"discharge":83.5,
+"measured_at":"2026-09-29 21:00",
 "amphoe":"เฉลิมพระเกียรติ"
 },
 {
@@ -353,7 +353,7 @@
 "bank_msl":158.1,
 "storage_pct":62.88,
 "discharge":70.2,
-"measured_at":"2026-09-29 20:00",
+"measured_at":"2026-09-29 21:00",
 "amphoe":"พิมาย"
 },
 {
@@ -361,11 +361,11 @@
 "name":"ตำบลในเมือง",
 "lat":14.98457,
 "lon":102.092941,
-"level_msl":176.33,
+"level_msl":176.38,
 "bank_msl":177.6,
-"storage_pct":59.55,
+"storage_pct":61.15,
 "discharge":null,
-"measured_at":"2026-09-29 20:00",
+"measured_at":"2026-09-29 21:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -373,11 +373,11 @@
 "name":"บ้านบัว",
 "lat":15.18159,
 "lon":102.242737,
-"level_msl":160.87,
+"level_msl":160.85,
 "bank_msl":162.6,
-"storage_pct":53.49,
+"storage_pct":52.96,
 "discharge":null,
-"measured_at":"2026-09-29 20:00",
+"measured_at":"2026-09-29 21:00",
 "amphoe":"โนนสูง"
 },
 {
@@ -385,16 +385,16 @@
 "name":"บ้านโคกกรวด",
 "lat":14.93281,
 "lon":101.951889,
-"level_msl":193.32,
+"level_msl":193.36,
 "bank_msl":195.3,
-"storage_pct":41.42,
-"discharge":1.74,
-"measured_at":"2026-09-29 20:00",
+"storage_pct":42.6,
+"discharge":1.82,
+"measured_at":"2026-09-29 21:00",
 "amphoe":"เมืองนครราชสีมา"
 }
 ],
 "status":{
-"rain":"ok",
+"rain":"error: 'str' object has no attribute 'get'",
 "waterlevel":"ok"
 }
 }
