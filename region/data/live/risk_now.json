@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-09-29T13:33:20+00:00",
+ "updated_at": "2026-09-29T14:45:37+00:00",
  "matrix_verified": false,
  "tambon": [
   {
@@ -136,7 +136,7 @@
   },
   {
    "tcode": "301013",
-   "t_state": 0,
+   "t_state": 1,
    "s_class": null,
    "level_rank": null
   },
