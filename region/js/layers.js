@@ -1,7 +1,7 @@
 /* เลเยอร์เพิ่มเติมจากหลายแหล่ง — โหลดเมื่อผู้ใช้เปิดเท่านั้น (lazy) เพื่อไม่ให้หน้าแรกช้า
    แหล่งที่เรียกจากเบราว์เซอร์ตรง: ThaiWater public API, RainViewer
    แหล่งที่ผ่าน GitHub Actions (ต้องใช้ key): GISTDA flood 7 วัน, Sentinel-1 (Earth Engine) */
-document.addEventListener('sdss:ready', () => {
+document.addEventListener('sdss:ready', async () => {
   'use strict';
   const { map, cfg, hex } = window.SDSS;
   const L_ = cfg.layers;
@@ -37,9 +37,18 @@ document.addEventListener('sdss:ready', () => {
   }
   const inArea = (la, lo) => AREA.some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
   // ในพื้นที่ = อยู่ในสองอำเภอ · ใกล้เคียง = อยู่ใน buffer รอบพื้นที่ · นอกพื้นที่ = ไกลกว่านั้น (ข้อมูลระดับจังหวัด)
-  let _bb = null;
-  const tag = (s) => inArea(s.lat, s.lon) ? '<span class="tag-in">ในพื้นที่</span>'
-    : inBox(s.lat, s.lon, _bb || (_bb = bbox())) ? '<span class="tag-out">ใกล้เคียง</span>' : '<span class="tag-out">นอกพื้นที่</span>';
+  // ลุ่มน้ำต้นทาง (HydroBASINS L12 ตรวจกับ D.A กรมชลประทานแล้ว): LCK = ลำเชียงไกรเหนือ M.188A · MUN_UP = มูลเหนือ M.2A · STUDY = เหนือ M.194
+  const BAS = await fetch('data/basins.geojson', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  const BP = {}; (BAS ? BAS.features : []).forEach(f => BP[f.properties.id] = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates);
+  const inPolys = (la, lo, P) => (P || []).some(p => inRing(lo, la, p[0]) && !p.slice(1).some(h => inRing(lo, la, h)));
+  const basinOf = (la, lo) => inPolys(la, lo, BP.LCK) ? 'LCK' : inPolys(la, lo, BP.MUN_UP) ? 'MUN_UP' : inPolys(la, lo, BP.STUDY) ? 'STUDY' : null;
+  // เกี่ยวข้อง = อยู่ในสองอำเภอ หรืออยู่ในลุ่มน้ำที่ไหลเข้าพื้นที่ (ถ้ายังไม่มีไฟล์ลุ่มน้ำ ถือว่าเกี่ยวข้องทั้งหมด)
+  const rel = (s) => !BAS || inArea(s.lat, s.lon) || basinOf(s.lat, s.lon) !== null;
+  const tag = (s) => { if (inArea(s.lat, s.lon)) return '<span class="tag-in">ในพื้นที่</span>';
+    if (!BAS) return '<span class="tag-out">นอกพื้นที่</span>';
+    const b = basinOf(s.lat, s.lon);
+    return b === 'LCK' ? '<span class="tag-up">ต้นน้ำลำเชียงไกร</span>' : b === 'MUN_UP' ? '<span class="tag-up">ต้นน้ำมูล</span>'
+      : b === 'STUDY' ? '<span class="tag-up">ในลุ่มน้ำ</span>' : '<span class="tag-out">นอกลุ่มน้ำ</span>'; };
   const inBox = (la, lo, bb) => la != null && lo != null && lo >= bb[0] && lo <= bb[2] && la >= bb[1] && la <= bb[3];
   const n = (x) => { const v = parseFloat(x); return Number.isFinite(v) ? v : null; };
   const th = (x) => (x && typeof x === 'object') ? x.th : x;
@@ -93,11 +102,12 @@ document.addEventListener('sdss:ready', () => {
   // ใช้ค่าจากกรมชลประทาน (อัปเดตเร็วกว่า ThaiWater ~1 วัน) เมื่อใหม่กว่าหรือเท่ากัน และเพิ่มอ่างที่ ThaiWater ไม่มี
   function mergeRid(dams, rid) {
     if (!rid || rid.status !== 'ok') return dams;
-    const byName = new Map(dams.map(d => [d.name, d]));
+    const norm = (x) => String(x || '').replace(/\s+/g, '');   // ชื่อสองแหล่งเว้นวรรคต่างกัน เช่น "อ่างเก็บน้ำ บ้านซับกระจาย"
+    const byName = new Map(dams.map(d => [norm(d.name), d]));
     (rid.items || []).forEach(r => {
       if (!r.date || r.pct == null) return;
-      let d = byName.get(r.name);
-      if (!d) { d = { name: r.name, kind: 'medium', lat: r.lat, lon: r.lon, amphoe: null }; dams.push(d); byName.set(r.name, d); }
+      let d = byName.get(norm(r.name));
+      if (!d) { d = { name: r.name.replace(/\s+/g, ''), kind: 'medium', lat: r.lat, lon: r.lon, amphoe: null }; dams.push(d); byName.set(norm(r.name), d); }
       if (!d.date || r.date >= d.date) Object.assign(d, { pct: r.pct, storage: r.storage, inflow: r.inflow, released: r.release,
         date: r.date, stale: false, src: 'กรมชลประทาน', pct_prev: r.pct_prev });
       const h = (rid.hist || {})[r.code];
@@ -232,6 +242,17 @@ document.addEventListener('sdss:ready', () => {
       }
     },
     {
+      id: 'basins', icon: 'ti-topology-star-3', label: 'ขอบเขตลุ่มน้ำ (HydroBASINS)', on: true,
+      async build() {
+        if (!BAS) throw new Error('ยังไม่มีไฟล์ขอบเขตลุ่มน้ำ');
+        const col = { LCK: '#38BDF8', MUN_UP: '#A78BFA', STUDY: '#94A3B8' };
+        const lyr = L.geoJSON({ type: 'FeatureCollection', features: BAS.features.filter(f => f.properties.id !== 'STUDY') }, {
+          style: f => ({ color: col[f.properties.id], weight: 2, dashArray: '6 4', fill: false }),
+          onEachFeature: (f, l) => l.bindTooltip(`${f.properties.name} · ${Number(f.properties.area_km2).toLocaleString('th-TH')} ตร.กม. (D.A กรมชลประทาน ${Number(f.properties.da_rid).toLocaleString('th-TH')})`, { sticky: true }) });
+        return { lyr, sub: 'ลำเชียงไกร (ฟ้า) · มูลตอนบน (ม่วง) · ตรวจกับ D.A กรมชลประทานแล้ว', attr: 'HydroBASINS © WWF (HydroSHEDS)' };
+      }
+    },
+    {
       id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ', on: true,
       async build() {
         return { toggle: (on) => { map.getContainer().classList.toggle('hide-labels', !on); window.SDSS.setTambonVisible(on); },
@@ -298,7 +319,7 @@ document.addEventListener('sdss:ready', () => {
           bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 7 : 5, weight: inArea(s.lat, s.lon) ? 1.5 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
-          fillColor: rainColor(s[key]), fillOpacity: 0.9
+          fillColor: rainColor(s[key]), fillOpacity: rel(s) ? 0.9 : 0.3
         }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)}<br>อ.${esc(s.amphoe)}<br>ฝน 24 ชม. <b>${fmt(s.rain_24h)}</b> มม.<br>
             ฝน 1 ชม. ${fmt(s.rain_1h)} มม.<br><span class="muted">${tTime(s.time)}</span>`)));
         return { lyr, sub: `ThaiWater · ${tw.rain.length} สถานี · ${key === 'rain_24h' ? 'ฝน 24 ชม.' : 'ฝน 1 ชม.'}${tw.via === 'snapshot' ? ' (snapshot)' : ''}`,
@@ -313,7 +334,7 @@ document.addEventListener('sdss:ready', () => {
           bubblingMouseEvents: false,
           radius: inArea(s.lat, s.lon) ? 8 : 6, weight: inArea(s.lat, s.lon) ? 2 : 1,
           color: inArea(s.lat, s.lon) ? '#0F172A' : '#64748B', dashArray: inArea(s.lat, s.lon) ? null : '2 2',
-          fillColor: bankStatus(s, trendWL(h, s)).color, fillOpacity: 0.95
+          fillColor: bankStatus(s, trendWL(h, s)).color, fillOpacity: rel(s) ? 0.95 : 0.3
         }).bindPopup(`<b>${esc(s.name)}</b> ${tag(s)} <span class="mono">${esc(s.code)}</span><br>
             ${(() => { const t = trendWL(h, s), b = bankStatus(s, t), e = bankEta(s, t);
               const gap = s.bank_msl != null && s.level_msl != null ? s.bank_msl - s.level_msl : null;
@@ -351,7 +372,7 @@ document.addEventListener('sdss:ready', () => {
         const [p, h] = await Promise.all([province(), history()]), rows = p.dams || [];
         const lyr = L.layerGroup(rows.map(d => L.circleMarker([d.lat, d.lon], {
           bubblingMouseEvents: false,
-          radius: d.kind === 'large' ? 11 : 7, weight: 2, color: '#FFFFFF', fillColor: damColor(d), fillOpacity: 0.95
+          radius: d.kind === 'large' ? 11 : 7, weight: 2, color: '#FFFFFF', fillColor: damColor(d), fillOpacity: rel(d) ? 0.95 : 0.3
         }).bindPopup(`<b>${esc(d.name)}</b> ${tag(d)}<br>${d.kind === 'large' ? 'เขื่อน/อ่างขนาดใหญ่' : 'อ่างขนาดกลาง'} · อ.${esc(d.amphoe)}<br>
             ปริมาณน้ำ <b>${fmt(d.pct, 1)}%</b> (${fmt(d.storage, 2)} ล้าน ลบ.ม.)<br>
             น้ำไหลเข้า ${fmt(d.inflow, 2)} · ระบาย ${fmt(d.released, 2)} ล้าน ลบ.ม./วัน<br>
@@ -434,7 +455,7 @@ document.addEventListener('sdss:ready', () => {
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'glofas']],
-    ['③ น้ำท่วม', ['gistda']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels']]];
+    ['③ น้ำท่วม', ['gistda']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'basins']]];
   function render() {
     $('layers').innerHTML = GROUPS.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);
@@ -478,11 +499,11 @@ document.addEventListener('sdss:ready', () => {
     const h = await history();
     try {
       const tw = await thaiwater();
-      const rain = tw.rain.filter(s => s.rain_24h != null).sort((a, b) => b.rain_24h - a.rain_24h);
-      const wl = tw.waterlevel.filter(s => s.storage_pct != null).sort((a, b) => b.storage_pct - a.storage_pct);
+      const rain = tw.rain.filter(s => s.rain_24h != null && rel(s)).sort((a, b) => b.rain_24h - a.rain_24h);
+      const wl = tw.waterlevel.filter(s => s.storage_pct != null && rel(s)).sort((a, b) => b.storage_pct - a.storage_pct);
       const heavy = rain.filter(s => s.rain_24h >= 35.1);
       const nIn = (a) => a.filter(s => inArea(s.lat, s.lon)).length;
-      const where = (s) => inArea(s.lat, s.lon) ? '' : ' (ใกล้เคียง)';
+      const where = (s) => inArea(s.lat, s.lon) ? '' : ' (' + tag(s).replace(/<[^>]+>/g, '') + ')';
       setK('k-rmax', rain.length ? fmt(rain[0].rain_24h) + ' มม.' : '—', rain.length ? rain[0].name + where(rain[0]) : 'ไม่มีข้อมูลสถานี');
       setK('k-heavy', `${heavy.length}`, `จาก ${rain.length} สถานี (ในพื้นที่ ${nIn(rain)})`);
       const st = wl.map(s => ({ s, t: trendWL(h, s) })).map(x => Object.assign(x, { b: bankStatus(x.s, x.t), e: bankEta(x.s, x.t) }));
@@ -513,8 +534,10 @@ document.addEventListener('sdss:ready', () => {
       ['k-rmax', 'k-heavy', 'k-wl'].forEach(id => setK(id, '—', 'ไม่มีข้อมูล'));
     }
     try {
-      const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null).sort((a, b) => b.pct - a.pct);
-      const hi = dams.filter(d => d.pct >= 80), over = dams.filter(d => d.pct > 100);
+      const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null && rel(d)).sort((a, b) => b.pct - a.pct);
+      // ลำดับความสำคัญ: ในพื้นที่/ต้นน้ำลำเชียงไกร → ในลุ่มน้ำ → ต้นน้ำมูล (ไกลกว่า ผลต่อพื้นที่อ่อนกว่า)
+      const pr = (d) => inArea(d.lat, d.lon) ? 0 : ({ LCK: 0, STUDY: 1, MUN_UP: 2 }[basinOf(d.lat, d.lon)] ?? 3);
+      const hi = dams.filter(d => d.pct >= 80).sort((a, b) => pr(a) - pr(b) || b.pct - a.pct), over = dams.filter(d => d.pct > 100);
       setK('k-dam', `${hi.length}`, `เกินความจุ ${over.length} · จาก ${dams.length} อ่าง`);
       const rows = hi.slice(0, 6).map(d => `<div class="wrow" data-k="d:${esc(d.name)}" data-l="dams">
           <span><span class="dot" style="background:${damColor(d)}"></span>${esc(d.name)} ${tag(d)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">อ่างเก็บน้ำ · อ.${esc(d.amphoe || '—')}</span></span>
@@ -525,6 +548,16 @@ document.addEventListener('sdss:ready', () => {
         const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 11)); m.openPopup(); }
       });
     } catch (e) { setK('k-dam', '—', e.message); }
+    try {   // ฝนเฉลี่ยลุ่มลำเชียงไกร (แทน KPI ฝนคาดการณ์รายตำบล)
+      const br = await json('data/live/basin_rain.json');
+      const b = br && br.status === 'ok' && br.basins && br.basins.LCK;
+      if (b) {
+        $('k-fcst').previousElementSibling.textContent = 'ฝนเฉลี่ยลุ่มลำเชียงไกร 24 ชม.';
+        $('k-fcst').textContent = fmt(b.past24) + ' มม.';
+        const sub = $('k-fcst').nextElementSibling;
+        if (sub) sub.textContent = `คาดการณ์ 24 ชม. ${fmt(b.next24)} · 72 ชม. ${fmt(b.next72)} มม. · 7 วัน ${fmt(b.past7d, 0)} มม.`;
+      }
+    } catch (e) { /* ยังไม่มีไฟล์ → คง KPI เดิม */ }
     try {
       const g = await json('data/live/gistda_flood_7d.geojson');
       if (g.status === 'ok') setK('k-flood', Number(g.total_rai || 0).toLocaleString('th-TH') + ' ไร่',

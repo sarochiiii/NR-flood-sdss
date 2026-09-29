@@ -30,6 +30,28 @@ def t_from_water(st, cfg):
     return 3 if ratio >= th["crit"] else 2 if ratio >= th["warn"] else 1 if ratio >= th["watch"] else 0
 
 
+def basin_t(cfg, key, smap, ridmap):
+    """ตรรกะเดียวกับ basinT() ใน region.js"""
+    b = (cfg.get("t_rules") or {}).get("basins", {}).get(key)
+    if not b:
+        return None
+    t = None
+    st = smap.get(b.get("river_station"))
+    if st and st.get("storage_pct") is not None:
+        v = 0
+        for lim, tv in sorted(cfg["t_rules"]["bank_to_t"].items(), key=lambda x: -float(x[0])):
+            if st["storage_pct"] >= float(lim):
+                v = tv; break
+        t = max(t or 0, v)
+    for d in b.get("dams", []):
+        r = ridmap.get(d["code"])
+        if not r or r.get("pct") is None:
+            continue
+        v = 2 if d.get("t2") and r["pct"] >= d["t2"] else 1 if r["pct"] >= d["t1"] else 0
+        t = max(t or 0, v)
+    return t
+
+
 def main():
     cfg = load("config.json")
     tambon = [f["properties"] for f in load("data/tambon.geojson")["features"]]
@@ -37,10 +59,16 @@ def main():
     water = load("data/live/water_region.json")
     rmap = {r["tcode"]: r for r in rain.get("tambon", [])}
     smap = {s["code"]: s for s in water.get("stations", [])}
+    try:
+        ridmap = {i["code"]: i for i in load("data/live/rid_reservoir.json").get("items", [])}
+    except Exception:
+        ridmap = {}
+    bt = {k: basin_t(cfg, k, smap, ridmap) for k in (cfg.get("t_rules") or {}).get("basins", {})}
     rows = []
     for p in tambon:
         ts = [t for t in (t_from_rain(rmap.get(p["tcode"]), cfg),
-                          t_from_water(smap.get(p.get("station_code")), cfg)) if t is not None]
+                          t_from_water(smap.get(p.get("station_code")), cfg),
+                          bt.get(p.get("basin"))) if t is not None]
         t = max(ts) if ts else None
         s = p.get("s_class")
         rank = cfg["matrix"][s - 1][t] if (s and t is not None) else None

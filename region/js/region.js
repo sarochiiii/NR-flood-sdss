@@ -22,9 +22,10 @@
     } catch (e) { console.warn('โหลดไม่สำเร็จ:', url, e); return null; }
   }
 
-  const [cfg, tambon, amphoe, hex, rainFile, water] = await Promise.all([
+  const [cfg, tambon, amphoe, hex, rainFile, water, ridRes] = await Promise.all([
     load('config.json'), load('data/tambon.geojson'), load('data/amphoe.geojson'),
-    load('data/hex.geojson'), load('data/live/rain_region.json'), load('data/live/water_region.json')
+    load('data/hex.geojson'), load('data/live/rain_region.json'), load('data/live/water_region.json'),
+    load('data/live/rid_reservoir.json')
   ]);
   if (!cfg || !tambon) {
     $('badge').className = 'badge badge-err'; $('badge').textContent = 'โหลดข้อมูลหลักไม่สำเร็จ';
@@ -83,12 +84,27 @@
   const staMap = new Map((water && water.stations || []).map(s => [s.code, s]));
   const riskRank = (s, t) => (s && t !== null && t !== undefined) ? cfg.matrix[s - 1][t] : null;
 
+  // T รายตำบล = max(ฝนในตำบล, อ่างต้นทางของลุ่ม, สถานีลำน้ำของลุ่ม) · ลุ่มจาก HydroBASINS (tambon.basin)
+  const TR = cfg.t_rules || { basins: {}, bank_to_t: {} };
+  const ridMap = new Map(((ridRes && ridRes.items) || []).map(i => [i.code, i]));
+  const bankT = (pct) => pct == null ? null : Object.entries(TR.bank_to_t).sort((a, b) => b[0] - a[0]).reduce((acc, [lim, t]) => acc ?? (pct >= +lim ? t : null), null) ?? 0;
+  function basinT(key) {
+    const b = TR.basins[key]; if (!b) return { t: null, why: [] };
+    const why = []; let t = null;
+    const st = staMap.get(b.river_station);
+    if (st && st.storage_pct != null) { const v = bankT(st.storage_pct); t = Math.max(t ?? 0, v); why.push([`${b.river_station} ${Math.round(st.storage_pct)}% ตลิ่ง`, v]); }
+    (b.dams || []).forEach(d => { const r = ridMap.get(d.code); if (!r || r.pct == null) return;
+      const v = d.t2 && r.pct >= d.t2 ? 2 : r.pct >= d.t1 ? 1 : 0; t = Math.max(t ?? 0, v); why.push([`${d.name.replace('อ่างเก็บน้ำ', 'อ่าง')} ${Math.round(r.pct)}%`, v]); });
+    return { t, why };
+  }
+  const BT = Object.fromEntries(Object.keys(TR.basins).map(k => [k, basinT(k)]));
   const T = {};   // สถานะรายตำบล
   tambon.features.forEach(f => {
     const p = f.properties, r = rainMap.get(p.tcode), st = staMap.get(p.station_code);
-    const ts = [tFromRain(r), tFromWater(st)].filter(v => v !== null);
+    const tr = tFromRain(r), b = p.basin ? BT[p.basin] : null;
+    const ts = [tr, tFromWater(st), b && b.t].filter(v => v !== null && v !== undefined);
     const t = ts.length ? Math.max(...ts) : null;
-    T[p.tcode] = { p, r, st, t, s: p.s_class, rank: riskRank(p.s_class, t) };
+    T[p.tcode] = { p, r, st, t, tr, b, s: p.s_class, rank: riskRank(p.s_class, t) };
   });
   const hasS = tambon.features.some(f => f.properties.s_class);
 
@@ -217,7 +233,9 @@
     const o = T[code], p = o.p;
     const lvl = o.rank !== null
       ? `<span class="lvl lvl-${o.rank}">ระดับ${cfg.levels[o.rank].label} · ${cfg.levels[o.rank].desc}</span>`
-      : `<span class="lvl lvl-na">${hasS ? 'ข้อมูลไม่พอคำนวณระดับ' : 'แสดงสภาวะกระตุ้น (T)'}</span>`;
+      : o.t !== null ? `<span class="lvl lvl-${o.t}">T: ${cfg.t_states[o.t]}</span>` : `<span class="lvl lvl-na">ไม่มีข้อมูลพอคำนวณ</span>`;
+    const why = [['ฝนในตำบล', o.tr]].concat(o.b ? o.b.why : []).filter(x => x[1] !== null && x[1] !== undefined)
+      .map(([k, v]) => `${k} → ${cfg.t_states[v]}`).join(' · ');
     const st = o.st ? `${fmt(o.st.storage_pct, 0)}% ความจุ (${o.st.code})` : (p.station_code ? 'ไม่มีข้อมูลสถานี' : 'ยังไม่กำหนดสถานีตัวแทน');
     $('query').innerHTML = `
       <div class="q-name">ต.${p.name}</div>
@@ -226,12 +244,13 @@
       <dl class="kv">
         <dt>S (คงที่)</dt><dd>${o.s ? cfg.s_classes[o.s - 1] : '—'}</dd>
         <dt>T (ตอนนี้)</dt><dd>${o.t !== null ? cfg.t_states[o.t] : '—'}</dd>
+        <dt>ลุ่มน้ำ</dt><dd>${p.basin && TR.basins[p.basin] ? TR.basins[p.basin].label : 'นอกลุ่มที่ติดตาม'}</dd>
         ${p.bldg != null ? `<dt>อาคาร (Open Buildings)</dt><dd class="mono">${Number(p.bldg).toLocaleString('th-TH')} หลัง</dd>` : ''}
         <dt>ฝน 24 ชม. ที่ผ่านมา</dt><dd class="mono">${fmt(o.r && o.r.rain_24h_mm)} มม.</dd>
         <dt>คาดการณ์ 24 ชม.</dt><dd class="mono">${fmt(o.r && o.r.rain_next24h_mm)} มม.</dd>
         <dt>ฝนสะสม 7 วัน (แบบจำลอง)</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
-        <dt>ระดับน้ำสถานีตัวแทน</dt><dd class="mono">${st}</dd>
       </dl>
+      <div class="muted" style="font-size:11.5px;margin-top:6px">ที่มาของ T: ${why || '—'}${TR.verified ? '' : ' · เกณฑ์ยังไม่ยืนยันกับหน่วยงาน'}</div>
       ${code === cfg.sandbox.tcode ? `<a class="btn" href="${cfg.sandbox.url}">เปิด ${cfg.sandbox.label} →</a>` : ''}`;
     history.replaceState(null, '', '#t=' + code);
   }
@@ -292,7 +311,10 @@
     $('method').innerHTML = `<table><tr><th>S \\ T</th>${hdr}</tr>${rows}</table>
       <p><b>T จากฝน:</b> ใช้ค่าที่มากกว่าระหว่างฝน 24 ชม. ที่ผ่านมาและคาดการณ์ 24 ชม. ข้างหน้า เทียบ${cfg.rain.tmd_ref}
       ${cfg.rain.wet_7d_mm === null ? 'เงื่อนไขดินอิ่มน้ำจากฝนสะสม 7 วันยังไม่เปิดใช้' : `ฝนสะสม 7 วัน ≥ ${cfg.rain.wet_7d_mm} มม. เพิ่ม T หนึ่งขั้น`}</p>
-      <p><b>T จากระดับน้ำ:</b> ร้อยละความจุลำน้ำ (ThaiWater) หาร 100 ≥ ${cfg.water.ratio.watch} / ${cfg.water.ratio.warn} / ${cfg.water.ratio.crit} (${cfg.water.note})</p>
+      <p><b>T จากลุ่มน้ำ:</b> ตำบลจัดเข้าลุ่มตามขอบเขต HydroBASINS (ลำเชียงไกร 16 ตำบล · แม่น้ำมูล 5 ตำบล) ·
+      สถานีลำน้ำของลุ่ม (ลำเชียงไกร M.188A · มูล M.2A) เทียบตลิ่ง ≥70% → เฝ้าระวัง · ≥90% → เตือน · ≥100% → วิกฤต ·
+      อ่างลำเชียงไกรตอนบน ≥100% → เฝ้าระวัง · ตอนล่าง ≥90% → เฝ้าระวัง, ≥100% → เตือน
+      ${TR.verified ? '' : '(ข้อเสนอ ยังไม่ยืนยันกับชลประทาน)'}</p>
       <p><b>S:</b> ความอ่อนไหวเชิงสัมพัทธ์ภายในพื้นที่ศึกษา จากความถี่น้ำท่วมซ้ำ (GISTDA) ค่า HAND และระยะห่างจากทางน้ำ (MERIT Hydro) ต่อ hexagon H3 res 8</p>
       <p>${cfg.matrix_verified ? '' : 'ค่าในเมทริกซ์เป็นข้อเสนอเบื้องต้น รอการ calibrate กับเหตุการณ์ปี 2564'}</p>`;
   }
