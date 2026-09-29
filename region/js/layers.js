@@ -233,14 +233,23 @@ document.addEventListener('sdss:ready', async () => {
         const d = await json('data/live/gistda_flood_7d.geojson');
         if (d.status === 'not_configured') throw new Error('ยังไม่ตั้ง GISTDA_API_KEY');
         if (d.status === 'error' && !d.features.length) throw new Error('ดึงจาก GISTDA ไม่สำเร็จ');
-        const lyr = L.geoJSON(d, { style: f => ({ color: f.properties.in_area ? '#1D4ED8' : '#64748B', weight: 0.4,
-            fillColor: '#3B82F6', fillOpacity: f.properties.in_area ? 0.6 : 0.35 }),
-          onEachFeature: (f, l) => l.bindPopup(`<b>น้ำท่วมตรวจพบ (GISTDA 7 วัน)</b><br>ต.${esc(f.properties.tb_name)} อ.${esc(f.properties.ap_name)}<br>
+        // เซลล์ H3 ของ GISTDA เล็กมาก (~65 ไร่/เซลล์ ส่วนใหญ่ท่วมไม่กี่ไร่) → ซูมไกลแสดงเป็นวงกลมตามพื้นที่ ซูมใกล้แสดงรูปเซลล์
+        const pop = (f) => `<b>น้ำท่วมตรวจพบ (GISTDA 7 วัน)</b><br>ต.${esc(f.properties.tb_name)} อ.${esc(f.properties.ap_name)}<br>
             ${fmt(f.properties.area_rai, 1)} ไร่ในเซลล์นี้<br>
             ${f.properties.bldg ? `อาคาร ${f.properties.bldg} หลัง · ` : ''}${f.properties.pop ? `ประชากร ~${f.properties.pop} คน · ` : ''}${f.properties.school ? `โรงเรียน ${f.properties.school} · ` : ''}${f.properties.hosp ? `สถานพยาบาล ${f.properties.hosp}` : ''}
-            <br><span class="muted">ภาพ ${esc(imgs(f.properties.img))}</span>`) });
+            <br><span class="muted">ภาพ ${esc(imgs(f.properties.img))}</span>`;
+        const cells = L.geoJSON(d, { style: f => ({ color: f.properties.in_area ? '#0369A1' : '#0891B2', weight: 1,
+            fillColor: '#00E5FF', fillOpacity: f.properties.in_area ? 0.85 : 0.65 }), onEachFeature: (f, l) => l.bindPopup(pop(f)) });
+        const dots = L.layerGroup((d.features || []).map(f => { const c = L.geoJSON(f).getBounds().getCenter();
+          return L.circleMarker(c, { radius: Math.max(3, Math.min(14, 2 + Math.sqrt(f.properties.area_rai || 0))), weight: 1, color: '#0369A1',
+            fillColor: '#00E5FF', fillOpacity: 0.85 }).bindPopup(pop(f)); }));
+        const lyr = L.layerGroup();
+        const sync = () => { const near = map.getZoom() >= 12;
+          if (near) { lyr.removeLayer(dots); lyr.addLayer(cells); } else { lyr.removeLayer(cells); lyr.addLayer(dots); } };
+        lyr.on('add', () => { sync(); map.on('zoomend', sync); });
+        lyr.on('remove', () => map.off('zoomend', sync));
         const nT = Object.keys(d.by_tambon || {}).length;
-        return { lyr, sub: `ในพื้นที่ ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${nT} ตำบล · ภาพล่าสุด ${imgs((d.images || []).slice(-1)[0])}`,
+        return { lyr, sub: `ในพื้นที่ ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${nT} ตำบล · ทั้งจังหวัด ${Number(d.province_rai || 0).toLocaleString('th-TH')} ไร่ · ภาพล่าสุด ${imgs((d.images || []).slice(-1)[0])}`,
           attr: 'น้ำท่วม © GISTDA' };
       }
     },

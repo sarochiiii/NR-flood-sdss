@@ -78,11 +78,10 @@ def main():
                     by_tb[tb] = round(by_tb.get(tb, 0) + a, 1)
                     for k in EXP:
                         exp_in[k] += ex[k]
-                if not (study or inside_bbox(g, bb)):
-                    continue
+                # เก็บทุกเซลล์ในจังหวัด (เดิมเก็บเฉพาะกรอบรอบพื้นที่) เพื่อเห็นสถานการณ์ต้นน้ำ เช่น ลำตะคอง ลำเชียงไกรตอนบน
                 feats.append({"type": "Feature", "properties": {
                     "tb": tb, "tb_name": p.get("tb_tn"), "ap_name": p.get("ap_tn"),
-                    "area_rai": round(a, 2), "img": p.get("file_name"), "in_area": study,
+                    "area_rai": round(a, 2), "img": p.get("file_name"), "in_area": study, "near": inside_bbox(g, bb),
                     "bldg": ex["building"], "pop": ex["population"], "school": ex["school"], "hosp": ex["hospital"]},
                     "geometry": json.loads(json.dumps(g), parse_float=lambda x: round(float(x), 5))})
             offset += LIMIT
