@@ -1,163 +1,163 @@
 {
  "status": "ok",
- "updated_at": "2026-09-29T02:00:20+00:00",
+ "updated_at": "2026-09-29T08:34:52+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
    "tcode": "300901",
    "rain_24h_mm": 1.2,
-   "rain_7d_mm": 161.5,
-   "rain_next24h_mm": 4.4
+   "rain_7d_mm": 162.4,
+   "rain_next24h_mm": 0.9
   },
   {
    "tcode": "300902",
    "rain_24h_mm": 1.0,
-   "rain_7d_mm": 154.9,
-   "rain_next24h_mm": 1.2
+   "rain_7d_mm": 155.5,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "300903",
-   "rain_24h_mm": 1.1,
-   "rain_7d_mm": 163.7,
-   "rain_next24h_mm": 2.6
+   "rain_24h_mm": 0.7,
+   "rain_7d_mm": 164.1,
+   "rain_next24h_mm": 0.7
   },
   {
    "tcode": "300904",
-   "rain_24h_mm": 1.1,
-   "rain_7d_mm": 163.7,
-   "rain_next24h_mm": 2.6
+   "rain_24h_mm": 0.7,
+   "rain_7d_mm": 164.1,
+   "rain_next24h_mm": 0.7
   },
   {
    "tcode": "300905",
-   "rain_24h_mm": 2.0,
-   "rain_7d_mm": 176.7,
-   "rain_next24h_mm": 3.8
+   "rain_24h_mm": 1.4,
+   "rain_7d_mm": 177.0,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "300906",
-   "rain_24h_mm": 2.0,
-   "rain_7d_mm": 176.7,
-   "rain_next24h_mm": 3.8
+   "rain_24h_mm": 1.4,
+   "rain_7d_mm": 177.0,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "300907",
-   "rain_24h_mm": 1.5,
-   "rain_7d_mm": 168.3,
-   "rain_next24h_mm": 4.5
+   "rain_24h_mm": 0.8,
+   "rain_7d_mm": 168.5,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "300908",
    "rain_24h_mm": 1.2,
-   "rain_7d_mm": 161.5,
-   "rain_next24h_mm": 4.4
+   "rain_7d_mm": 162.4,
+   "rain_next24h_mm": 0.9
   },
   {
    "tcode": "300909",
-   "rain_24h_mm": 0.8,
-   "rain_7d_mm": 132.4,
-   "rain_next24h_mm": 3.4
+   "rain_24h_mm": 1.5,
+   "rain_7d_mm": 133.7,
+   "rain_next24h_mm": 0.7
   },
   {
    "tcode": "300914",
-   "rain_24h_mm": 1.1,
-   "rain_7d_mm": 133.9,
-   "rain_next24h_mm": 5.0
+   "rain_24h_mm": 1.2,
+   "rain_7d_mm": 134.7,
+   "rain_next24h_mm": 0.7
   },
   {
    "tcode": "301001",
-   "rain_24h_mm": 1.2,
-   "rain_7d_mm": 141.4,
-   "rain_next24h_mm": 1.6
+   "rain_24h_mm": 0.6,
+   "rain_7d_mm": 141.8,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301002",
-   "rain_24h_mm": 0.9,
-   "rain_7d_mm": 146.4,
-   "rain_next24h_mm": 2.2
+   "rain_24h_mm": 1.0,
+   "rain_7d_mm": 146.9,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "301003",
-   "rain_24h_mm": 1.5,
-   "rain_7d_mm": 133.4,
-   "rain_next24h_mm": 1.3
+   "rain_24h_mm": 0.6,
+   "rain_7d_mm": 133.8,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301004",
-   "rain_24h_mm": 1.2,
-   "rain_7d_mm": 141.4,
-   "rain_next24h_mm": 1.6
+   "rain_24h_mm": 0.6,
+   "rain_7d_mm": 141.8,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301005",
-   "rain_24h_mm": 1.4,
-   "rain_7d_mm": 135.7,
-   "rain_next24h_mm": 1.1
+   "rain_24h_mm": 0.4,
+   "rain_7d_mm": 136.0,
+   "rain_next24h_mm": 0.4
   },
   {
    "tcode": "301006",
-   "rain_24h_mm": 2.5,
+   "rain_24h_mm": 0.3,
    "rain_7d_mm": 139.4,
-   "rain_next24h_mm": 2.8
+   "rain_next24h_mm": 0.4
   },
   {
    "tcode": "301007",
-   "rain_24h_mm": 1.6,
-   "rain_7d_mm": 146.4,
-   "rain_next24h_mm": 1.6
+   "rain_24h_mm": 0.5,
+   "rain_7d_mm": 146.7,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "301008",
-   "rain_24h_mm": 1.8,
-   "rain_7d_mm": 143.8,
-   "rain_next24h_mm": 3.2
+   "rain_24h_mm": 0.7,
+   "rain_7d_mm": 144.3,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301009",
-   "rain_24h_mm": 1.8,
-   "rain_7d_mm": 143.8,
-   "rain_next24h_mm": 3.2
+   "rain_24h_mm": 0.7,
+   "rain_7d_mm": 144.3,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301010",
    "rain_24h_mm": 1.0,
-   "rain_7d_mm": 154.9,
-   "rain_next24h_mm": 1.2
+   "rain_7d_mm": 155.5,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301011",
-   "rain_24h_mm": 1.2,
-   "rain_7d_mm": 136.5,
-   "rain_next24h_mm": 2.5
+   "rain_24h_mm": 1.0,
+   "rain_7d_mm": 137.2,
+   "rain_next24h_mm": 0.9
   },
   {
    "tcode": "301012",
-   "rain_24h_mm": 0.9,
-   "rain_7d_mm": 146.4,
-   "rain_next24h_mm": 2.2
+   "rain_24h_mm": 1.0,
+   "rain_7d_mm": 146.9,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "301013",
-   "rain_24h_mm": 1.0,
-   "rain_7d_mm": 146.9,
-   "rain_next24h_mm": 2.3
+   "rain_24h_mm": 0.9,
+   "rain_7d_mm": 147.4,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "301014",
-   "rain_24h_mm": 1.0,
-   "rain_7d_mm": 146.9,
-   "rain_next24h_mm": 2.3
+   "rain_24h_mm": 0.9,
+   "rain_7d_mm": 147.4,
+   "rain_next24h_mm": 0.6
   },
   {
    "tcode": "301015",
-   "rain_24h_mm": 1.5,
-   "rain_7d_mm": 133.4,
-   "rain_next24h_mm": 1.3
+   "rain_24h_mm": 0.6,
+   "rain_7d_mm": 133.8,
+   "rain_next24h_mm": 0.5
   },
   {
    "tcode": "301016",
-   "rain_24h_mm": 1.5,
-   "rain_7d_mm": 133.4,
-   "rain_next24h_mm": 1.3
+   "rain_24h_mm": 0.6,
+   "rain_7d_mm": 133.8,
+   "rain_next24h_mm": 0.5
   }
  ]
 }
