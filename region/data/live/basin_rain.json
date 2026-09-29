@@ -1,0 +1,1 @@
+{"status":"ok","updated_at":"2026-09-29T01:58:09+00:00","source":"Open-Meteo (แบบจำลอง) · ถ่วงน้ำหนักพื้นที่ลุ่มย่อย HydroBASINS L12","basins":{"LCK":{"past24":1.9,"past72":20.3,"past7d":163.8,"next24":2.1,"next72":8.2,"n_points":21,"area_km2":3136},"MUN_UP":{"past24":3.4,"past72":29.6,"past7d":134.6,"next24":1.1,"next72":8.2,"n_points":35,"area_km2":4820}}}
