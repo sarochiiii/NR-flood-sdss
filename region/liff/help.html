@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ขอความช่วยเหลือ · เฝ้าระวังน้ำ โนนไทย–โนนสูง</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><link rel="stylesheet" href="liff.css"></head>
+<body>
+<header style="background:#7F1D1D"><b>🆘 ขอความช่วยเหลือ</b><div style="color:#FECACA">ส่งถึง ADM ของตำบลและเจ้าหน้าที่ · ไม่เผยแพร่สาธารณะ</div></header>
+<main>
+  <div class="card" style="border-color:#FCA5A5"><b>หากมีอันตรายต่อชีวิต โทรทันที</b> — ระบบนี้ไม่ใช่ศูนย์สั่งการ และอาจไม่มีผู้ตอบในทันที
+    <div class="sos"><a href="tel:1669">1669<small>เจ็บป่วยฉุกเฉิน</small></a><a href="tel:1784">1784<small>สายด่วน ปภ.</small></a><a href="tel:191">191<small>เหตุด่วนเหตุร้าย</small></a></div></div>
+
+  <label class="h">ตำแหน่งที่ต้องการความช่วยเหลือ</label>
+  <div id="map"></div>
+  <button class="btn sec" id="gps" type="button">ใช้ตำแหน่งปัจจุบันของฉัน</button>
+  <div class="muted" id="pos" style="margin-top:6px">ยังไม่ได้เลือกตำแหน่ง (แตะแผนที่ได้)</div>
+
+  <label class="h">ต้องการความช่วยเหลือด้านใด</label><div class="chips" id="kind"></div>
+  <label class="h" for="people">จำนวนคน</label><input type="number" id="people" min="1" max="999" inputmode="numeric" placeholder="เช่น 3">
+  <label class="chk"><input type="checkbox" id="vul"><span>มีผู้ป่วย ผู้ติดเตียง ผู้สูงอายุ ผู้พิการ เด็กเล็ก หรือหญิงตั้งครรภ์</span></label>
+  <label class="h" for="phone">เบอร์ติดต่อกลับ</label><input type="tel" id="phone" inputmode="tel" placeholder="08x-xxx-xxxx">
+  <label class="h" for="note">รายละเอียด <span class="muted">(ไม่บังคับ)</span></label><textarea id="note" rows="3" maxlength="500" placeholder="เช่น น้ำขึ้นถึงชั้นล่าง ออกจากบ้านไม่ได้"></textarea>
+
+  <label class="chk"><input type="checkbox" id="consent"><span>ยินยอมให้ส่งตำแหน่งและเบอร์โทรนี้ถึง ADM ของตำบลและเจ้าหน้าที่ เพื่อติดต่อช่วยเหลือเท่านั้น (ลบเบอร์โทร 90 วันหลังปิดเรื่อง)</span></label>
+  <button class="btn" id="send" style="background:#B91C1C">ส่งคำขอความช่วยเหลือ</button>
+  <div class="msg" id="msg"></div>
+  <div id="mine"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script><script src="common.js"></script>
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id), X = window.LIFFX;
+  const say = (t, c) => { $('msg').className = 'msg ' + (c || ''); $('msg').innerHTML = t; };
+  const map = L.map('map').setView([15.12, 102.2], 10);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri' }).addTo(map);
+  let pin = null, pos = null;
+  const setPos = (ll) => { pos = ll; if (pin) pin.setLatLng(ll); else pin = L.marker(ll).addTo(map); $('pos').textContent = `${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`; };
+  map.on('click', e => setPos(e.latlng));
+  $('gps').onclick = () => navigator.geolocation && navigator.geolocation.getCurrentPosition(p => { const ll = L.latLng(p.coords.latitude, p.coords.longitude); setPos(ll); map.setView(ll, 16); },
+    () => say('เปิดตำแหน่งไม่ได้ — แตะแผนที่แทน', 'err'), { enableHighAccuracy: true, timeout: 10000 });
+  $('kind').innerHTML = Object.entries(X.KIND).map(([k, v]) => `<button type="button" class="chip" data-k="${k}">${v}</button>`).join('');
+  $('kind').querySelectorAll('.chip').forEach(b => b.onclick = () => b.classList.toggle('on'));
+  const ST = { new: 'รับเรื่องแล้ว', in_progress: 'กำลังช่วยเหลือ', done: 'เสร็จสิ้น' };
+  const mine = async () => { try { const r = await X.post('/api/help/mine');
+    $('mine').innerHTML = r.items.length ? '<label class="h">คำขอของฉัน</label>' + r.items.map(i => `<div class="card"><b>${X.esc(i.ref)}</b> · ${ST[i.status] || i.status}<br><span class="muted">${new Date(i.created_at).toLocaleString('th-TH')}</span></div>`).join('') : ''; } catch (e) {} };
+  try { if (!await X.init()) return; } catch (e) { say('กรุณาเปิดหน้านี้จากเมนูในแอป LINE', 'err'); return; }
+  mine();
+  $('send').onclick = async () => {
+    const kind = [...$('kind').querySelectorAll('.chip.on')].map(b => b.dataset.k);
+    if (!pos) return say('เลือกตำแหน่งก่อน', 'err');
+    if (!kind.length) return say('เลือกประเภทความช่วยเหลือ', 'err');
+    if ($('phone').value.replace(/\D/g, '').length < 9) return say('ใส่เบอร์ติดต่อกลับ', 'err');
+    if (!$('consent').checked) return say('กรุณายินยอมให้ส่งข้อมูลถึงผู้ช่วยเหลือ', 'err');
+    $('send').disabled = true; say('กำลังส่ง…');
+    try {
+      const r = await X.post('/api/help', { lat: pos.lat, lon: pos.lng, kind, people: $('people').value, vulnerable: $('vul').checked, phone: $('phone').value, note: $('note').value, consent: true });
+      say(`ส่งแล้ว · รหัส <b>${X.esc(r.ref)}</b> · ต.${X.esc(r.tambon)}<br>${r.notified ? `แจ้ง ADM/เจ้าหน้าที่แล้ว ${r.notified} คน` : 'ยังไม่มี ADM ของตำบลในระบบ — <b>โปรดโทร 1784</b>'}<br>หากอาการหรือสถานการณ์แย่ลง โทร 1669 / 1784 ทันที`, 'ok');
+      mine();
+    } catch (e) { say(X.esc(e.message), 'err'); $('send').disabled = false; }
+  };
+})();
+</script></body></html>

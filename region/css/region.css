@@ -137,3 +137,16 @@ body{font-family:var(--font);color:var(--text);background:var(--white);font-size
 
 .lgrp{font-size:11.5px;font-weight:600;color:var(--teal);margin:10px 0 2px;letter-spacing:.2px}
 .lgrp:first-child{margin-top:0}
+
+/* ปุ่มรายงาน/ขอความช่วยเหลือ */
+.act2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.act{display:block;border-radius:10px;padding:10px 12px;font-weight:600;font-size:14.5px;text-decoration:none;line-height:1.35}
+.act small{display:block;font-weight:400;font-size:11.5px;opacity:.9}
+.act-rep{background:#0E7C7B;color:#fff}.act-help{background:#B91C1C;color:#fff}
+.act.off{background:#E2E8F0;color:#64748B;pointer-events:none}
+/* รายการจับตา: แสดง 5 รายการแรก */
+#now.collapsed .wrow:nth-child(n+6){display:none}
+.more{font:inherit;font-size:13px;border:0;background:none;color:var(--teal);cursor:pointer;padding:6px 0}
+/* หมุดรายงานจากประชาชน */
+.rp-pin{font-size:18px;line-height:1;filter:drop-shadow(0 0 2px #000)}
+.rp-pin.unv{opacity:.75}

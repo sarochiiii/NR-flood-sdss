@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ลงทะเบียนตำบล · เฝ้าระวังน้ำ โนนไทย–โนนสูง</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+  :root{--navy:#0A1628;--teal:#0E7C7B;--border:#E2E8F0;--muted:#64748B;--red:#B91C1C}
+  *{box-sizing:border-box} body{margin:0;font-family:'IBM Plex Sans Thai',system-ui,sans-serif;color:#0F172A;background:#F8FAFC;font-size:16px;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+  header{background:var(--navy);color:#fff;padding:14px 16px} header b{font-size:17px} header div{font-size:13px;color:#5EEAD4}
+  main{padding:16px;max-width:520px;margin:0 auto}
+  label{display:block;font-weight:500;margin:14px 0 6px}
+  select,input[type=text]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}
+  .box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.65;margin-top:14px}
+  .chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:15px} .chk input{width:22px;height:22px;margin-top:2px}
+  button{width:100%;font:inherit;font-weight:600;padding:13px;border-radius:10px;border:0;margin-top:16px;cursor:pointer}
+  .pri{background:var(--teal);color:#fff} .sec{background:#fff;color:var(--red);border:1px solid var(--border)}
+  .msg{margin-top:12px;font-size:14px} .err{color:var(--red)} .ok{color:var(--teal)} .muted{color:var(--muted);font-size:13px}
+  details summary{cursor:pointer;color:var(--teal);font-size:14px;margin-top:14px}
+</style>
+</head>
+<body>
+<header><b>ลงทะเบียนตำบล</b><div>เฝ้าระวังน้ำ อ.โนนไทย–โนนสูง · โครงการวิจัย มรภ.นครราชสีมา</div></header>
+<main>
+  <div id="current" class="muted">กำลังตรวจสอบข้อมูล…</div>
+
+  <label for="amphoe">อำเภอ</label>
+  <select id="amphoe"><option value="">เลือกอำเภอ</option></select>
+  <label for="tambon">ตำบลที่ท่านต้องการติดตาม</label>
+  <select id="tambon" disabled><option value="">เลือกตำบล</option></select>
+
+  <details>
+    <summary>ADM หรือเจ้าหน้าที่ อบต. (มีรหัสเชิญ)</summary>
+    <label for="invite">รหัสเชิญจากทีมวิจัย</label>
+    <input id="invite" type="text" autocomplete="off" placeholder="CHANAT-7K2Q">
+    <div class="muted" style="margin-top:6px">ADM จะได้รับสรุปสถานการณ์ประจำวัน 07:00 น. และเมนูรายงานสถานการณ์</div>
+  </details>
+
+  <div class="box">
+    <b>การเก็บและใช้ข้อมูลส่วนบุคคล</b><br>
+    ระบบจะเก็บ <b>รหัสผู้ใช้ LINE</b> <b>ตำบลที่เลือก</b> และ <b>บทบาท</b> (ประชาชน/ADM) เพื่อส่งข้อมูลสถานการณ์น้ำของตำบลนั้นให้ท่านเท่านั้น
+    ไม่เก็บชื่อ เบอร์โทร หรือตำแหน่งบ้าน ไม่เผยแพร่ และไม่ส่งต่อให้บุคคลอื่น
+    ข้อมูลจะถูกลบเมื่อท่านกด "ลบข้อมูลของฉัน" หรือเลิกติดตามบัญชีนี้<br>
+    <span class="muted">ผู้ควบคุมข้อมูล: โครงการวิจัยย่อยที่ 2 มหาวิทยาลัยราชภัฏนครราชสีมา</span>
+  </div>
+  <label class="chk"><input type="checkbox" id="consent"><span>ข้าพเจ้ายินยอมให้เก็บและใช้ข้อมูลตามที่ระบุข้างต้น</span></label>
+
+  <button class="pri" id="save">บันทึก</button>
+  <div id="msg" class="msg"></div>
+  <button class="sec" id="del" hidden>ลบข้อมูลของฉัน</button>
+  <p class="muted" style="margin-top:18px">ข้อมูลเพื่อเฝ้าระวัง ไม่ใช่ประกาศเตือนภัยทางการ ติดตามประกาศจาก ปภ. อำเภอ และ อบต.</p>
+</main>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script>
+// ค่า LIFF_ID และ URL ของ Worker อยู่ใน config.js (ใช้ร่วมทุกหน้า)
+const LIFF_ID = window.LINE_CFG.LIFF_ID, API = window.LINE_CFG.API;
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const say = (t, cls) => { $('msg').className = 'msg ' + (cls || ''); $('msg').textContent = t; };
+  let T = [];
+  try { T = (await (await fetch('../data/tambon.geojson')).json()).features.map(f => f.properties); } catch (e) { say('โหลดรายชื่อตำบลไม่สำเร็จ', 'err'); }
+  const am = [...new Map(T.map(t => [t.acode, t.amphoe])).entries()];
+  am.forEach(([c, n]) => $('amphoe').add(new Option('อ.' + n, c)));
+  $('amphoe').onchange = () => {
+    const s = $('tambon'); s.length = 1; s.disabled = !$('amphoe').value;
+    T.filter(t => t.acode === $('amphoe').value).sort((a, b) => a.name.localeCompare(b.name, 'th')).forEach(t => s.add(new Option('ต.' + t.name, t.tcode)));
+  };
+  const post = async (p, b) => {
+    const r = await fetch(API + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ idToken: liff.getIDToken() }, b)) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'เกิดข้อผิดพลาด'); return j;
+  };
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+  } catch (e) { $('current').textContent = 'กรุณาเปิดหน้านี้จากเมนูในแอป LINE'; return; }
+  try {
+    const me = await post('/api/me', {});
+    if (me.user) {
+      const t = T.find(x => x.tcode === me.user.tcode);
+      $('current').innerHTML = `ลงทะเบียนแล้ว: <b>ต.${t ? t.name : me.user.tcode}</b> · ${me.user.role === 'public' ? 'ประชาชน' : me.user.role === 'adm' ? 'ADM' : 'เจ้าหน้าที่'}`;
+      if (t) { $('amphoe').value = t.acode; $('amphoe').onchange(); $('tambon').value = t.tcode; }
+      $('del').hidden = false;
+    } else $('current').textContent = 'ยังไม่ได้ลงทะเบียน';
+  } catch (e) { $('current').textContent = e.message; }
+
+  $('save').onclick = async () => {
+    if (!$('tambon').value) return say('เลือกตำบลก่อน', 'err');
+    if (!$('consent').checked) return say('ต้องยินยอมก่อนบันทึก', 'err');
+    $('save').disabled = true; say('กำลังบันทึก…');
+    try {
+      const r = await post('/api/register', { tcode: $('tambon').value, consent: true, invite: $('invite').value.trim() || undefined });
+      say(`บันทึกแล้ว ต.${(T.find(x => x.tcode === r.tcode) || {}).name || r.tcode} · ${r.role === 'public' ? 'ประชาชน' : r.role === 'adm' ? 'ADM' : 'เจ้าหน้าที่'}`, 'ok');
+      setTimeout(() => liff.isInClient() && liff.closeWindow(), 1500);
+    } catch (e) { say(e.message, 'err'); }
+    $('save').disabled = false;
+  };
+  $('del').onclick = async () => {
+    if (!confirm('ลบข้อมูลการลงทะเบียนทั้งหมดของท่าน?')) return;
+    try { await post('/api/unregister', {}); say('ลบข้อมูลแล้ว', 'ok'); $('del').hidden = true; $('current').textContent = 'ยังไม่ได้ลงทะเบียน'; }
+    catch (e) { say(e.message, 'err'); }
+  };
+})();
+</script>
+</body>
+</html>

@@ -257,6 +257,7 @@
 
   /* ---------- รายการจับตาและ KPI ---------- */
   function renderWatch() {
+    if (!$('watch')) return;   // ถอดส่วน "ตำบลเรียงตามฝน" ออกจากแผงขวาแล้ว (29 ก.ย. 69)
     const key = o => [o.rank ?? -1, o.t ?? -1, o.r ? Math.max(o.r.rain_24h_mm, o.r.rain_next24h_mm) : -1];
     const list = Object.values(T).sort((a, b) => {
       const ka = key(a), kb = key(b);

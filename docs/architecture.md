@@ -76,7 +76,7 @@ Settings → Actions → General → Workflow permissions = **Read and write**
 |---|---|
 | โค้ด Worker `line-hub` | `line/worker.js` (คัดลอกไปวางใน Cloudflare → Edit code) |
 | ฐานข้อมูลผู้ใช้ | Cloudflare D1 `line-hub-db` ตาม `line/schema.sql` — **ข้อมูลส่วนบุคคล ห้ามนำขึ้น repo** |
-| หน้าลงทะเบียน LIFF | `region/liff/register.html` (ต้องใส่ LIFF_ID และ URL Worker) |
+| หน้า LIFF | `region/liff/` register · report · help · staff · ค่าร่วมใน `config.js` (LIFF_ID, URL Worker) · LIFF endpoint = โฟลเดอร์ |
 | ภาพ rich menu | `line/richmenu_2500x1686.png` (6 ช่อง ตั้งค่าใน OA Manager) |
 | คู่มือตั้งค่า | `line/SETUP.md` |
 Worker อ่านข้อมูลสถานการณ์จากเว็บสาธารณะ (config.json, tambon, rain, thaiwater, tw_province, gistda) · cron 00:00 UTC ส่งสรุป D1 ให้ role adm/staff

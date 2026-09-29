@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รายงานสถานการณ์ · เฝ้าระวังน้ำ โนนไทย–โนนสูง</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><link rel="stylesheet" href="liff.css"></head>
+<body>
+<header><b>📍 รายงานสถานการณ์</b><div>ขึ้นแผนที่ทันทีพร้อมป้าย "ยังไม่ได้ตรวจสอบ" จนกว่า ADM/เจ้าหน้าที่จะยืนยัน</div></header>
+<main>
+  <label class="h">ตำแหน่ง <span class="muted">(แตะแผนที่ หรือใช้ตำแหน่งปัจจุบัน)</span></label>
+  <div id="map"></div>
+  <button class="btn sec" id="gps" type="button">ใช้ตำแหน่งปัจจุบันของฉัน</button>
+  <div class="muted" id="pos" style="margin-top:6px">ยังไม่ได้เลือกตำแหน่ง</div>
+
+  <label class="h">หมวด <span class="muted">(เลือกได้หลายหมวด)</span></label>
+  <div class="chips" id="cats"></div>
+  <div id="depthBox" hidden><label class="h">ระดับน้ำโดยประมาณ</label><div class="chips" id="depth"></div></div>
+
+  <label class="h" for="note">รายละเอียด <span class="muted">(ไม่บังคับ)</span></label>
+  <textarea id="note" rows="3" maxlength="500" placeholder="เช่น น้ำสูงแค่ไหน ถนนสายไหนผ่านไม่ได้"></textarea>
+
+  <label class="chk"><input type="checkbox" id="consent"><span>รายงานนี้จะแสดงบนแผนที่สาธารณะ 30 วัน <b>โดยไม่แสดงชื่อผู้รายงาน</b> — ไม่ใส่ชื่อ เบอร์โทร หรือข้อมูลส่วนบุคคลของผู้อื่นในรายละเอียด</span></label>
+  <button class="btn" id="send">ส่งรายงาน</button>
+  <div class="msg" id="msg"></div>
+  <p class="muted">หากมีผู้ติดค้างหรือต้องการความช่วยเหลือ ใช้เมนู <b>ขอความช่วยเหลือ</b> แทน · ระบบนี้ไม่ใช่การแจ้งเหตุฉุกเฉิน</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script><script src="common.js"></script>
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id), X = window.LIFFX;
+  const say = (t, c) => { $('msg').className = 'msg ' + (c || ''); $('msg').textContent = t; };
+  const map = L.map('map').setView([15.12, 102.2], 10);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri' }).addTo(map);
+  fetch('../data/amphoe.geojson').then(r => r.json()).then(g => L.geoJSON(g, { interactive: false, style: { color: '#FDE68A', weight: 2, fill: false } }).addTo(map)).catch(() => {});
+  let pin = null, pos = null;
+  const setPos = (ll) => { pos = ll; if (pin) pin.setLatLng(ll); else pin = L.marker(ll).addTo(map); $('pos').textContent = `${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`; };
+  map.on('click', e => setPos(e.latlng));
+  $('gps').onclick = () => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => { const ll = L.latLng(p.coords.latitude, p.coords.longitude); setPos(ll); map.setView(ll, 16); },
+    () => say('เปิดตำแหน่งไม่ได้ — แตะแผนที่แทน', 'err'), { enableHighAccuracy: true, timeout: 10000 }) : say('อุปกรณ์ไม่รองรับตำแหน่ง', 'err');
+  const chips = (el, dict, multi, onChange) => { el.innerHTML = Object.entries(dict).map(([k, v]) => `<button type="button" class="chip" data-k="${k}">${v}</button>`).join('');
+    el.querySelectorAll('.chip').forEach(b => b.onclick = () => { if (!multi) el.querySelectorAll('.chip').forEach(x => x !== b && x.classList.remove('on')); b.classList.toggle('on'); onChange && onChange(); }); };
+  const sel = (el) => [...el.querySelectorAll('.chip.on')].map(b => b.dataset.k);
+  chips($('cats'), X.CATS, true, () => { $('depthBox').hidden = !sel($('cats')).includes('flood'); });
+  chips($('depth'), X.DEPTH, false);
+  try { if (!await X.init()) return; } catch (e) { say('กรุณาเปิดหน้านี้จากเมนูในแอป LINE', 'err'); return; }
+  $('send').onclick = async () => {
+    if (!pos) return say('เลือกตำแหน่งก่อน', 'err');
+    if (!sel($('cats')).length) return say('เลือกหมวดอย่างน้อย 1 หมวด', 'err');
+    if (!$('consent').checked) return say('กรุณายอมรับเงื่อนไขการเผยแพร่', 'err');
+    $('send').disabled = true; say('กำลังส่ง…');
+    try {
+      const r = await X.post('/api/report', { lat: pos.lat, lon: pos.lng, cats: sel($('cats')), depth: sel($('depth'))[0], note: $('note').value, consent: true });
+      say(`ส่งแล้ว · ต.${r.tambon} · ขอบคุณที่ช่วยรายงาน`, 'ok');
+      setTimeout(() => liff.isInClient() && liff.closeWindow(), 1800);
+    } catch (e) { say(e.message, 'err'); $('send').disabled = false; }
+  };
+})();
+</script></body></html>

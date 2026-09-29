@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/region.css?v=24">
+<link rel="stylesheet" href="css/region.css?v=25">
 </head>
 <body>
 <header class="hdr">
@@ -54,14 +54,16 @@
     <section class="card" id="query">
       <div class="muted">แตะตำบลบนแผนที่เพื่อดูรายละเอียด</div>
     </section>
+    <div class="act2" id="act2">
+      <a class="act act-rep" id="btn-report" href="#">📍 รายงานสถานการณ์<small>ปักหมุดน้ำท่วม ถนนขาด ไฟดับ</small></a>
+      <a class="act act-help" id="btn-help" href="#">🆘 ขอความช่วยเหลือ<small>ส่งถึง ADM ของตำบล</small></a>
+    </div>
+    <div class="muted" id="act-note" style="font-size:12px;margin:-4px 0 8px">ใช้ผ่านแอป LINE · ต้องลงทะเบียนตำบลกับ LINE OA ก่อน · อันตรายต่อชีวิตโทร 1669 / 1784</div>
     <a class="btn" href="lamchiangkrai.html" style="margin-top:0">เฝ้าระวังลำเชียงไกร · ต้นน้ำ → แม่น้ำมูล →</a>
     <section>
       <h2 class="rail-h">สถานีที่ควรจับตา <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
-      <div id="now"></div>
-    </section>
-    <section>
-      <h2 class="rail-h">ตำบลเรียงตามฝน (แบบจำลอง)</h2>
-      <div id="watch"></div>
+      <div id="now" class="collapsed"></div>
+      <button class="more" id="now-more" type="button">ดูทั้งหมด ▾</button>
     </section>
     <section>
       <h2 class="rail-h">สถานะข้อมูล</h2>
@@ -84,7 +86,8 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="js/layers.js?v=24"></script>
-<script src="js/region.js?v=24"></script>
+<script src="liff/config.js?v=25"></script>
+<script src="js/layers.js?v=25"></script>
+<script src="js/region.js?v=25"></script>
 </body>
 </html>

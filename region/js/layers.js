@@ -254,6 +254,23 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
+      id: 'reports', icon: 'ti-map-pin-exclamation', label: 'รายงานจากประชาชน (30 วัน)', on: false,
+      async build() {
+        if (!lineReady) throw new Error('เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ');
+        const [rp, hs] = await Promise.all([json(LC.API + '/api/reports'), json(LC.API + '/api/help/summary').catch(() => null)]);
+        const ICON = { flood: '🌊', road: '🚧', power: '⚡', landslide: '⛰️', tree: '🌳', building: '🏚️', other: '❗' };
+        const CAT = { flood: 'น้ำท่วม', road: 'ถนนผ่านไม่ได้', power: 'ไฟดับ', landslide: 'ดินสไลด์', tree: 'ต้นไม้ล้ม', building: 'อาคารเสียหาย', other: 'อื่น ๆ' };
+        const DEP = { ankle: 'ตาตุ่ม', knee: 'เข่า', waist: 'เอว', chest: 'อก', over: 'ท่วมมิดหัว' };
+        const lyr = L.layerGroup((rp.items || []).map(r => L.marker([r.lat, r.lon], {
+            icon: L.divIcon({ className: '', html: `<span class="rp-pin ${r.status === 'verified' ? '' : 'unv'}">${ICON[r.cats[0]] || '❗'}</span>`, iconSize: [20, 20], iconAnchor: [10, 10] }) })
+          .bindPopup(`<b>${r.cats.map(c => CAT[c] || c).join(' · ')}</b>${r.depth ? ` · ระดับน้ำ${DEP[r.depth]}` : ''}<br>
+            <span class="bk" style="background:${r.status === 'verified' ? '#1E8449' : '#94A3B8'}">${r.status === 'verified' ? 'ตรวจสอบแล้ว' : 'ยังไม่ได้ตรวจสอบ'}</span>
+            ${r.note ? `<div class="trend">${esc(r.note)}</div>` : ''}<div class="muted" style="font-size:11px">${new Date(r.created_at).toLocaleString('th-TH')} · รายงานโดยผู้ลงทะเบียน LINE OA</div>`)));
+        const open = hs ? Object.values(hs.by_tambon || {}).reduce((a, b) => a + b, 0) : 0, nT = hs ? Object.keys(hs.by_tambon || {}).length : 0;
+        return { lyr, sub: `${(rp.items || []).length} รายงาน${open ? ` · คำขอความช่วยเหลือที่ยังเปิด ${open} เรื่อง (${nT} ตำบล)` : ''}`, attr: 'รายงานจากประชาชน (ยังไม่ได้ตรวจสอบทั้งหมด)' };
+      }
+    },
+    {
       id: 'basins', icon: 'ti-topology-star-3', label: 'ขอบเขตลุ่มน้ำ (HydroBASINS)', on: true,
       async build() {
         if (!BAS) throw new Error('ยังไม่มีไฟล์ขอบเขตลุ่มน้ำ');
@@ -467,7 +484,7 @@ document.addEventListener('sdss:ready', async () => {
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'glofas']],
-    ['③ น้ำท่วม', ['gistda']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'basins']]];
+    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'basins']]];
   function render() {
     $('layers').innerHTML = GROUPS.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);
@@ -657,6 +674,14 @@ document.addEventListener('sdss:ready', async () => {
   const lp = (hide) => { $('body').classList.toggle('lp-hidden', hide); setTimeout(() => map.invalidateSize(), 60); };
   if ($('lp-hide')) $('lp-hide').onclick = () => lp(true);
   if ($('lp-show')) $('lp-show').onclick = () => lp(false);
+
+  // ปุ่มรายงาน/ขอความช่วยเหลือ → หน้า LIFF (ใช้ได้เมื่อตั้งค่า LINE OA แล้วใน liff/config.js)
+  const LC = window.LINE_CFG || {}, lineReady = LC.LIFF_ID && !/YOUR_/.test(LC.LIFF_ID) && LC.API && !/YOUR-/.test(LC.API);
+  [['btn-report', 'report.html'], ['btn-help', 'help.html']].forEach(([id, page]) => { const a = $(id); if (!a) return;
+    if (lineReady) { a.href = `https://liff.line.me/${LC.LIFF_ID}/${page}`; a.target = '_blank'; a.rel = 'noopener'; }
+    else { a.classList.add('off'); a.removeAttribute('href'); } });
+  if (!lineReady && $('act-note')) $('act-note').textContent = 'เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ · อันตรายต่อชีวิตโทร 1669 / 1784';
+  if ($('now-more')) $('now-more').onclick = () => { const c = $('now').classList.toggle('collapsed'); $('now-more').textContent = c ? 'ดูทั้งหมด ▾' : 'ย่อ ▴'; };
 
   defs.forEach(d => state[d.id] = { on: false });
   render();

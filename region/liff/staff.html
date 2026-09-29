@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow"><title>จัดการคำขอและรายงาน · ADM/เจ้าหน้าที่</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="liff.css">
+<style>.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.row button{font:inherit;font-size:13.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer}
+.row button.on{background:var(--teal);color:#fff;border-color:var(--teal)}.st{font-size:12px;font-weight:600;border-radius:10px;padding:1px 8px}
+.st-new{background:#FEE2E2;color:#991B1B}.st-in_progress{background:#FEF3C7;color:#92400E}.st-done{background:#DCFCE7;color:#166534}
+.st-unverified{background:#F1F5F9;color:#475569}.st-verified{background:#DCFCE7;color:#166534}.st-hidden{background:#E2E8F0;color:#64748B}
+.tabs{display:flex;gap:6px;margin-top:4px}.tabs button{flex:1;font:inherit;padding:8px;border:1px solid var(--border);background:#fff;border-radius:8px}.tabs button.on{background:var(--navy);color:#fff}</style></head>
+<body>
+<header><b>จัดการคำขอและรายงาน</b><div id="who">สำหรับ ADM และเจ้าหน้าที่ · ข้อมูลส่วนบุคคล ห้ามส่งต่อ</div></header>
+<main>
+  <div class="tabs"><button id="t-help" class="on">🆘 คำขอความช่วยเหลือ</button><button id="t-rep">📍 รายงานสถานการณ์</button></div>
+  <div class="msg" id="msg"></div><div id="list"></div>
+</main>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script><script src="common.js"></script>
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id), X = window.LIFFX, e = X.esc;
+  const say = (t, c) => { $('msg').className = 'msg ' + (c || ''); $('msg').textContent = t; };
+  let T = {}; try { (await (await fetch('../data/tambon.geojson')).json()).features.forEach(f => T[f.properties.tcode] = f.properties); } catch (err) {}
+  const tn = (c) => T[c] ? `ต.${T[c].name} อ.${T[c].amphoe}` : c, when = (s) => new Date(s).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+  const HS = { new: 'รับเรื่อง', in_progress: 'กำลังช่วย', done: 'เสร็จสิ้น' }, RS = { unverified: 'ยังไม่ตรวจสอบ', verified: 'ตรวจสอบแล้ว', hidden: 'ซ่อน' };
+  let tab = 'help';
+  async function load() {
+    say('กำลังโหลด…');
+    try {
+      if (tab === 'help') {
+        const r = await X.post('/api/staff/help');
+        $('who').textContent = (r.role === 'staff' ? 'เจ้าหน้าที่ (ทุกตำบล)' : 'ADM (เฉพาะตำบลของท่าน)') + ' · ห้ามส่งต่อข้อมูลส่วนบุคคล';
+        $('list').innerHTML = r.items.length ? r.items.map(i => `<div class="card"><b>${e(i.ref)}</b> <span class="st st-${i.status}">${HS[i.status]}</span> · ${e(tn(i.tcode))}
+          <br>${i.kind.split(',').map(k => X.KIND[k] || k).join(', ')} · ${i.people || '—'} คน${i.vulnerable ? ' · <b>มีกลุ่มเปราะบาง</b>' : ''}
+          <br>☎ ${i.phone ? `<a href="tel:${e(i.phone)}">${e(i.phone)}</a>` : '—'} · <a href="https://maps.google.com/?q=${i.lat},${i.lon}" target="_blank" rel="noopener">นำทาง</a>
+          ${i.note ? `<br><span class="muted">${e(i.note)}</span>` : ''}<br><span class="muted">${when(i.created_at)}${i.handled_by ? ' · ผู้ดูแล …' + e(i.handled_by) : ''}</span>
+          <div class="row">${Object.entries(HS).map(([k, v]) => `<button data-id="${i.id}" data-s="${k}" class="${i.status === k ? 'on' : ''}">${v}</button>`).join('')}</div></div>`).join('')
+          : '<div class="card">ไม่มีคำขอใน 30 วัน</div>';
+        $('list').querySelectorAll('button[data-s]').forEach(b => b.onclick = async () => { await X.post('/api/staff/help/update', { id: +b.dataset.id, status: b.dataset.s }); load(); });
+      } else {
+        const r = await X.post('/api/staff/reports');
+        $('list').innerHTML = r.items.length ? r.items.map(i => `<div class="card"><span class="st st-${i.status}">${RS[i.status]}</span> · ${e(tn(i.tcode))}
+          <br>${i.cats.split(',').map(c => X.CATS[c] || c).join(', ')}${i.depth ? ' · ระดับน้ำ ' + X.DEPTH[i.depth] : ''}
+          ${i.note ? `<br>${e(i.note)}` : ''}<br><span class="muted">${when(i.created_at)} · <a href="https://maps.google.com/?q=${i.lat},${i.lon}" target="_blank" rel="noopener">ดูตำแหน่ง</a></span>
+          <div class="row">${Object.entries(RS).map(([k, v]) => `<button data-id="${i.id}" data-s="${k}" class="${i.status === k ? 'on' : ''}">${v}</button>`).join('')}</div></div>`).join('')
+          : '<div class="card">ไม่มีรายงานใน 30 วัน</div>';
+        $('list').querySelectorAll('button[data-s]').forEach(b => b.onclick = async () => { await X.post('/api/staff/report/update', { id: +b.dataset.id, status: b.dataset.s }); load(); });
+      }
+      say('');
+    } catch (err) { say(err.message, 'err'); $('list').innerHTML = ''; }
+  }
+  $('t-help').onclick = () => { tab = 'help'; $('t-help').classList.add('on'); $('t-rep').classList.remove('on'); load(); };
+  $('t-rep').onclick = () => { tab = 'rep'; $('t-rep').classList.add('on'); $('t-help').classList.remove('on'); load(); };
+  try { if (!await X.init()) return; } catch (err) { say('กรุณาเปิดหน้านี้จากแอป LINE', 'err'); return; }
+  load(); setInterval(load, 60000);
+})();
+</script></body></html>
