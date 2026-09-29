@@ -26,7 +26,7 @@
 | RainViewer / Open-Meteo | ฟรีสำหรับงานไม่ใช่เชิงพาณิชย์ ต้องแสดงเครดิต (ทำแล้ว) |
 | Esri World Imagery (basemap) | เรียกแบบไม่มี key → ตรวจเงื่อนไข หรือเปลี่ยน basemap |
 | Open Buildings | CC BY 4.0 / ODbL แสดงเครดิตแล้ว |
-| ขอบเขตตำบล | OpenGISData-Thailand ไม่ระบุต้นฉบับ → แทนด้วยข้อมูลกรมการปกครอง |
+| ขอบเขตตำบล | เปลี่ยนเป็น shapefile `NR_admin3` (pcode, 2022-01-22) แล้ว · ระบุหน่วยงานต้นทางให้ชัดในเอกสารอ้างอิง |
 
 ## ค่าใช้จ่ายและข้อจำกัด GitHub (repo สาธารณะ = ฟรี)
 - Pages ~1 GB, bandwidth soft ~100 GB/เดือน, build soft ~10 ครั้ง/ชม. — ใช้จริงน้อยกว่ามาก

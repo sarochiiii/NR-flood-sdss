@@ -25,7 +25,7 @@
 
 | ไฟล์ | เนื้อหา | ที่มา |
 |---|---|---|
-| `tambon.geojson` | 26 ตำบล: `tcode, name, amphoe, acode, area_km2, lat, lon, station_code(null), s_class(null), bldg` | OpenGISData-Thailand (ไม่ใช่ข้อมูลทางการ) |
+| `tambon.geojson` | 26 ตำบล: `tcode, name, amphoe, acode, area_km2, lat, lon, station_code(null), s_class(null), bldg, basin` | shapefile `NR_admin3` (adm3_pcode, valid_on 2022-01-22) — เปลี่ยน 29 ก.ย. 69 แทน OpenGISData · รหัส/ชื่อตรงกันครบ 26 ตำบล · IoU กับขอบเขตเดิม 0.84–0.96 |
 | `amphoe.geojson` | 2 อำเภอ (acode 3009 โนนไทย, 3010 โนนสูง) | รวมจาก tambon |
 | `hex.geojson` | H3 res 8 1,421 ช่อง + `bldg` | `scripts/region/merge_buildings.py` |
 | `buildings.json` | จุดอาคาร 156,670 หลัง (delta-encoded) | GEE `region_buildings.js` |
