@@ -43,4 +43,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add region/data/live/
-          git diff --staged --quiet || { git commit -m "data(region): อัปเดตข้อมูลสด $(date -u '+%Y-%m-%d %H:%M UTC')" && git pull --rebase && git push; }
+          git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+          git commit -m "data(region): อัปเดตข้อมูลสด $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # ลองส่งซ้ำสูงสุด 4 ครั้ง (GitHub อาจตอบ Internal Server Error ชั่วคราว หรือมี commit อื่นเข้ามาระหว่างรัน)
+          for i in 1 2 3 4; do
+            git pull --rebase --quiet && git push && exit 0
+            echo "push ไม่สำเร็จ (ครั้งที่ $i) — รอ $((i * 15)) วินาทีแล้วลองใหม่"
+            sleep $((i * 15))
+          done
+          echo "::error::push ไม่สำเร็จหลังลอง 4 ครั้ง — รอบถัดไปจะส่งข้อมูลใหม่เอง"
+          exit 1
