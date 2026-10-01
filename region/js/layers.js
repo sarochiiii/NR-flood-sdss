@@ -271,7 +271,7 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
-      id: 'basins', icon: 'ti-topology-star-3', label: 'ขอบเขตลุ่มน้ำ (HydroBASINS)', on: true,
+      id: 'basins', icon: 'ti-topology-star-3', label: 'ขอบเขตลุ่มน้ำ (HydroBASINS)', on: false,
       async build() {
         if (!BAS) throw new Error('ยังไม่มีไฟล์ขอบเขตลุ่มน้ำ');
         const col = { LCK: '#38BDF8', MUN_UP: '#A78BFA', TAK: '#FB923C', STUDY: '#94A3B8' };
