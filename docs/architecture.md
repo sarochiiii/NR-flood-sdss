@@ -1,91 +1,55 @@
-# โครงสร้างระบบและไฟล์
+# โครงสร้างเว็บ SDSS-ChanAT (repo sarochiiii/NR-flood-sdss)
 
-## สารบัญ
-- หน้าเว็บ · ไฟล์ข้อมูลคงที่ · ไฟล์ข้อมูลสด · สคริปต์ · GEE · workflow · บัญชีและ secret
+## ภาพรวม
+```
+แหล่งข้อมูล ─┬─ browser เรียกตรง: ThaiWater public, RainViewer, Open-Meteo (สำรอง)
+             └─ GitHub Actions `region-live` ทุกชั่วโมง นาทีที่ 15 → commit region/data/live/*
+เว็บ static (GitHub Pages) อ่าน config.json + data/*.json → Leaflet
+LINE OA (Cloudflare Worker) อ่าน JSON เดียวกันจากเว็บ เพื่อตอบ "สถานการณ์น้ำ"
+```
 
 ## หน้าเว็บ (`region/`)
-
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `index.html` | หน้าหลัก: KPI 6 ช่อง, แถบแจ้งเตือนระดับน้ำ, แผนที่, แผงขวา (การ์ดตำบล/จุดที่แตะ, ปุ่มลำเชียงไกร, สถานีที่ควรจับตา, เลเยอร์, ตำบลเรียงตามฝน, สถานะข้อมูล, วิธีคำนวณ) |
-| `lamchiangkrai.html` | หน้าเฝ้าระวังลำเชียงไกร: อ่างตอนบน → อ่างตอนล่าง → M.206 → จันอัด → M.188A → มูล (M.2A + ลำตะคอง M.164 → M.194 → **ลำเชียงไกรบรรจบ** → M.195 → M.184) |
-| `js/region.js` | แผนที่ ขอบเขตตำบล โหมดสี (เส้นขอบอย่างเดียว=ค่าเริ่มต้น / T / ฝน 24 ชม. / ฝน 7 วัน) การ์ดตำบล สถานะข้อมูล ส่งออก `window.SDSS` |
-| `js/layers.js` | เลเยอร์เพิ่มเติม KPI สถานีที่ควรจับตา แนวโน้ม/กราฟ สถานะตลิ่ง ETA แถบแจ้งเตือน แตะจุดใดก็ได้ รีเฟรชทุก 10 นาที |
-| `css/region.css` | สไตล์ (IBM Plex Sans Thai, navy/teal) |
-| `config.json` | เกณฑ์ทั้งหมด (ดู config-logic.md) |
+| `index.html` | หัว **SDSS-ChanAT** (ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ ตำบลจันอัด อำเภอโนนสูง จังหวัดนครราชสีมา) · KPI · แถบแจ้งเตือนตลิ่ง · **แผงชั้นข้อมูลซ้าย (ซ่อนได้)** · แผนที่ · แผงขวา (ปุ่ม 📍รายงาน/🆘ขอความช่วยเหลือ, ปุ่มลำเชียงไกร, การ์ดตำบล, สถานีที่ควรจับตา 5 อันดับ + ดูทั้งหมด, สถานะข้อมูล, วิธีคำนวณ) |
+| `lamchiangkrai.html` | ลำเชียงไกร: อ่างตอนบน → อ่างตอนล่าง → M.206 → จันอัด → M.188A → มูล · แม่น้ำมูล: M.2A + ลำตะคอง M.164 → M.194 → **ลำเชียงไกรบรรจบ** → M.195 → M.184 · อ่างใช้ข้อมูลกรมชลประทาน (กราฟทั้งปี เทียบปีก่อน วันคาดเต็มความจุ) · พยากรณ์ GloFAS 5 จุด |
+| `js/region.js` | แผนที่ basemap **ภาพดาวเทียมเป็นค่าเริ่มต้น** (สีเส้น/ชื่อปรับตาม basemap) · เขตตำบล โหมดสี (เส้นขอบเขตอย่างเดียว=ค่าเริ่มต้น · T · ฝนคาดการณ์ 24 ชม.) · การ์ดตำบล + "ที่มาของ T" · `window.SDSS` |
+| `js/layers.js` | ชั้นข้อมูล KPI รายการจับตา (กรองตามลุ่มน้ำ) แนวโน้ม สถานะตลิ่ง ETA แถบแจ้งเตือน แตะจุด รีเฟรช 10 นาที ปุ่ม LINE |
+| `css/region.css` | สไตล์ |
+| `config.json` | เกณฑ์ทั้งหมด (`rain`, `water`, `bank`, `t_rules`, `sandbox`) |
+| `liff/` | หน้า LIFF register/report/help/staff + `config.js` (LIFF_ID, API) — **ยังเป็นค่า placeholder** (รอระบบ D1) ปุ่ม 📍/🆘 บนเว็บจึงเป็นสีเทา |
 
-ชั้นข้อมูลใน `layers.js` จัดกลุ่มตามห่วงโซ่น้ำท่วม (ปรับ 28 ก.ย. 69):
-① ฝน: `rainsta` ฝนสถานี · `rainacc` ฝนสะสม 7/3 วัน (สถานีในพื้นที่ + buffer) · `radar` เรดาร์ฝน 2 ชม. (ภาพเคลื่อนไหว + พื้นที่ครอบคลุม)
-② อ่าง/ลำน้ำ: `dams` · `wlsta` · `glofas` (ทดลอง)  ③ น้ำท่วม: `gistda`  ④ ผลกระทบ: `bldg` อาคาร/สิ่งปลูกสร้าง  พื้นฐาน: `labels`
-เปิดเป็นค่าเริ่มต้น: เขตตำบล/อำเภอ · อ่างเก็บน้ำ · ระดับน้ำ · น้ำท่วมตรวจพบ · **ถอดแล้ว:** ภาพ Sentinel-1 (ซ้ำกับ GISTDA; workflow ยังเก็บภาพอยู่) · โหมดฝนสะสม 7 วันแบบจำลอง
-โหมดสีตำบล: เส้นขอบเขตอย่างเดียว (ค่าเริ่มต้น) · สภาวะ T · ฝนคาดการณ์ 24 ชม.
-รอบถัดไป: กรองอ่าง/สถานี/รายการจับตาด้วยขอบเขตลุ่มน้ำ (HydroSHEDS) และปรับ T ให้ใช้ฝนลุ่มน้ำ + อ่างต้นทาง + M.188A
-
-## ไฟล์ข้อมูลคงที่ (`region/data/`)
-
-| ไฟล์ | เนื้อหา | ที่มา |
-|---|---|---|
-| `tambon.geojson` | 26 ตำบล: `tcode, name, amphoe, acode, area_km2, lat, lon, station_code(null), s_class(null), bldg, basin` | shapefile `NR_admin3` (adm3_pcode, valid_on 2022-01-22) — เปลี่ยน 29 ก.ย. 69 แทน OpenGISData · รหัส/ชื่อตรงกันครบ 26 ตำบล · IoU กับขอบเขตเดิม 0.84–0.96 |
-| `amphoe.geojson` | 2 อำเภอ (acode 3009 โนนไทย, 3010 โนนสูง) | รวมจาก tambon |
-| `hex.geojson` | H3 res 8 1,421 ช่อง + `bldg` | `scripts/region/merge_buildings.py` |
-| `buildings.json` | จุดอาคาร 156,670 หลัง (delta-encoded) | GEE `region_buildings.js` |
-| `bldg/<tcode>.json`, `bldg/index.json` | รูปอาคาร 154,115 หลัง แยกรายตำบล | GEE `region_buildings_poly.js` → `build_building_tiles.py` |
-| `rid_stations.json` | 79 สถานีกรมชลประทาน ลุ่มน้ำมูล ปีน้ำ 2569: `river, zg (ม.รทก.), da (ตร.กม.), lat, lon, coord_q` | PDF "สถานีสำรวจระดับน้ำ ลุ่มน้ำมูล 2569" |
-
-## ไฟล์ข้อมูลสด (`region/data/live/`) — เขียนโดย Actions เท่านั้น ห้ามแก้มือ
-
-| ไฟล์ | สคริปต์ |
+## ชั้นข้อมูล (แผงซ้าย จัดตามห่วงโซ่น้ำท่วม) · ✓ = เปิดเป็นค่าเริ่มต้น
+| กลุ่ม | id · ชื่อ |
 |---|---|
-| `rain_region.json` | `fetch_rain.py` (Open-Meteo รายตำบล) |
-| `thaiwater_region.json`, `water_region.json` | `fetch_thaiwater.py` |
-| `tw_province.json` | `fetch_tw_province.py` (ฝนสะสม 3/7 วัน 73 สถานี, อ่าง 39 แห่ง) |
-| `gistda_flood_7d.geojson` | `fetch_gistda_flood.py` (มี `by_tambon`, `exposure`, `images`) |
-| `s1_latest.json`, `s1_latest.png` | `fetch_s1.py` (commit PNG ใหม่เมื่อวันที่ภาพเปลี่ยนเท่านั้น) |
-| `history.json` | `update_history.py` (ระดับน้ำ 14 วัน, อ่าง 30 รายการ) |
-| `risk_now.json` | `compute_risk.py` (เตรียมไว้ให้ LINE OA) |
-| `raw/` | ข้อมูลดิบรอบตรวจโครงสร้าง ลบได้ |
+| ① ฝน | `rainsta` ฝนสถานีตรวจวัด (24 ชม./1 ชม.) · `rainacc` ฝนสะสม 7/3 วัน (สถานีในพื้นที่+buffer) · `radar` เรดาร์ฝน 2 ชม. (ภาพเคลื่อนไหว ▶/⏸ + หน้ากากพื้นที่ครอบคลุม) |
+| ② อ่างเก็บน้ำและลำน้ำ | `dams` อ่างเก็บน้ำ ✓ (ThaiWater + กรมชลประทาน) · `wlsta` ระดับน้ำสถานี ✓ · `structures` **อาคารชลศาสตร์ลำเชียงไกร (ปภ./อบต.)** ✓ 64 จุด ไอคอนสี่เหลี่ยมสีเดียว `#DB2777` ไม่มีตัวอักษร · `glofas` พยากรณ์ปริมาณน้ำ 30 วัน (ทดลอง) |
+| ③ น้ำท่วม | `gistda` น้ำท่วมตรวจพบ ✓ (ทั้งจังหวัด · ซูม <12 วงกลมตามพื้นที่ · ≥12 เซลล์ H3 สีฟ้าสด) · `reports` รายงานจากประชาชน 30 วัน (รอระบบ D1) |
+| ④ ผลกระทบ | `bldg` อาคาร/สิ่งปลูกสร้าง (ซูม 13–14 จุด · ≥15 polygon รายตำบล) |
+| พื้นฐาน | `labels` เขตตำบล/อำเภอ ✓ · `basins` ขอบเขตลุ่มน้ำ HydroBASINS (ปิดเป็นค่าเริ่มต้น) |
+ถอดแล้ว: ภาพ Sentinel-1 (ซ้ำกับ GISTDA; workflow ยังเก็บภาพ) · โหมดฝนสะสม 7 วันแบบจำลอง · ตำบลเรียงตามฝน
 
-## สคริปต์ (`scripts/region/`) — Python มาตรฐาน + shapely/pyproj/earthengine-api
-`_common.py` (path, bbox+buffer 0.15°, read/write) · fetch_* ตามตารางบน · `update_history.py` · `compute_risk.py` ·
-`merge_buildings.py` · `build_building_tiles.py` · `merge_susceptibility.py` (ชั้น S — พักไว้)
-ทุก fetch_* ออกแบบให้ไม่ทำให้ workflow ล้ม: ถ้าดึงไม่ได้จะเขียน `status: error` และเก็บข้อมูลเดิมไว้
-
-## GEE (`gee/`) และ asset ใน `projects/ee-sarochineek/assets/`
-| asset | เนื้อหา |
+## ข้อมูลคงที่ (`region/data/`)
+| ไฟล์ | เนื้อหา · ที่มา |
 |---|---|
-| `NR_hex_res8_shp` | กริด H3 res 8 (field h3, tcode) |
-| `NR_FloodFreq` | น้ำท่วมซ้ำซาก GISTDA ระดับจังหวัด (field `Repeating` 1–9, `Label` 0–3; มี GeometryCollection/LineString ต้องกรอง) |
-| `Repeatarea` | น้ำท่วมซ้ำซากเฉพาะจันอัด |
-| `ChanAtOSM`, `ChiangKri`, `ChiangKriFull` | ขอบเขตจันอัด, เส้นลำเชียงไกร (สำหรับ Sandbox) |
-สคริปต์: `region_buildings.js` (จุด+hex) · `region_buildings_poly.js` (รูปอาคาร SHP) · `region_susceptibility.js` (ชั้น S — พักไว้)
+| `tambon.geojson` / `amphoe.geojson` | 26 ตำบล (โนนไทย 10 · โนนสูง 16): `tcode, name, amphoe, acode, area_km2, lat, lon, station_code, s_class, bldg, basin` · shapefile `NR_admin3` (adm3_pcode, valid_on 2022-01-22) |
+| `basins.geojson` · `basin_points.json` | ลุ่ม LCK (เหนือ M.188A) · MUN_UP (เหนือ M.2A) · TAK (ลำตะคองเหนือ M.164) · STUDY (เหนือ M.195) · ไม่มีรู · 78 จุดตัวแทนฝนลุ่มน้ำ |
+| `structures.geojson` | อาคารชลศาสตร์ 64 จุด (`seq` จากอ่างตอนล่างลงไป, `name`, `name_src`, `type`, `tcode`) · ปภ. และ อบต. (อนุญาตเผยแพร่แล้ว) · ต้นฉบับ `data/src/structures_point_1.kml` |
+| `rid_stations.json` | 79 สถานีกรมชลประทาน ลุ่มน้ำมูล (Z.G, D.A, พิกัดที่แก้จาก UTM) |
+| `buildings.json` · `bldg/<tcode>.json` · `hex.geojson` | Open Buildings V3 (≥0.70): จุด 156,507 หลัง · polygon 153,886 หลัง · H3 res 8 |
+| `rid_rsv/` | ประวัติรายวันอ่างจาก Excel กรมชลประทาน (**ยังไม่ขึ้น repo** — อยู่ใน update-20) |
+
+## ข้อมูลสด (`region/data/live/`) — Actions เขียน ห้ามแก้มือ
+`rain_region` · `basin_rain` (ฝนเฉลี่ยลุ่ม LCK/MUN_UP) · `thaiwater_region` · `water_region` · `tw_province` · `rid_reservoir` (อ่างกลาง 24 แห่ง + ประวัติ 400 วัน) · `glofas` (5 จุด) · `gistda_flood_7d.geojson` (ทั้งจังหวัด) · `s1_latest.*` · `history` · `risk_now`
+
+## สคริปต์ (`scripts/region/`)
+fetch: `fetch_rain` · `fetch_basin_rain` · `fetch_thaiwater` · `fetch_tw_province` · `fetch_rid_reservoir` · `fetch_glofas` · `fetch_gistda_flood` · `fetch_s1` · `update_history` · `compute_risk`
+สร้างข้อมูลครั้งเดียว: `merge_buildings` · `build_building_tiles` · `build_basins` · `import_rid_rsv` · `import_structures` · `import_sandbox_layers` · `merge_susceptibility` (ชั้น S พักไว้)
 
 ## Workflow `.github/workflows/region-live.yml`
-cron `15 * * * *` + ปุ่ม Run workflow · ขั้นตอน: ติดตั้ง library → fetch_rain → fetch_thaiwater → fetch_tw_province →
-fetch_gistda_flood → fetch_s1 → update_history → compute_risk → commit `region/data/live/` (ใช้ actions/checkout@v6, setup-python@v6)
-Settings → Actions → General → Workflow permissions = **Read and write**
+ทุกชั่วโมงนาที 15 + Run workflow · ลำดับ: ติดตั้ง lib → ฝนรายตำบล → ฝนลุ่มน้ำ → ThaiWater → ThaiWater จังหวัด → กรมชลประทาน → GloFAS → GISTDA → Sentinel-1 → ประวัติ → ความเสี่ยง → **commit (ลอง push ซ้ำ 4 ครั้ง 15/30/45/60 วินาที)**
+Secrets: `GISTDA_API_KEY` · `EE_SERVICE_ACCOUNT_KEY` (service account `github-actions-ee@ee-sarochineek` · Earth Engine Resource Writer + Service Usage Consumer)
 
-## บัญชีและ secret (ห้ามเก็บค่าจริงในเอกสาร)
-| รายการ | ที่อยู่ |
-|---|---|
-| `GISTDA_API_KEY` | GitHub Secret · สมัคร/หมุนเวียนที่ api-gateway.gistda.or.th (หมุนเวียน key เมื่อสงสัยว่าหลุด) |
-| `EE_SERVICE_ACCOUNT_KEY` | GitHub Secret · service account `github-actions-ee@ee-sarochineek.iam.gserviceaccount.com` roles: Earth Engine Resource Writer + Service Usage Consumer |
-| `EE_PROJECT` | ตั้งตรงใน workflow = ee-sarochineek |
-
-## LINE OA (ระยะ P1 · 27 ก.ย. 69)
-| ส่วน | ที่อยู่ |
-|---|---|
-| โค้ด Worker `line-hub` | `line/worker.js` (คัดลอกไปวางใน Cloudflare → Edit code) |
-| ฐานข้อมูลผู้ใช้ | Cloudflare D1 `line-hub-db` ตาม `line/schema.sql` — **ข้อมูลส่วนบุคคล ห้ามนำขึ้น repo** |
-| หน้า LIFF | `region/liff/` register · report · help · staff · ค่าร่วมใน `config.js` (LIFF_ID, URL Worker) · LIFF endpoint = โฟลเดอร์ |
-| ภาพ rich menu | `line/richmenu_2500x1686.png` (6 ช่อง ตั้งค่าใน OA Manager) |
-| คู่มือตั้งค่า | `line/SETUP.md` |
-Worker อ่านข้อมูลสถานการณ์จากเว็บสาธารณะ (config.json, tambon, rain, thaiwater, tw_province, gistda) · cron 00:00 UTC ส่งสรุป D1 ให้ role adm/staff
-
-## Sandbox จันอัด แบบจำกัดสิทธิ์ (ข้อมูลครัวเรือน)
-| ส่วน | ที่อยู่ |
-|---|---|
-| หน้าเว็บ + `households.geojson` | Cloudflare Pages (Direct Upload) ชื่อ project ที่เดายาก — **ไม่อยู่ใน GitHub** |
-| การยืนยันตัวตน | Cloudflare Access (Zero Trust Free) · One-time PIN ทางอีเมล · ผู้มีสิทธิ์ ≤ 5 อีเมล · 2 application (URL หลัก + `*.project.pages.dev`) |
-| ข้อมูลที่หน้า Sandbox อ่านจากเว็บสาธารณะ | tambon, bldg/301010, thaiwater_region, tw_province, config |
-| ปุ่มจากเว็บสาธารณะ | `region/config.json` → `sandbox.url`, `sandbox.label` |
-คู่มือ: `README-SETUP.md` ในชุดไฟล์ sandbox-private (เก็บในไดรฟ์ของโครงการ ไม่ใช่ repo)
+## GEE (project ee-sarochineek) · `gee/`
+assets: `NR_hex_res8_shp` · `NR_FloodFreq` · `Repeatarea` (จันอัด) · `ChanAtOSM` · `ChiangKri` · `ChiangKriFull`
+สคริปต์: `region_buildings(_poly).js` · `basins_hydrosheds.js` · `sandbox_layers.js` (S1 Sandbox — ยังไม่ได้รัน) · `region_susceptibility.js` (พักไว้)

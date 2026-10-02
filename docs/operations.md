@@ -8,11 +8,16 @@
 2. github.com/sarochiiii/NR-flood-sdss → **Add file → Upload files** → ลาก**โฟลเดอร์ระดับบนสุด** (`region`, `scripts`) ไปวาง
    ไฟล์ชื่อซ้ำจะถูกเขียนทับ ไฟล์อื่นไม่ถูกแตะ
 3. **Commit changes** → รอ Actions → `pages-build-deployment` ขึ้น ✓ (1–2 นาที)
-4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=15)
+4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=29)
    มิฉะนั้น browser จะใช้ไฟล์เก่าใน cache (GitHub Pages cache ~10 นาที) — ผู้ใช้กด Ctrl+F5 ได้ชั่วคราว
 
 ข้อห้าม: อย่าลากโฟลเดอร์ `.github` ผ่าน Upload files (อาจไม่ติด) — แก้ workflow ด้วยการเปิดไฟล์แล้วกดดินสอ ✏️
 ข้อห้าม: อย่าอัปโหลดไฟล์ใน `region/data/live/` ทับ (Actions เป็นผู้เขียน)
+
+### ก่อนสร้างไฟล์อัปเดต (สำหรับผู้พัฒนา)
+clone repo ล่าสุด → diff กับไฟล์ที่จะส่ง → ถ้ามีการแก้จากช่องทางอื่น ให้แก้ต่อจากรุ่นใน repo ไม่ใช่รุ่นในเครื่อง
+ไฟล์ข้อมูล `.geojson` ไม่มีเลขรุ่น — หลังอัปโหลดให้ผู้ใช้กด Ctrl+F5 หนึ่งครั้ง
+ตรวจว่าอัปโหลดแล้ว: ในโฟลเดอร์บน GitHub ดู "Latest commit" ของไฟล์ ต้องเป็น "Add files via upload" เวลาล่าสุด
 
 ## 2. รัน workflow และอ่าน log
 Actions → **region-live** → **Run workflow** → เมื่อ ✓ คลิก **fetch** → ขยายขั้นที่ต้องการ
@@ -61,3 +66,12 @@ Settings → Secrets and variables → Actions → New repository secret / ด�
 | GEE upload: "not a correct extension" | เลือกเมนู Image upload | ใช้ NEW → Shape files |
 | แผนที่ฟ้าเบลอเมื่อซูมใกล้ | เรดาร์ฝน RainViewer ถูกขยายเกิน zoom 7 | ปิดชั้นเรดาร์ฝนเมื่อดูรายละเอียด |
 | scheduled workflow หยุดรัน | ไม่มีความเคลื่อนไหว ~60 วัน / GitHub ปิด | Actions → enable workflow → Run |
+
+| `remote: Internal Server Error` ตอน push | GitHub ขัดข้องชั่วคราว | ขั้น commit ลองซ้ำเอง 4 ครั้ง · รอบถัดไปส่งข้อมูลใหม่ |
+| ชั้นข้อมูลยังเป็นแบบเดิมหลังอัปโหลด | ไฟล์ไม่ได้ขึ้น repo จริง / cache | ตรวจ Latest commit · Ctrl+F5 |
+
+## 7. LINE OA (Worker chanat-line-webhook)
+- แก้โค้ด: Cloudflare → Workers & Pages → chanat-line-webhook → Edit code → วางทั้งไฟล์ → Deploy (เลข "1" ที่แท็บ = คำเตือนชนิดข้อมูล ไม่ใช่ error)
+- ตัวแปร: Settings → Variables and Secrets → Add variable → **ติ๊ก Secret** สำหรับค่าลับ (ไม่ติ๊ก = Text มองเห็นได้) · กล่องเหลือง "Update your Wrangler configuration" ไม่ต้องทำตาม
+- Logs: Observability · ถ้า ADM ไม่ได้รับแจ้ง หา `multicast failed` (429 = โควตาหมด)
+- เปิดให้ OA เข้ากลุ่ม: manager.line.biz (เข้าด้วยบัญชี LINE ที่ดูแล OA หรือบัญชีธุรกิจที่เป็นอีเมล) → ตั้งค่า → ตั้งค่าบัญชี → เข้าร่วมแชทกลุ่ม → ยอมรับคำเชิญ · ผู้เชิญต้องเป็นเพื่อนกับ OA · ควรขออนุญาตสมาชิกกลุ่มก่อน
