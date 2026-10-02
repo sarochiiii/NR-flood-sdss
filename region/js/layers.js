@@ -278,7 +278,7 @@ document.addEventListener('sdss:ready', async () => {
     {
       id: 'reports', icon: 'ti-map-pin-exclamation', label: 'รายงานจากประชาชน (30 วัน)', on: false,
       async build() {
-        if (!lineReady) throw new Error('เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ');
+        if (!lineReady) throw new Error('รายงานบนแผนที่: รอระบบระยะสอง (ตอนนี้รายงานส่งถึง ADM ทาง LINE)');
         const [rp, hs] = await Promise.all([json(LC.API + '/api/reports'), json(LC.API + '/api/help/summary').catch(() => null)]);
         const ICON = { flood: '🌊', road: '🚧', power: '⚡', landslide: '⛰️', tree: '🌳', building: '🏚️', other: '❗' };
         const CAT = { flood: 'น้ำท่วม', road: 'ถนนผ่านไม่ได้', power: 'ไฟดับ', landslide: 'ดินสไลด์', tree: 'ต้นไม้ล้ม', building: 'อาคารเสียหาย', other: 'อื่น ๆ' };
@@ -699,10 +699,19 @@ document.addEventListener('sdss:ready', async () => {
 
   // ปุ่มรายงาน/ขอความช่วยเหลือ → หน้า LIFF (ใช้ได้เมื่อตั้งค่า LINE OA แล้วใน liff/config.js)
   const LC = window.LINE_CFG || {}, lineReady = LC.LIFF_ID && !/YOUR_/.test(LC.LIFF_ID) && LC.API && !/YOUR-/.test(LC.API);
-  [['btn-report', 'report.html'], ['btn-help', 'help.html']].forEach(([id, page]) => { const a = $(id); if (!a) return;
-    if (lineReady) { a.href = `https://liff.line.me/${LC.LIFF_ID}/${page}`; a.target = '_blank'; a.rel = 'noopener'; }
-    else { a.classList.add('off'); a.removeAttribute('href'); } });
-  if (!lineReady && $('act-note')) $('act-note').textContent = 'เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ · อันตรายต่อชีวิตโทร 1669 / 1784';
+  // ปุ่มรายงาน/ขอความช่วยเหลือ:
+  //  1) ระบบ D1 + LIFF พร้อม (LIFF_ID, API) → เปิดฟอร์มปักหมุด
+  //  2) มีเพียง LINE OA (OA_ID) → เปิดแชท "จันอัดบ้านฉัน" พร้อมพิมพ์คำสั่งให้ ผู้ใช้กดส่ง แล้วทำตามขั้นตอนในแชท
+  const oaId = LC.OA_ID && !/YOUR_/.test(LC.OA_ID) ? LC.OA_ID.trim() : '';
+  const oaLink = (msg) => `https://line.me/R/oaMessage/${encodeURIComponent(oaId)}/?${encodeURIComponent(msg)}`;
+  [['btn-report', 'report.html', 'รายงานเหตุ'], ['btn-help', 'help.html', 'ขอความช่วยเหลือ']].forEach(([id, page, cmd]) => { const a = $(id); if (!a) return;
+    if (lineReady) a.href = `https://liff.line.me/${LC.LIFF_ID}/${page}`;
+    else if (oaId) a.href = oaLink(cmd);
+    else { a.classList.add('off'); a.removeAttribute('href'); return; }
+    a.target = '_blank'; a.rel = 'noopener'; });
+  if ($('act-note')) $('act-note').innerHTML = lineReady ? $('act-note').innerHTML
+    : oaId ? `เปิดแชท LINE "จันอัดบ้านฉัน" แล้วกด<b>ส่ง</b> · ต้องเพิ่มเพื่อนและลงทะเบียนก่อน (<a href="https://line.me/R/ti/p/${encodeURIComponent(oaId)}" target="_blank" rel="noopener">เพิ่มเพื่อน</a>) · อันตรายต่อชีวิตโทร 1669 / 1784`
+    : 'เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ · อันตรายต่อชีวิตโทร 1669 / 1784';
   if ($('now-more')) $('now-more').onclick = () => { const c = $('now').classList.toggle('collapsed'); $('now-more').textContent = c ? 'ดูทั้งหมด ▾' : 'ย่อ ▴'; };
 
   defs.forEach(d => state[d.id] = { on: false });
