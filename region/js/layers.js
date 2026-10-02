@@ -704,9 +704,32 @@ document.addEventListener('sdss:ready', async () => {
   //  2) มีเพียง LINE OA (OA_ID) → เปิดแชท "จันอัดบ้านฉัน" พร้อมพิมพ์คำสั่งให้ ผู้ใช้กดส่ง แล้วทำตามขั้นตอนในแชท
   const oaId = LC.OA_ID && !/YOUR_/.test(LC.OA_ID) ? LC.OA_ID.trim() : '';
   const oaLink = (msg) => `https://line.me/R/oaMessage/${encodeURIComponent(oaId)}/?${encodeURIComponent(msg)}`;
+  // ลิงก์ line.me/R/oaMessage ใช้ได้เฉพาะแอป LINE บนมือถือ — บนคอมพิวเตอร์ LINE จะพาไปหน้าแรก line.me
+  // จึงแสดง QR ให้สแกนด้วยมือถือแทน (สร้าง QR ในเครื่อง ไม่ส่งข้อมูลออกนอกหน้า)
+  const UA = navigator.userAgent || '';
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+  let qrLib = null;
+  const loadQR = () => qrLib || (qrLib = new Promise((ok, no) => { if (window.qrcode) return ok(window.qrcode);
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload = () => ok(window.qrcode); sc.onerror = () => { qrLib = null; no(); }; document.head.appendChild(sc); }));
+  function showOaQR(cmd, title) {
+    const url = oaLink(cmd), add = `https://line.me/R/ti/p/${encodeURIComponent(oaId)}`;
+    let m = $('oa-qr'); if (m) m.remove();
+    m = document.createElement('div'); m.id = 'oa-qr'; m.className = 'qr-modal';
+    m.innerHTML = `<div class="qr-box" role="dialog" aria-modal="true"><button class="qr-x" aria-label="ปิด">✕</button>
+      <b>${title.trim()}</b><p>เปิดได้เฉพาะแอป LINE บนมือถือ · สแกน QR ด้วยกล้องมือถือ แล้วกด <b>ส่ง</b> ในแชท "จันอัดบ้านฉัน"</p>
+      <div class="qr-img">กำลังสร้าง QR…</div>
+      <p class="muted">ยังไม่เป็นเพื่อน? <a href="${add}" target="_blank" rel="noopener">เพิ่มเพื่อน LINE OA</a> แล้วลงทะเบียนตำบลก่อน · อันตรายต่อชีวิตโทร 1669 / 1784</p></div>`;
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.onclick = (e) => { if (e.target === m || e.target.classList.contains('qr-x')) close(); };
+    document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
+    loadQR().then(q => { const qr = q(0, 'M'); qr.addData(url); qr.make(); m.querySelector('.qr-img').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true }); })
+      .catch(() => { m.querySelector('.qr-img').innerHTML = `สร้าง QR ไม่สำเร็จ · เปิดลิงก์นี้บนมือถือ:<br><code style="word-break:break-all">${url}</code>`; });
+  }
   [['btn-report', 'report.html', 'รายงานเหตุ'], ['btn-help', 'help.html', 'ขอความช่วยเหลือ']].forEach(([id, page, cmd]) => { const a = $(id); if (!a) return;
     if (lineReady) a.href = `https://liff.line.me/${LC.LIFF_ID}/${page}`;
-    else if (oaId) a.href = oaLink(cmd);
+    else if (oaId) { a.href = oaLink(cmd); if (!isMobile) a.onclick = (e) => { e.preventDefault(); showOaQR(cmd, a.textContent.split('\n')[0]); }; }
     else { a.classList.add('off'); a.removeAttribute('href'); return; }
     a.target = '_blank'; a.rel = 'noopener'; });
   if ($('act-note')) $('act-note').innerHTML = lineReady ? $('act-note').innerHTML
