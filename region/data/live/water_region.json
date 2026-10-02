@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-02T05:42:28+00:00",
+ "updated_at": "2026-10-02T12:40:41+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,31 +10,31 @@
    "level_m": 201.98,
    "bank_m": 201.97,
    "storage_pct": 100.58,
-   "measured_at": "2026-10-02 12:30"
+   "measured_at": "2026-10-02 19:20"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 203.47,
+   "level_m": 203.44,
    "bank_m": 203.9,
-   "storage_pct": 89.17,
-   "measured_at": "2026-10-02 11:00"
+   "storage_pct": 88.41,
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 154.51,
+   "level_m": 154.56,
    "bank_m": 155.3,
-   "storage_pct": 86.14,
-   "measured_at": "2026-10-02 11:00"
+   "storage_pct": 87.02,
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
-   "level_m": 166.84,
+   "level_m": 166.85,
    "bank_m": 167.83,
-   "storage_pct": 85.88,
-   "measured_at": "2026-10-02 12:30"
+   "storage_pct": 85.93,
+   "measured_at": "2026-10-02 19:20"
   },
   {
    "code": "M.2A",
@@ -42,31 +42,31 @@
    "level_m": 165.68,
    "bank_m": 167.7,
    "storage_pct": 75.52,
-   "measured_at": "2026-10-02 11:00"
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.71,
+   "level_m": 176.76,
    "bank_m": 177.6,
-   "storage_pct": 71.66,
-   "measured_at": "2026-10-02 11:00"
+   "storage_pct": 73.25,
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.52,
+   "level_m": 161.36,
    "bank_m": 162.6,
-   "storage_pct": 70.97,
-   "measured_at": "2026-10-02 11:00"
+   "storage_pct": 66.67,
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 155.38,
+   "level_m": 155.45,
    "bank_m": 158.1,
-   "storage_pct": 62.74,
-   "measured_at": "2026-10-02 11:00"
+   "storage_pct": 63.7,
+   "measured_at": "2026-10-02 18:00"
   },
   {
    "code": "M.191",
@@ -74,7 +74,7 @@
    "level_m": 193.38,
    "bank_m": 195.3,
    "storage_pct": 43.2,
-   "measured_at": "2026-10-02 11:00"
+   "measured_at": "2026-10-02 18:00"
   }
  ]
 }
