@@ -257,14 +257,16 @@ document.addEventListener('sdss:ready', async () => {
       id: 'structures', icon: 'ti-building-bridge', label: 'อาคารชลศาสตร์ลำเชียงไกร (ปภ./อบต.)', on: true,
       async build() {
         const d = await json('data/structures.geojson');
+        const STRUCT_COLOR = '#DB2777';   // สีเดียวทุกประเภท (ชมพูเข้ม ไม่ซ้ำกับสีสถานะระดับน้ำ/อ่าง) · ประเภทดูใน popup
         const TY = { gate: ['บ', '#0E7C7B', 'อาคารบังคับน้ำ'], drain: ['ร', '#2563EB', 'อาคารระบายน้ำ'], weir: ['ฝ', '#7C3AED', 'ฝาย'],
           retention: ['ก', '#0891B2', 'แก้มลิง'], reservoir: ['อ', '#1E3A8A', 'อ่างเก็บน้ำ'], bridge: ['ส', '#64748B', 'สะพาน'],
           canal: ['ท', '#64748B', 'ระบบส่งน้ำ'], river: ['น', '#64748B', 'จุดอ้างอิงลำน้ำ'], other: ['•', '#64748B', 'อื่น ๆ'] };
         const n = d.features.length;
-        const lyr = L.layerGroup(d.features.map(f => { const p = f.properties, [ch, col, lab] = TY[p.type] || TY.other;
+        const lyr = L.layerGroup(d.features.map(f => { const p = f.properties, lab = (TY[p.type] || TY.other)[2];
           return L.marker([f.geometry.coordinates[1], f.geometry.coordinates[0]], {
             icon: L.divIcon({ className: '', iconSize: [18, 18], iconAnchor: [9, 9],
-              html: `<span style="display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:${col};color:#fff;font-size:11px;font-weight:700;border:1.5px solid #fff;box-shadow:0 0 2px #000">${ch}</span>` }) })
+              html: `<span style="display:block;width:12px;height:12px;border-radius:3px;background:${STRUCT_COLOR};border:2px solid #fff;box-shadow:0 0 2px #000"></span>` }) })
+            .bindTooltip(esc(p.name), { direction: 'top', offset: [0, -7] })
             .bindPopup(`<b>${esc(p.name)}</b><br>${lab} · ลำดับที่ ${p.seq}/${n} จากอ่างลำเชียงไกรตอนล่าง
               <br>${p.tambon ? `ต.${esc(p.tambon)} อ.${esc(p.amphoe)}` : 'ใกล้แนวเขตตำบล'}
               <div class="muted" style="font-size:11px">ที่มา: ปภ. และ อบต. · ตำแหน่งตามข้อมูลที่ได้รับ ยังไม่ได้ตรวจภาคสนาม</div>`); }));
