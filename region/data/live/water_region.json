@@ -1,80 +1,80 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-03T02:01:15+00:00",
+ "updated_at": "2026-10-03T08:10:08+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
    "code": "ONE022",
    "name": "คลองสามบาท บ้านกุดพิมาน",
-   "level_m": 201.94,
+   "level_m": 201.92,
    "bank_m": 201.97,
-   "storage_pct": 98.92,
-   "measured_at": "2026-10-03 08:50"
+   "storage_pct": 98.08,
+   "measured_at": "2026-10-03 14:50"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 154.66,
+   "level_m": 154.68,
    "bank_m": 155.3,
-   "storage_pct": 88.77,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 89.12,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 203.37,
+   "level_m": 203.35,
    "bank_m": 203.9,
-   "storage_pct": 86.65,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 86.15,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
-   "level_m": 166.79,
+   "level_m": 166.75,
    "bank_m": 167.83,
-   "storage_pct": 85.11,
-   "measured_at": "2026-10-03 08:50"
+   "storage_pct": 84.46,
+   "measured_at": "2026-10-03 14:50"
   },
   {
    "code": "M.2A",
    "name": "บ้านด่านกะตา",
-   "level_m": 165.63,
+   "level_m": 165.58,
    "bank_m": 167.7,
-   "storage_pct": 74.91,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 74.3,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.69,
+   "level_m": 176.68,
    "bank_m": 177.6,
-   "storage_pct": 71.02,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 70.7,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 155.53,
+   "level_m": 155.54,
    "bank_m": 158.1,
-   "storage_pct": 64.79,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 64.93,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.17,
+   "level_m": 161.14,
    "bank_m": 162.6,
-   "storage_pct": 61.56,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 60.75,
+   "measured_at": "2026-10-03 14:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.35,
+   "level_m": 193.34,
    "bank_m": 195.3,
-   "storage_pct": 42.31,
-   "measured_at": "2026-10-03 08:00"
+   "storage_pct": 42.01,
+   "measured_at": "2026-10-03 14:00"
   }
  ]
 }
