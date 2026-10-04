@@ -1,0 +1,12 @@
+# ข้อมูลส่วนบุคคล / ค่าลับ — ห้ามขึ้น repo สาธารณะ
+sandbox-private/
+KEEP_OFFLINE*/
+*house_key*
+*.env
+.dev.vars
+line/kv/wrangler.toml
+*service*account*.json
+# เครื่องมือ
+node_modules/
+__pycache__/
+.wrangler/

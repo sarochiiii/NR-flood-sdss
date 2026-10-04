@@ -1,0 +1,53 @@
+// ทดสอบ line/kv/worker.js ด้วย KV และ LINE API จำลอง:  node --no-warnings tests/worker_kv.test.mjs
+import assert from 'node:assert/strict';
+import w from '../line/kv/worker.js';
+
+const store = new Map();
+const KV = { get: async (k, t) => { const v = store.get(k); return v == null ? null : (t === 'json' ? JSON.parse(v) : v); },
+  put: async (k, v) => { store.set(k, v); }, delete: async k => { store.delete(k); },
+  list: async ({ prefix }) => ({ keys: [...store.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true }) };
+const sent = [];
+globalThis.fetch = async (u, o = {}) => { u = String(u);
+  if (u.includes('github.io')) return { ok: false };                        // ข้อมูลสถานการณ์น้ำ — ไม่ทดสอบที่นี่
+  if (u.endsWith('/quota')) return { ok: true, json: async () => ({ type: 'limited', value: 300 }) };
+  if (u.endsWith('/consumption')) return { ok: true, json: async () => ({ totalUsage: 0 }) };
+  if (u.includes('/members/count')) return { ok: true, json: async () => ({ count: 5 }) };
+  sent.push({ u, b: JSON.parse(o.body) }); return { ok: true, status: 200, text: async () => '' }; };
+const env = { USERS: KV, LINE_CHANNEL_SECRET: 's', LINE_CHANNEL_TOKEN: 't', STATS_KEY: 'k'.repeat(24), DAILY_GROUP_PUSH: 'on' };
+const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('s'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+async function send(ev) {
+  const b = JSON.stringify({ events: [ev] });
+  const sig = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(b)))));
+  const n = sent.length;
+  const r = await w.fetch(new Request('https://x', { method: 'POST', body: b, headers: { 'x-line-signature': sig } }), env);
+  assert.equal(r.status, 200);
+  return sent.length > n ? sent.at(-1).b.messages.map(m => m.text || m.type).join(' | ') : '';
+}
+const U = (id, text) => send({ type: 'message', replyToken: 'r', source: { type: 'user', userId: id }, message: { type: 'text', text } });
+const G = (id, text) => send({ type: 'message', replyToken: 'r', source: { type: 'group', groupId: 'G1', userId: id }, message: { type: 'text', text } });
+
+store.set('invite:CHANAT-TEST1', JSON.stringify({ note: 'test' }));
+assert.match(await U('UA', 'ลงทะเบียน ADM'), /รหัสเชิญ/);
+assert.match(await U('UA', 'WRONG1'), /ไม่ถูกต้อง/);
+assert.match(await U('UA', 'chanat-test1'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
+assert.match(await (U('UB', 'ลงทะเบียน ADM'), U('UB', 'CHANAT-TEST1')), /ถูกใช้แล้ว/);
+assert.match(await U('UC', 'ลงทะเบียน ประชาชน'), /ประชาชน/);
+// ขอความช่วยเหลือ (ทางลัด) → แจ้ง ADM
+assert.match(await U('UC', 'ขอความช่วยเหลือ'), /1669/);
+for (const m of ['หมู่ 5', 'ข้าม', 'ทดสอบ']) await U('UC', m);
+await U('UC', 'ยืนยัน');
+const mc = sent.filter(s => s.u.includes('multicast')).at(-1);
+assert.deepEqual(mc.b.to, ['UA']);
+// กลุ่ม: ข้อความทั่วไปไม่ตอบ · ผู้ไม่มีรหัสเปิดรายงานไม่ได้
+await send({ type: 'join', replyToken: 'r', source: { type: 'group', groupId: 'G1' } });
+assert.equal(await G('UC', 'สวัสดี'), '');
+assert.match(await G('UC', 'เปิดรายงานประจำวัน'), /เฉพาะ ADM/);
+assert.match(await G('UA', 'เปิดรายงานประจำวัน'), /เปิดรายงาน/);
+// /api/reports สาธารณะ: ไม่มีรายละเอียด/ผู้รายงาน · ขอความช่วยเหลือเป็นจำนวนเท่านั้น
+const pr = await (await w.fetch(new Request('https://x/api/reports'), env)).json();
+assert.equal(pr.items.length, 0);
+assert.equal(Object.values(pr.help_by_village).reduce((a, b) => a + b, 0), 1);
+assert.ok(!JSON.stringify(pr).includes('ทดสอบ') && !JSON.stringify(pr).includes('UC'));
+// /stats ต้องใช้ key
+assert.equal((await w.fetch(new Request('https://x/stats'), env)).status, 403);
+console.log('worker_kv: ผ่านทุกกรณี');

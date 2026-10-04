@@ -8,7 +8,7 @@
 2. github.com/sarochiiii/NR-flood-sdss → **Add file → Upload files** → ลาก**โฟลเดอร์ระดับบนสุด** (`region`, `scripts`) ไปวาง
    ไฟล์ชื่อซ้ำจะถูกเขียนทับ ไฟล์อื่นไม่ถูกแตะ
 3. **Commit changes** → รอ Actions → `pages-build-deployment` ขึ้น ✓ (1–2 นาที)
-4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=29)
+4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=31)
    มิฉะนั้น browser จะใช้ไฟล์เก่าใน cache (GitHub Pages cache ~10 นาที) — ผู้ใช้กด Ctrl+F5 ได้ชั่วคราว
 
 ข้อห้าม: อย่าลากโฟลเดอร์ `.github` ผ่าน Upload files (อาจไม่ติด) — แก้ workflow ด้วยการเปิดไฟล์แล้วกดดินสอ ✏️

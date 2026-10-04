@@ -3,10 +3,10 @@
 ## บัญชีและระบบ (ใช้งานจริง)
 - LINE OA แพ็กเกจ **Free** (300 push/เดือน · ตอบกลับไม่นับ) · Provider `NRRU-IDRM` · Messaging API + webhook ไปยัง Worker
 - Cloudflare Worker **`chanat-line-webhook`** · KV binding `USERS` → namespace `LINE_USERS`
-- โค้ด **v4.2** (`line-webhook-worker-v4.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
+- โค้ด **v4.4** (`line/kv/worker.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
 - rich menu 4 ปุ่ม: สถานการณ์น้ำ · แผนที่เสี่ยง · แจ้งเหตุ · ติดต่อ อบต.
 
-## ความสามารถ v4.2
+## ความสามารถ v4.4
 | เรื่อง | รายละเอียด |
 |---|---|
 | ลงทะเบียน | ประชาชน: กดปุ่ม · **ADM: พิมพ์ "ลงทะเบียน ADM" + รหัสเชิญ (ใช้ครั้งเดียว)** · ข้อความแจ้งการใช้ข้อมูล · "ลบข้อมูลของฉัน" |
@@ -14,6 +14,11 @@
 | แจ้งเหตุ (แชท) | ประเภท → หมู่บ้าน → ตำแหน่ง (ปุ่มส่งตำแหน่ง/ข้าม) → รายละเอียด → ยืนยัน → multicast ถึง **ADM ที่ยืนยันด้วยรหัสเชิญ** (`index:adm2`) · รายงานหมดอายุ 90 วัน |
 | กลุ่ม LINE ของ ADM | เชิญ OA เข้ากลุ่ม · ตอบเฉพาะ `สถานการณ์น้ำ` · `เปิดรายงานประจำวัน` · `ปิดรายงานประจำวัน` (เปิด/ปิดได้เฉพาะ ADM ที่มีรหัส) · ข้อความอื่นไม่อ่าน/ไม่เก็บ/ไม่ตอบ · ส่งสรุป 07:00 น. เมื่อ `DAILY_GROUP_PUSH=on` · **ตรวจโควตาก่อนส่ง** (กลุ่มนับตามจำนวนสมาชิก) |
 | `/stats?key=STATS_KEY` | ผู้ลงทะเบียน (แยก adm/public) · ยังไม่ลงทะเบียน · active 7/30 วัน · เข้าร่วมรายเดือน · กลุ่ม · รายงานแยกประเภท/เดือน — ไม่มีข้อมูลรายบุคคล |
+
+## เพิ่มใน v4.3–v4.4
+- ทางลัด `ขอความช่วยเหลือ` (ไม่มี session) → แสดงเบอร์ 1669/1784/191 → ข้ามไปขั้นหมู่บ้าน
+- ปุ่ม 📍/🆘 บนเว็บ เปิดแชท OA พร้อมคำสั่ง (`line.me/R/oaMessage/@142uxpzr/?…`) — ตั้ง `OA_ID` ใน `region/liff/config.js`
+- `GET /api/reports` สาธารณะ (CORS sarochiiii.github.io): 7 วัน · เฉพาะน้ำท่วมบ้าน/ถนนที่แชร์ตำแหน่ง · ปัด ~100 ม. · ไม่มีรายละเอียด/ผู้รายงาน · ขอความช่วยเหลือเป็นจำนวนรายหมู่บ้าน → ชั้น "รายงานเหตุจาก LINE OA" บนเว็บ (จางตามอายุ)
 
 ## KV keys
 `user:<id>` {role, adm, invite, consent, last_active} · `session:<id>` (30 นาที) · `report:<id>` (TTL 90 วัน) · `invite:<CODE>` {note, used_by} · `index:adm2` · `group:<gid>` {approved, daily, members, last_push} · `index:adm` (เดิม — ลบได้)

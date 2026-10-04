@@ -14,8 +14,8 @@ description: คู่มือพัฒนาและดูแลระบบ 
 
 | ส่วน | ที่อยู่ | สถานะ |
 |---|---|---|
-| **เว็บสาธารณะ SDSS-ChanAT** | https://sarochiiii.github.io/NR-flood-sdss/region/ · หน้าลำเชียงไกร `…/region/lamchiangkrai.html` | ใช้งาน · `?v=29` |
-| **LINE OA "จันอัดบ้านฉัน"** | Cloudflare Worker `chanat-line-webhook` (KV `LINE_USERS`) · โค้ด `line-webhook-worker-v4.js` (v4.2) | ใช้งาน · แพ็กเกจ Free |
+| **เว็บสาธารณะ SDSS-ChanAT** | https://sarochiiii.github.io/NR-flood-sdss/region/ · หน้าลำเชียงไกร `…/region/lamchiangkrai.html` | ใช้งาน · `?v=31` |
+| **LINE OA "จันอัดบ้านฉัน"** | Cloudflare Worker `chanat-line-webhook` (KV `LINE_USERS`) · โค้ด `line/kv/worker.js` (v4.4) | ใช้งาน · แพ็กเกจ Free |
 | **Sandbox บ้านด่านติง (จำกัดสิทธิ์)** | Cloudflare Pages + Cloudflare Access (≤ 5 อีเมล) · ไฟล์ชุด `sandbox-private` **ไม่อยู่ใน GitHub** | เตรียมไฟล์แล้ว · แสดงตำแหน่งบ้าน 97 หลัง |
 
 รายละเอียด: เว็บ → `references/architecture.md` · LINE OA → `references/line-oa.md` · Sandbox → `references/sandbox.md`
@@ -35,7 +35,7 @@ description: คู่มือพัฒนาและดูแลระบบ 
 
 - **clone repo ล่าสุดก่อนแก้เสมอ** (`git clone --depth 1 https://github.com/sarochiiii/NR-flood-sdss.git`) แล้ว diff กับสำเนาในเครื่อง — มีการแก้จากช่องทางอื่น (เช่นชื่อระบบ SDSS-ChanAT, ปิดชั้นลุ่มน้ำเป็นค่าเริ่มต้น) ถ้าไม่ตรวจจะเขียนทับ
 - ส่งงานเป็น `update-N.zip` ที่มีเฉพาะไฟล์ที่เปลี่ยน ตาม path จริง ผู้ใช้อัปโหลดผ่านหน้าเว็บ GitHub (ไม่ใช้ git)
-- แก้ JS/CSS ต้องเพิ่ม `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน 29 → ครั้งถัดไป 30)
+- แก้ JS/CSS ต้องเพิ่ม `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน 31 → ครั้งถัดไป 32)
 - ทดสอบก่อนส่ง: `node --check`, jsdom + leaflet (mock fetch), Worker ด้วย mock KV/D1 (`node:sqlite`), TypeScript `--checkJs` สำหรับโค้ดที่วางใน Cloudflare editor
 - ตรรกะ T อยู่ 2 ที่: `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 - ผู้ใช้หลักไม่ใช้ command line: อธิบายเป็นการคลิกทีละขั้น ภาษาไทย ศัพท์เทคนิคอังกฤษ
