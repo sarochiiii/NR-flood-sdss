@@ -273,7 +273,7 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
-      id: 'structures', icon: 'ti-building-bridge', label: 'อาคารชลศาสตร์ลำเชียงไกร (ปภ./อบต.)', on: true,
+      id: 'structures', icon: 'ti-building-bridge', label: 'อาคารชลศาสตร์ลำเชียงไกร (ปภ./อบต.)', on: false,
       async build() {
         const d = await json('data/structures.geojson');
         const STRUCT_COLOR = '#DB2777';   // สีเดียวทุกประเภท (ชมพูเข้ม ไม่ซ้ำกับสีสถานะระดับน้ำ/อ่าง) · ประเภทดูใน popup
