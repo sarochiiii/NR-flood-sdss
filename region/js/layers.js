@@ -341,7 +341,7 @@ document.addEventListener('sdss:ready', async () => {
         // อ่าง สระ หนอง บึง กุด พื้นที่ชุ่มน้ำ (ไม่รวมตัวลำน้ำ) · สร้างโดย workflow osm-rivers (scripts/region/build_osm_water.py)
         const d = await json('data/osm_water.geojson').catch(() => { throw new Error('รอ workflow osm-rivers สร้างข้อมูล'); });
         const TY = { reservoir: ['อ่างเก็บน้ำ', '#1E3A8A'], lake: ['หนอง/บึง', '#1D4ED8'], oxbow: ['กุด', '#0369A1'], pond: ['สระ/บ่อ', '#0EA5E9'],
-          wetland: ['พื้นที่ชุ่มน้ำ', '#0F766E'], basin: ['บ่อพัก/บ่อบำบัด', '#64748B'], other: ['แหล่งน้ำอื่น', '#38BDF8'] };
+          wetland: ['พื้นที่ชุ่มน้ำ', '#0F766E'], basin: ['บ่อพัก/บ่อบำบัด', '#64748B'], other: ['แหล่งน้ำ (OSM ไม่ระบุประเภท)', '#38BDF8'] };
         const ty = (t) => TY[t] || TY.other;
         const lyr = L.geoJSON(d, { style: f => ({ color: ty(f.properties.type)[1], weight: 1, fillColor: ty(f.properties.type)[1],
             fillOpacity: f.properties.type === 'wetland' ? 0.25 : 0.55, dashArray: f.properties.type === 'wetland' ? '3 2' : null }),
