@@ -336,6 +336,22 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
+      id: 'water', icon: 'ti-droplet-half-2', label: 'แหล่งน้ำผิวดิน (OpenStreetMap)', on: false,
+      async build() {
+        // อ่าง สระ หนอง บึง กุด พื้นที่ชุ่มน้ำ (ไม่รวมตัวลำน้ำ) · สร้างโดย workflow osm-rivers (scripts/region/build_osm_water.py)
+        const d = await json('data/osm_water.geojson').catch(() => { throw new Error('รอ workflow osm-rivers สร้างข้อมูล'); });
+        const TY = { reservoir: ['อ่างเก็บน้ำ', '#1E3A8A'], lake: ['หนอง/บึง', '#1D4ED8'], oxbow: ['กุด', '#0369A1'], pond: ['สระ/บ่อ', '#0EA5E9'],
+          wetland: ['พื้นที่ชุ่มน้ำ', '#0F766E'], basin: ['บ่อพัก/บ่อบำบัด', '#64748B'], other: ['แหล่งน้ำอื่น', '#38BDF8'] };
+        const ty = (t) => TY[t] || TY.other;
+        const lyr = L.geoJSON(d, { style: f => ({ color: ty(f.properties.type)[1], weight: 1, fillColor: ty(f.properties.type)[1],
+            fillOpacity: f.properties.type === 'wetland' ? 0.25 : 0.55, dashArray: f.properties.type === 'wetland' ? '3 2' : null }),
+          onEachFeature: (f, l) => l.bindTooltip(`${esc(f.properties.name || 'ไม่มีชื่อใน OSM')} · ${ty(f.properties.type)[0]} · ${Number(f.properties.area_rai).toLocaleString('th-TH', { maximumFractionDigits: 1 })} ไร่`, { sticky: true }) });
+        const c = d.count || {}, top = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${ty(k)[0]} ${v}`).join(' · ');
+        return { lyr, sub: `${d.features.length.toLocaleString('th-TH')} แหล่ง · ${Number(d.total_rai || 0).toLocaleString('th-TH')} ไร่ · ${top}`,
+          attr: 'แหล่งน้ำ © OpenStreetMap contributors (ODbL)' };
+      }
+    },
+    {
       id: 'labels', icon: 'ti-map-pin', label: 'เขตตำบล/อำเภอ', on: true,
       async build() {
         return { toggle: (on) => { map.getContainer().classList.toggle('hide-labels', !on); window.SDSS.setTambonVisible(on); },
@@ -538,7 +554,7 @@ document.addEventListener('sdss:ready', async () => {
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'structures', 'glofas']],
-    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'basins']]];
+    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'water', 'basins']]];
   function render() {
     $('layers').innerHTML = GROUPS.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);

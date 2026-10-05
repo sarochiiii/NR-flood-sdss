@@ -1,12 +1,12 @@
 name: osm-rivers
-# ลำน้ำจาก OpenStreetMap → region/data/osm_rivers.geojson (ข้อมูลคงที่ ไม่ต้องอัปเดตบ่อย)
+# ลำน้ำ + แหล่งน้ำผิวดินจาก OpenStreetMap → region/data/osm_rivers.geojson, osm_water.geojson (ข้อมูลคงที่ ไม่ต้องอัปเดตบ่อย)
 on:
   workflow_dispatch:
   schedule:
     - cron: '40 2 1 * *'        # วันที่ 1 ของทุกเดือน 09:40 น.
   push:
     branches: [main]
-    paths: [scripts/region/build_osm_rivers.py]
+    paths: [scripts/region/build_osm_rivers.py, scripts/region/build_osm_water.py]
 concurrency: { group: osm-rivers, cancel-in-progress: false }
 jobs:
   build:
@@ -18,13 +18,15 @@ jobs:
         with: { python-version: '3.11' }
       - name: ดึงลำน้ำจาก OSM (Overpass)
         run: python scripts/region/build_osm_rivers.py
+      - name: ดึงแหล่งน้ำผิวดินจาก OSM (อ่าง สระ หนอง บึง กุด พื้นที่ชุ่มน้ำ)
+        run: python scripts/region/build_osm_water.py
       - name: commit ผลลัพธ์
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add region/data/osm_rivers.geojson 2>/dev/null || true
+          for f in region/data/osm_rivers.geojson region/data/osm_water.geojson; do if [ -f "$f" ]; then git add "$f"; fi; done
           git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
-          git commit -m "data(region): ลำน้ำจาก OpenStreetMap $(date -u '+%Y-%m-%d')"
+          git commit -m "data(region): ลำน้ำและแหล่งน้ำจาก OpenStreetMap $(date -u '+%Y-%m-%d')"
           for i in 1 2 3 4; do
             git pull --rebase --quiet && git push && exit 0
             sleep $((i * 15))
