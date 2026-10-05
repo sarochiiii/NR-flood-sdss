@@ -1,0 +1,32 @@
+name: osm-rivers
+# ลำน้ำจาก OpenStreetMap → region/data/osm_rivers.geojson (ข้อมูลคงที่ ไม่ต้องอัปเดตบ่อย)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '40 2 1 * *'        # วันที่ 1 ของทุกเดือน 09:40 น.
+  push:
+    branches: [main]
+    paths: [scripts/region/build_osm_rivers.py]
+concurrency: { group: osm-rivers, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - name: ดึงลำน้ำจาก OSM (Overpass)
+        run: python scripts/region/build_osm_rivers.py
+      - name: commit ผลลัพธ์
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add region/data/osm_rivers.geojson 2>/dev/null || true
+          git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+          git commit -m "data(region): ลำน้ำจาก OpenStreetMap $(date -u '+%Y-%m-%d')"
+          for i in 1 2 3 4; do
+            git pull --rebase --quiet && git push && exit 0
+            sleep $((i * 15))
+          done
+          exit 1
