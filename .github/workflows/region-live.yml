@@ -18,6 +18,8 @@ jobs:
         run: python scripts/region/fetch_rain.py
       - name: ฝนเฉลี่ยลุ่มน้ำ (Open-Meteo × HydroBASINS)
         run: python scripts/region/fetch_basin_rain.py
+      - name: พยากรณ์อากาศ ECMWF ต.จันอัด (Open-Meteo · ทุก 3 ชม.)
+        run: python scripts/region/fetch_ecmwf.py
       - name: สถานีฝนและระดับน้ำ (ThaiWater)
         run: python scripts/region/fetch_thaiwater.py
       - name: ฝนสะสม 1/3/7 วัน และอ่างเก็บน้ำ (ThaiWater จังหวัด)

@@ -33,6 +33,12 @@
 - ส่งพิกัดตัวแทน 26 ตำบลในคำขอเดียว ได้ list · ฟรีสำหรับงานไม่ใช่เชิงพาณิชย์
 - เทียบกับสถานีจริง (21–26 ก.ย. 69): แบบจำลองสูงกว่าสถานีในพื้นที่ราว 15–40 มม./7 วัน
 
+### 4ข. ECMWF IFS ผ่าน Open-Meteo (`scripts/region/fetch_ecmwf.py` → `live/ecmwf.json`)
+- `…/v1/forecast?latitude=<จันอัด>&longitude=…&models=ecmwf_ifs025&hourly=precipitation&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=Asia/Bangkok`
+- กริด 0.25° (~25 กม.) · ECMWF ออกรอบละ 6 ชม. → ดึงไม่เกินทุก 3 ชม. · ใช้ในรายงาน "สถานการณ์น้ำ" (ฝน 24/72 ชม. + 3 วัน)
+- ยังไม่ได้ตรวจชื่อ field กับคำตอบจริงจากเครื่องพัฒนา (เครือข่ายปิด) — ตรวจ `live/ecmwf.json` หลัง Actions รอบแรก · ถ้า `status: error` ดู `error`
+- ผลแบบจำลองระดับโลก ไม่ใช่การพยากรณ์ของกรมอุตุนิยมวิทยา · เครดิต CC BY 4.0
+
 ## 5. RainViewer
 - `https://api.rainviewer.com/public/weather-maps.json` → `host + radar.past[-1].path + /256/{z}/{x}/{y}/2/1_1.png`
 - รุ่นฟรีปี 2026: zoom สูงสุด 7 (`maxNativeZoom`) · ต้องแสดงเครดิต "Weather data by RainViewer"
