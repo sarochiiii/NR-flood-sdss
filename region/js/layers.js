@@ -204,19 +204,18 @@ document.addEventListener('sdss:ready', async () => {
     const LC = window.LINE_CFG || {};
     if (!LC.WEBHOOK) throw new Error('ยังไม่ได้ตั้ง WEBHOOK ใน liff/config.js');
     const d = await json(LC.WEBHOOK.replace(/\/$/, '') + '/api/reports');
-    const ICON = { 'น้ำท่วมบ้าน': '🏠', 'ถนนน้ำท่วม/ขาด': '🚧' };
     const now = Date.now();
     const lyr = L.layerGroup((d.items || []).map(r => { const h = (now - Date.parse(r.created_at)) / 36e5;
       const op = h <= 24 ? 1 : h <= 72 ? 0.7 : 0.45;                       // จางลงตามอายุรายงาน
       return L.marker([r.lat, r.lon], { opacity: op, icon: L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11],
-          html: `<span class="rp-pin" style="${r.by === 'adm' ? 'outline:2px solid #0E7C7B;border-radius:50%' : ''}">${ICON[r.type] || '❗'}</span>` }) })
+          html: `<span class="rp-dot${h <= 24 ? ' new' : ''}" title="${esc(r.type)}"></span>` }) })   // จุดแดงกระพริบ (24 ชม. แรกกระพริบแรงกว่า)
         .bindPopup(`<b>${esc(r.type)}</b> · ${esc(r.village)}<br>
           <span class="bk" style="background:${r.by === 'adm' ? '#0E7C7B' : '#94A3B8'}">${r.by === 'adm' ? 'รายงานโดย ADM' : 'รายงานจากประชาชน · ยังไม่ได้ตรวจสอบ'}</span>
           <div class="trend">${new Date(r.created_at).toLocaleString('th-TH')} · ${h < 1 ? 'ไม่ถึง 1 ชม.' : Math.round(h) + ' ชม.'}ที่แล้ว</div>
           <div class="muted" style="font-size:11px">ตำแหน่งโดยประมาณ (~100 ม.) · ไม่แสดงตัวผู้รายงาน</div>`); }));
     const nHelp = Object.values(d.help_by_village || {}).reduce((a, b) => a + b, 0), nNo = Object.values(d.no_location_by_village || {}).reduce((a, b) => a + b, 0);
     return { lyr, sub: `${(d.items || []).length} จุด ใน ${d.days} วัน` + (nNo ? ` · ไม่มีตำแหน่ง ${nNo}` : '') + (nHelp ? ` · ขอความช่วยเหลือ ${nHelp} เรื่อง (ไม่แสดงตำแหน่ง)` : ''),
-      attr: 'รายงานจาก LINE OA จันอัดบ้านฉัน (ยังไม่ได้ตรวจสอบทั้งหมด)' };
+      attr: 'จุดแจ้งเหตุจาก LINE OA จันอัดบ้านฉัน (ยังไม่ได้ตรวจสอบ)' };
   }
   // GloFAS: สถานะจากค่ามัธยฐานพยากรณ์เทียบเกณฑ์ค่าสูงสุดรายปี (≈ รอบ 2/5/20 ปี)
   function glofasStatus(p) {
@@ -295,7 +294,7 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
-      id: 'reports', icon: 'ti-map-pin-exclamation', label: 'รายงานเหตุจาก LINE OA', on: false,
+      id: 'reports', icon: 'ti-map-pin-exclamation', label: 'จุดแจ้งเหตุจาก LINE OA', on: true,
       async build() {
         if (!lineReady) return reportsV4();
         const [rp, hs] = await Promise.all([json(LC.API + '/api/reports'), json(LC.API + '/api/help/summary').catch(() => null)]);
@@ -737,13 +736,13 @@ document.addEventListener('sdss:ready', async () => {
   //  2) มีเพียง LINE OA (OA_ID) → เปิดแชท "จันอัดบ้านฉัน" พร้อมพิมพ์คำสั่งให้ ผู้ใช้กดส่ง แล้วทำตามขั้นตอนในแชท
   const oaId = LC.OA_ID && !/YOUR_/.test(LC.OA_ID) ? LC.OA_ID.trim() : '';
   const oaLink = (msg) => `https://line.me/R/oaMessage/${encodeURIComponent(oaId)}/?${encodeURIComponent(msg)}`;
-  [['btn-report', 'report.html', 'รายงานเหตุ'], ['btn-help', 'help.html', 'ขอความช่วยเหลือ']].forEach(([id, page, cmd]) => { const a = $(id); if (!a) return;
+  [['btn-report', 'report.html', 'รายงานเหตุ']].forEach(([id, page, cmd]) => { const a = $(id); if (!a) return;
     if (lineReady) a.href = `https://liff.line.me/${LC.LIFF_ID}/${page}`;
     else if (oaId) a.href = oaLink(cmd);
     else { a.classList.add('off'); a.removeAttribute('href'); return; }
     a.target = '_blank'; a.rel = 'noopener'; });
   if ($('act-note')) $('act-note').innerHTML = lineReady ? $('act-note').innerHTML
-    : oaId ? `เปิดแชท LINE "จันอัดบ้านฉัน" แล้วกด<b>ส่ง</b> · ต้องเพิ่มเพื่อนและลงทะเบียนก่อน (<a href="https://line.me/R/ti/p/${encodeURIComponent(oaId)}" target="_blank" rel="noopener">เพิ่มเพื่อน</a>) · อันตรายต่อชีวิตโทร 1669 / 1784`
+    : oaId ? `เปิดแชท LINE "จันอัดบ้านฉัน" แล้วกด<b>ส่ง</b> · ต้องแชร์ตำแหน่งที่เกิดเหตุ จุดจะขึ้นบนแผนที่เป็นจุดแดงกระพริบ · ต้องเพิ่มเพื่อนและลงทะเบียนก่อน (<a href="https://line.me/R/ti/p/${encodeURIComponent(oaId)}" target="_blank" rel="noopener">เพิ่มเพื่อน</a>) · อันตรายต่อชีวิตโทร 1669 / 1784`
     : 'เปิดใช้เมื่อตั้งค่า LINE OA เสร็จ · อันตรายต่อชีวิตโทร 1669 / 1784';
   if ($('now-more')) $('now-more').onclick = () => { const c = $('now').classList.toggle('collapsed'); $('now-more').textContent = c ? 'ดูทั้งหมด ▾' : 'ย่อ ▴'; };
 

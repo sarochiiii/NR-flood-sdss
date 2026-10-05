@@ -163,3 +163,11 @@ button.btn{background:#fff;font-family:inherit;cursor:pointer}button.btn:disable
 .lrep{margin-top:8px}.lrep pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:12.5px;line-height:1.55;margin:0 0 8px;max-height:320px;overflow:auto}
 .lrep-act{display:flex;gap:6px;margin-bottom:6px}.lrep-act>*{flex:1;padding:6px;border-radius:6px;font-size:13px;font-weight:500;font-family:inherit;text-align:center;cursor:pointer;text-decoration:none}
 .lrep-act button{background:#fff;border:1px solid var(--teal);color:var(--teal);font-family:inherit}.lrep-act a{background:#06C755;color:#fff;border:1px solid #06C755}
+/* จุดแจ้งเหตุจาก LINE OA: จุดแดงกระพริบ */
+.act2.one{grid-template-columns:1fr}
+.rp-dot{position:relative;display:block;box-sizing:border-box;width:18px;height:18px;margin:2px;border-radius:50%;background:#DC2626;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,.6)}
+.rp-dot::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #DC2626;animation:rp-pulse 1.6s ease-out infinite}
+.rp-dot.new{animation:rp-blink 1s steps(2,start) infinite}
+@keyframes rp-pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.8);opacity:0}}
+@keyframes rp-blink{50%{background:#FCA5A5}}
+@media (prefers-reduced-motion:reduce){.rp-dot::after,.rp-dot.new{animation:none}}
