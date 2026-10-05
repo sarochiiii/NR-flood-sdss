@@ -21,14 +21,21 @@ jobs:
       - name: ดึงแหล่งน้ำผิวดินจาก OSM (อ่าง สระ หนอง บึง กุด พื้นที่ชุ่มน้ำ)
         run: python scripts/region/build_osm_water.py
       - name: commit ผลลัพธ์
+        # ไฟล์ที่สร้างใหม่ถือเป็นค่าล่าสุดเสมอ: ถ้า main มี commit อื่นเข้ามาระหว่างรัน (เช่น region-live หรือ run osm-rivers ซ้อน)
+        # ให้ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ แทน git pull --rebase ซึ่งจะ conflict เมื่อไฟล์เดียวกันถูกแก้ทั้งสองฝั่ง
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for f in region/data/osm_rivers.geojson region/data/osm_water.geojson; do if [ -f "$f" ]; then git add "$f"; fi; done
-          git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
-          git commit -m "data(region): ลำน้ำและแหล่งน้ำจาก OpenStreetMap $(date -u '+%Y-%m-%d')"
+          mkdir -p /tmp/osm
+          for f in osm_rivers osm_water; do if [ -f "region/data/$f.geojson" ]; then cp "region/data/$f.geojson" /tmp/osm/; fi; done
           for i in 1 2 3 4; do
-            git pull --rebase --quiet && git push && exit 0
+            git fetch --quiet origin main && git reset --quiet --hard origin/main
+            cp /tmp/osm/*.geojson region/data/ 2>/dev/null || true
+            for f in region/data/osm_rivers.geojson region/data/osm_water.geojson; do if [ -f "$f" ]; then git add "$f"; fi; done
+            git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+            git commit --quiet -m "data(region): ลำน้ำและแหล่งน้ำจาก OpenStreetMap $(date -u '+%Y-%m-%d')"
+            git push --quiet origin HEAD:main && exit 0
+            echo "push ไม่สำเร็จ (ครั้งที่ $i) — รอ $((i * 15)) วินาทีแล้วลองใหม่"
             sleep $((i * 15))
           done
           exit 1

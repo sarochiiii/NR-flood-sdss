@@ -35,7 +35,7 @@ docs/                        คู่มือส่งมอบ
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
 2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=35**
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=36**
 4. **รายงานสถานการณ์มี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` (ระหว่าง `// >>> situationReport` … `// <<<`) — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
