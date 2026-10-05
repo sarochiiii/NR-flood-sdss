@@ -558,7 +558,14 @@ document.addEventListener('sdss:ready', async () => {
       <i class="ti ${d.icon} licon" aria-hidden="true"></i>
       <div class="ltext"><div class="llab">${d.label}</div><div class="lsub ${s.err ? 'lerr' : ''}">${esc(s.err || s.sub || (s.loading ? 'กำลังโหลด…' : 'แตะเพื่อเปิด'))}</div></div>
       <label class="tog"><input type="checkbox" ${s.on ? 'checked' : ''} aria-label="${d.label}"><span></span></label>
-    </div>${swHtml}`;
+    </div>${swHtml}${d.id === 'labels' ? tmodeHtml(s.on) : ''}`;
+  }
+  // การแสดงผลตำบล (โหมดสี) — ย้ายจากปุ่มมุมขวาบนของแผนที่ · ปิดเขตตำบลแล้วเป็นสีจางและเลือกไม่ได้
+  function tmodeHtml(on) {
+    const S = window.SDSS, cur = S.getMode();
+    return `<fieldset class="tmode${on ? '' : ' off'}" ${on ? '' : 'disabled'}><legend>การแสดงผลตำบล</legend>
+      ${S.tambonModes().map(m => `<label><input type="radio" name="tmode" value="${m.id}" ${m.id === cur ? 'checked' : ''}> ${esc(m.label)}</label>`).join('')}
+    </fieldset>`;
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'structures', 'glofas']],
@@ -569,6 +576,7 @@ document.addEventListener('sdss:ready', async () => {
       return rows.length ? `<div class="lgrp">${g}</div>` + rows.map(row).join('') : '';
     }).join('');
     $('layers').querySelectorAll('.lrow input').forEach(cb => cb.onchange = () => setOn(cb.closest('.lrow').dataset.id, cb.checked));
+    $('layers').querySelectorAll('.tmode input').forEach(r => r.onchange = () => window.SDSS.setMode(r.value));
     $('layers').querySelectorAll('.lsw button').forEach(b => b.onclick = () => {
       const id = b.closest('.lsw').previousElementSibling.dataset.id;
       state[id].sw = b.dataset.sw; rebuild(id);
