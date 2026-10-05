@@ -295,7 +295,7 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
-      id: 'reports', icon: 'ti-map-pin-exclamation', label: 'รายงานเหตุจาก LINE OA', on: true,
+      id: 'reports', icon: 'ti-map-pin-exclamation', label: 'รายงานเหตุจาก LINE OA', on: false,
       async build() {
         if (!lineReady) return reportsV4();
         const [rp, hs] = await Promise.all([json(LC.API + '/api/reports'), json(LC.API + '/api/help/summary').catch(() => null)]);
@@ -320,6 +320,20 @@ document.addEventListener('sdss:ready', async () => {
           style: f => ({ color: col[f.properties.id], weight: 2, dashArray: '6 4', fill: false }),
           onEachFeature: (f, l) => l.bindTooltip(`${f.properties.name} · ${Number(f.properties.area_km2).toLocaleString('th-TH')} ตร.กม. (D.A กรมชลประทาน ${Number(f.properties.da_rid).toLocaleString('th-TH')})`, { sticky: true }) });
         return { lyr, sub: 'ลำเชียงไกร (ฟ้า) · มูลตอนบน (ม่วง) · ลำตะคอง (ส้ม) · ตรวจกับ D.A กรมชลประทานแล้ว', attr: 'HydroBASINS © WWF (HydroSHEDS)' };
+      }
+    },
+    {
+      id: 'rivers', icon: 'ti-wave-sine', label: 'แม่น้ำ/ลำน้ำ (OpenStreetMap)', on: false,
+      async build() {
+        // สร้างโดย .github/workflows/osm-rivers.yml (scripts/region/build_osm_rivers.py) · river หนา · canal ประ · stream บาง
+        const d = await json('data/osm_rivers.geojson').catch(() => { throw new Error('รอ workflow osm-rivers สร้างข้อมูล'); });
+        const ST = { river: { color: '#1D4ED8', weight: 3 }, canal: { color: '#0891B2', weight: 1.6, dashArray: '5 3' }, stream: { color: '#3B82F6', weight: 1.2, opacity: 0.8 } };
+        const TH = { river: 'แม่น้ำ/ลำน้ำสายหลัก', canal: 'คลอง/คลองส่งน้ำ', stream: 'ลำห้วย' };
+        const lyr = L.geoJSON(d, { interactive: true, style: f => ST[f.properties.type] || ST.stream,
+          onEachFeature: (f, l) => l.bindTooltip(`${esc(f.properties.name || 'ไม่มีชื่อใน OSM')} · ${TH[f.properties.type] || f.properties.type}`, { sticky: true }) });
+        const c = d.count || {};
+        return { lyr, sub: `แม่น้ำ ${c.river || 0} · คลอง ${c.canal || 0} · ลำห้วย ${c.stream || 0} เส้น · ${hhmm(d.updated_at)}`,
+          attr: 'ลำน้ำ © OpenStreetMap contributors (ODbL)' };
       }
     },
     {
@@ -381,7 +395,7 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
-      id: 'rainsta', icon: 'ti-droplet', label: 'ฝนสถานีตรวจวัด', on: false, sw: ['rain_24h', 'rain_1h'],
+      id: 'rainsta', icon: 'ti-droplet', label: 'ฝนสถานีตรวจวัด', on: true, sw: ['rain_24h', 'rain_1h'],
       swLabels: ['สะสม 24 ชม.', 'ความเข้มตอนนี้'],
       async build(state) {
         const tw = await thaiwater(), key = state.sw || 'rain_24h';
@@ -525,7 +539,7 @@ document.addEventListener('sdss:ready', async () => {
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'structures', 'glofas']],
-    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'basins']]];
+    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'basins']]];
   function render() {
     $('layers').innerHTML = GROUPS.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);

@@ -9,3 +9,6 @@
 → mock `window.fetch` ให้คืนไฟล์จาก `region/` (และ `region/data/live/` จาก repo) → ตั้ง `HTMLElement.prototype.clientWidth/Height` ให้ไม่เป็น 0
 → รอ ~2.5 วินาที แล้วตรวจ DOM เช่น `.lrow[data-id=...] .lsub`, `#now .wrow`, `#query` (การ์ดตำบลหลัง `window.SDSS.select('301010')`)
 หมายเหตุ: jsdom ไม่มี canvas — stub `HTMLCanvasElement.prototype.getContext`
+
+## รายงานสถานการณ์สำหรับ LINE
+`node --no-warnings tests/report.test.mjs` — `situationReport` ใน `region/js/report.js` ต้องตรงกับ `line/kv/worker.js` ทุกตัวอักษร · สร้างข้อความจาก `region/data/live` ได้ ไม่มี undefined/NaN · คำสั่ง "สถานการณ์น้ำ" ใน worker ได้ข้อความเดียวกับเว็บ

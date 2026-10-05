@@ -183,7 +183,9 @@
     $('modes').style.display = on ? '' : 'none';
     redraw();
   }
-  map.fitBounds(tLayer.getBounds(), { padding: [10, 10] });
+  // เปิดหน้าแรก: ซูมเต็มขอบเขต ต.จันอัด (cfg.sandbox.tcode) · ถ้าไม่พบใช้ขอบเขต 26 ตำบล
+  const homeT = tLayer.getLayers().find(l => l.feature.properties.tcode === cfg.sandbox.tcode);
+  map.fitBounds((homeT || tLayer).getBounds(), { padding: [10, 10] });
 
   function redraw() {
     if (hexLayer) {
