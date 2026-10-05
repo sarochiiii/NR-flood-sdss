@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.5 (รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.6 (ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -33,18 +33,21 @@
 const SITE_URL = 'https://sarochiiii.github.io/NR-flood-sdss/';
 const ABT_PHONE = '';   // เบอร์ อบต.จันอัด ที่ยืนยันแล้ว เช่น '044xxxxxx' (ว่าง = ยังไม่ยืนยัน)
 const VILLAGES = [];    // รายชื่อหมู่บ้านสำหรับปุ่มเลือก ไม่เกิน 12 รายการ (ว่าง = ให้พิมพ์เอง)
+// ปิด "ติดต่อ อบต." และ "ขอความช่วยเหลือ" ไว้ก่อน (ยังไม่เกิดเหตุ · ป้องกันการกดเล่น) — เปิดใหม่ = true
+const HELP_ENABLED = false;
 // ─────────────────────────────────────────────────────────────────
 
 const DISCLAIMER =
   'ระบบนี้เป็นเครื่องมือสนับสนุนการตัดสินใจของโครงการวิจัย ' +
   'ไม่ใช่การประกาศเตือนภัยอย่างเป็นทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.';
 const EMERGENCY = 'กรณีฉุกเฉินต่อชีวิต โทร 1669 (การแพทย์ฉุกเฉิน) หรือ 1784 (ปภ.) ทันที';
-const TYPES = ['น้ำท่วมบ้าน', 'ถนนน้ำท่วม/ขาด', 'ขอความช่วยเหลือ'];
+const TYPES = ['น้ำท่วมบ้าน', 'ถนนน้ำท่วม/ขาด', ...(HELP_ENABLED ? ['ขอความช่วยเหลือ'] : [])];
+const HELP_OFF = 'ปิดใช้งานชั่วคราว — ยังไม่เปิดช่องทางติดต่อ อบต./ขอความช่วยเหลือผ่านระบบนี้\n\n' + EMERGENCY;
 const SESSION_TTL = 1800;
 const REPORT_TTL = 90 * 86400;      // เก็บรายงานไว้ 90 วัน แล้ว KV ลบเอง
 const PRIVACY =
   'การใช้ข้อมูล: ระบบเก็บรหัสผู้ใช้ LINE ประเภทผู้ใช้ และรายงานที่ท่านส่ง (ตำแหน่ง/หมู่บ้าน/รายละเอียด) ' +
-  'เพื่อแจ้ง ADM และติดตามสถานการณ์เท่านั้น ไม่เผยแพร่ชื่อผู้รายงาน รายงานลบอัตโนมัติใน 90 วัน ' +
+  'เพื่อแสดงจุดแจ้งเหตุบนแผนที่ (ปัดตำแหน่ง ~100 ม.) และติดตามสถานการณ์เท่านั้น ไม่เผยแพร่ชื่อผู้รายงานและรายละเอียด รายงานลบอัตโนมัติใน 90 วัน ' +
   'พิมพ์ "ลบข้อมูลของฉัน" หรือเลิกติดตามบัญชีเพื่อลบข้อมูลได้ทุกเมื่อ';
 
 export default {
@@ -155,6 +158,7 @@ async function handleText(ev, env, userId, t) {
   }
 
   if (t === 'ติดต่อ อบต.') {
+    if (!HELP_ENABLED) return reply(ev, env, [text(HELP_OFF)]);
     return reply(ev, env, [text(ABT_PHONE
       ? `อบต.จันอัด โทร ${ABT_PHONE}\n\n${EMERGENCY}`
       : `อยู่ระหว่างยืนยันเบอร์ติดต่อ อบต.จันอัด\n\n${EMERGENCY}`)]);
@@ -175,6 +179,7 @@ async function handleText(ev, env, userId, t) {
   // ทางลัด "ขอความช่วยเหลือ" (จากปุ่มบนเว็บ) → ข้ามขั้นเลือกประเภท · ถ้ากำลังอยู่ในขั้นตอนอื่น ให้ถือเป็นการตอบขั้นนั้น
   const s = await getSession(env, userId);
   if (t === 'ขอความช่วยเหลือ' && !s) {
+    if (!HELP_ENABLED) return reply(ev, env, [text(HELP_OFF)]);
     const user = await getUser(env, userId);
     if (!user || !user.role) return reply(ev, env, [text('กรุณาลงทะเบียนก่อนขอความช่วยเหลือ\nหากมีอันตรายต่อชีวิต โทร 1669 · 1784 · 191 ทันที'), askRole()]);
     await putSession(env, userId, { step: 'village', type: 'ขอความช่วยเหลือ', started: nowIso() });
@@ -200,7 +205,7 @@ async function handleInvite(ev, env, userId, t) {
   await putUser(env, userId, { ...user, role: 'adm', adm: true, invite: code, active: true, consent: nowIso() });
   await setAdmIndex(env, userId, true);
   await env.USERS.delete(`session:${userId}`);
-  return reply(ev, env, [text(`ลงทะเบียนเป็น ADM เรียบร้อยแล้ว ท่านจะได้รับแจ้งเมื่อมีรายงานเหตุ\n\nข้อมูลในรายงานเป็นข้อมูลส่วนบุคคล ใช้เพื่อช่วยเหลือเท่านั้น ห้ามส่งต่อ\n\n${PRIVACY}`)]);
+  return reply(ev, env, [text(`ลงทะเบียนเป็น ADM เรียบร้อยแล้ว (เปิด/ปิดรายงานประจำวันในกลุ่ม LINE ได้) · รายงานเหตุจากประชาชนดูได้บนแผนที่ ${SITE_URL}region/\n\n${PRIVACY}`)]);
 }
 
 // ─── Report flow: type → village → location → note → confirm ─────
@@ -220,11 +225,8 @@ async function handleReportStep(ev, env, userId, s, t) {
     return reply(ev, env, [askLocation()]);
   }
 
-  if (s.step === 'location') {
-    if (t !== 'ข้าม') return reply(ev, env, [askLocation()]);
-    s.step = 'note';
-    await putSession(env, userId, s);
-    return reply(ev, env, [askNote()]);
+  if (s.step === 'location') {                 // ต้องแชร์ตำแหน่งเท่านั้น (ข้อความใดก็ตามจะถามซ้ำ)
+    return reply(ev, env, [askLocation(true)]);
   }
 
   if (s.step === 'note') {
@@ -259,32 +261,8 @@ async function submitReport(ev, env, userId, s) {
   await env.USERS.put(`report:${id}`, JSON.stringify(report), { expirationTtl: REPORT_TTL });
   await env.USERS.delete(`session:${userId}`);
 
-  // แจ้ง ADM ทุกคน ยกเว้นผู้รายงานเอง
-  const targets = (await getAdmIds(env)).filter((u) => u !== userId);
-
-  const ack = `รับรายงานแล้ว รหัส ${id}\n` + (targets.length
-    ? `ส่งแจ้งเตือนถึง ADM ${targets.length} คนแล้ว`
-    : 'บันทึกรายงานแล้ว แต่ยังไม่มี ADM ในระบบที่รับแจ้งได้');
-  await reply(ev, env, [text(s.type === 'ขอความช่วยเหลือ' ? `${ack}\n\n${EMERGENCY}` : ack)]);
-  if (targets.length) {
-    /** @type {any[]} */
-    const msgs = [text(
-      `[รายงานเหตุใหม่] ${report.type}\n` +
-      `หมู่บ้าน: ${report.village}\n` +
-      (report.note ? `รายละเอียด: ${report.note}\n` : '') +
-      `เวลา: ${thaiTime()}\n` +
-      `รหัส: ${id}`)];
-    if (report.lat != null) {
-      msgs.push({
-        type: 'location',
-        title: `${report.type} · ${report.village}`.slice(0, 100),
-        address: (report.address || 'ตำแหน่งที่ผู้รายงานแชร์').slice(0, 100),
-        latitude: report.lat,
-        longitude: report.lon,
-      });
-    }
-    await multicast(env, targets, msgs);
-  }
+  // v4.6: ไม่ส่งถึง ADM (ไม่ใช้โควตา push) — จุดแจ้งเหตุแสดงบนแผนที่ผ่าน /api/reports (ไอคอนจุดแดงกระพริบ)
+  await reply(ev, env, [text(`รับรายงานแล้ว รหัส ${id}\nจุดแจ้งเหตุจะแสดงบนแผนที่ภายในไม่กี่นาที\n${SITE_URL}region/\n\n${EMERGENCY}`)]);
 }
 
 // ─── Message builders ────────────────────────────────────────────
@@ -320,14 +298,14 @@ function askVillage() {
   return msg;
 }
 
-function askLocation() {
+function askLocation(again) {
   return {
     type: 'text',
-    text: 'รายงานเหตุ (3/4)\nกดปุ่ม "ส่งตำแหน่ง" เพื่อแชร์ตำแหน่งที่เกิดเหตุ หรือกด "ข้าม"',
+    text: (again ? 'ต้องแชร์ตำแหน่งที่เกิดเหตุจึงจะส่งรายงานได้\n' : '') +
+      'รายงานเหตุ (3/4)\nกดปุ่ม "ส่งตำแหน่ง" แล้วเลื่อนหมุดไปที่จุดเกิดเหตุ\nจุดนี้จะแสดงบนแผนที่สาธารณะ (ปัด ~100 ม. ไม่แสดงชื่อและรายละเอียด)',
     quickReply: {
       items: [
         { type: 'action', action: { type: 'location', label: 'ส่งตำแหน่ง' } },
-        qr('ข้าม'),
         qr('ยกเลิก'),
       ],
     },

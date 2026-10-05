@@ -32,12 +32,20 @@ assert.match(await U('UA', 'WRONG1'), /ไม่ถูกต้อง/);
 assert.match(await U('UA', 'chanat-test1'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
 assert.match(await (U('UB', 'ลงทะเบียน ADM'), U('UB', 'CHANAT-TEST1')), /ถูกใช้แล้ว/);
 assert.match(await U('UC', 'ลงทะเบียน ประชาชน'), /ประชาชน/);
-// ขอความช่วยเหลือ (ทางลัด) → แจ้ง ADM
-assert.match(await U('UC', 'ขอความช่วยเหลือ'), /1669/);
-for (const m of ['หมู่ 5', 'ข้าม', 'ทดสอบ']) await U('UC', m);
-await U('UC', 'ยืนยัน');
-const mc = sent.filter(s => s.u.includes('multicast')).at(-1);
-assert.deepEqual(mc.b.to, ['UA']);
+// v4.6: ติดต่อ อบต./ขอความช่วยเหลือ ปิดชั่วคราว → ตอบเบอร์ฉุกเฉิน ไม่เปิด session
+assert.match(await U('UC', 'ขอความช่วยเหลือ'), /ปิดใช้งานชั่วคราว[\s\S]*1669/);
+assert.match(await U('UC', 'ติดต่อ อบต.'), /ปิดใช้งานชั่วคราว/);
+assert.equal(store.get('session:UC'), undefined);
+// รายงานเหตุ: ไม่มีตัวเลือกขอความช่วยเหลือ · ต้องแชร์ตำแหน่ง · ไม่ส่งถึง ADM
+assert.doesNotMatch(JSON.stringify((await U('UC', 'รายงานเหตุ'), sent.at(-1).b)), /ขอความช่วยเหลือ/);
+assert.match(await U('UC', 'ขอความช่วยเหลือ'), /ประเภทเหตุการณ์/);
+await U('UC', 'น้ำท่วมบ้าน'); await U('UC', 'หมู่ 5');
+assert.match(await U('UC', 'ข้าม'), /ต้องแชร์ตำแหน่ง/);
+await send({ type: 'message', replyToken: 'r', source: { type: 'user', userId: 'UC' }, message: { type: 'location', latitude: 15.156789, longitude: 102.157891, address: 'x' } });
+await U('UC', 'บ้านเลขที่ทดสอบ');
+const nSent = sent.length;
+assert.match(await U('UC', 'ยืนยัน'), /รับรายงานแล้ว[\s\S]*แผนที่/);
+assert.equal(sent.slice(nSent).filter(s => s.u.includes('multicast') || s.u.includes('/push')).length, 0);
 // กลุ่ม: ข้อความทั่วไปไม่ตอบ · ผู้ไม่มีรหัสเปิดรายงานไม่ได้
 await send({ type: 'join', replyToken: 'r', source: { type: 'group', groupId: 'G1' } });
 assert.equal(await G('UC', 'สวัสดี'), '');
@@ -45,8 +53,8 @@ assert.match(await G('UC', 'เปิดรายงานประจำวั�
 assert.match(await G('UA', 'เปิดรายงานประจำวัน'), /เปิดรายงาน/);
 // /api/reports สาธารณะ: ไม่มีรายละเอียด/ผู้รายงาน · ขอความช่วยเหลือเป็นจำนวนเท่านั้น
 const pr = await (await w.fetch(new Request('https://x/api/reports'), env)).json();
-assert.equal(pr.items.length, 0);
-assert.equal(Object.values(pr.help_by_village).reduce((a, b) => a + b, 0), 1);
+assert.equal(pr.items.length, 1);
+assert.deepEqual([pr.items[0].lat, pr.items[0].lon, pr.items[0].type], [15.157, 102.158, 'น้ำท่วมบ้าน']);
 assert.ok(!JSON.stringify(pr).includes('ทดสอบ') && !JSON.stringify(pr).includes('UC'));
 // /stats ต้องใช้ key
 assert.equal((await w.fetch(new Request('https://x/stats'), env)).status, 403);
