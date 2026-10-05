@@ -241,6 +241,10 @@ document.addEventListener('sdss:ready', async () => {
       ${poly}${hl(t.q2, '#D68910', 'รอบ 2 ปี')}${hl(t.q5, '#C0392B', 'รอบ 5 ปี')}${hl(t.q20, '#7F1D1D', 'รอบ 20 ปี')}${today}${line(past, 1, '#0A1628')}${line(fc, 1, '#0E7C7B', true)}</svg>
       <div class="spark-lab"><span>60 วันก่อน</span><span>วันนี้ │ พยากรณ์ 30 วัน (แถบ = ช่วงชุดพยากรณ์)</span></div>`;
   }
+  // เกิน 100% (อ่างเกินความจุ / ระดับน้ำเกินตลิ่ง) → วงกลมแดงกระพริบซ้อนบนจุด (divIcon + CSS เพราะแผนที่วาดจุดด้วย canvas)
+  // interactive:false ให้การแตะทะลุไปที่จุดเดิมซึ่งมี popup
+  const overPulse = (la, lo, size) => L.marker([la, lo], { interactive: false, keyboard: false, icon: L.divIcon({ className: '',
+    iconSize: [size, size], iconAnchor: [size / 2, size / 2], html: '<span class="ov-pulse"></span>' }) });
   const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
 
   /* ---------- นิยามเลเยอร์ ---------- */
@@ -444,7 +448,9 @@ document.addEventListener('sdss:ready', async () => {
             ความจุลำน้ำ <b>${fmt(s.storage_pct, 0)}%</b>${R[s.code] && R[s.code].zg && s.level_msl != null ? ` · ความลึกน้ำ <b>${fmt(s.level_msl - R[s.code].zg, 2)} ม.</b>` : ''}<br>ระดับน้ำ ${fmt(s.level_msl, 2)} ม.รทก. · ตลิ่ง ${fmt(s.bank_msl, 2)} ม.รทก.<br>
             ${s.discharge != null ? `ปริมาณน้ำ ${fmt(s.discharge)} ลบ.ม./วิ<br>` : ''}<span class="muted">${tTime(s.measured_at)}</span>
             ${(() => { const t = trendWL(h, s); return t ? `<div class="trend">เทียบครั้งก่อน ${arrow(t.d, 'ซม.', 0)}<br>เทียบ 24 ชม. ${arrow(t.d24, 'ซม.', 0)}</div>${spark(t.series, 'ระดับน้ำ ม.รทก.')}` : ''; })()}`)));
-        return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = สถานะเทียบตลิ่ง`, attr: 'สถานี © สสน. (ThaiWater)' };
+        const wOver = tw.waterlevel.filter(s => s.storage_pct > 100);
+        wOver.forEach(s => lyr.addLayer(overPulse(s.lat, s.lon, inArea(s.lat, s.lon) ? 26 : 22)));
+        return { lyr, sub: `ThaiWater · ${tw.waterlevel.length} สถานี · สี = สถานะเทียบตลิ่ง${wOver.length ? ` · เกินตลิ่ง ${wOver.length} สถานี (วงแดงกระพริบ)` : ''}`, attr: 'สถานี © สสน. (ThaiWater)' };
       }
     },
     {
@@ -480,7 +486,9 @@ document.addEventListener('sdss:ready', async () => {
             ${d.stale ? '' : (() => { const t = trendDam(h, d); return `<div class="trend">เทียบวันก่อน ${arrow(t.d, '%', 1)}</div>${spark(t.series, 'ปริมาณน้ำ %')}`; })()}`)
           .on('add', function () { MARK['d:' + d.name] = this; })));
         const n = rows.filter(d => !d.stale && d.pct != null).length;
-        return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater), กรมชลประทาน' };
+        const dOver = rows.filter(d => !d.stale && d.pct > 100);
+        dOver.forEach(d => lyr.addLayer(overPulse(d.lat, d.lon, d.kind === 'large' ? 30 : 24)));
+        return { lyr, sub: `ThaiWater จังหวัด · ${n} อ่างมีข้อมูลปัจจุบัน${dOver.length ? ` · เกินความจุ ${dOver.length} อ่าง (วงแดงกระพริบ)` : ''} · ${hhmm(p.updated_at)}`, attr: 'อ่างเก็บน้ำ © สสน. (ThaiWater), กรมชลประทาน' };
       }
     },
     {
