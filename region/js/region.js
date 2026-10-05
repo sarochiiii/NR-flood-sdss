@@ -180,7 +180,6 @@
     showTambon = on;
     if (amLayer) { if (on && !map.hasLayer(amLayer)) amLayer.addTo(map); if (!on && map.hasLayer(amLayer)) map.removeLayer(amLayer); }
     $('legend').style.display = on ? '' : 'none';
-    $('modes').style.display = on ? '' : 'none';
     redraw();
   }
   // เปิดหน้าแรก: ซูมเต็มขอบเขต ต.จันอัด (cfg.sandbox.tcode) · ถ้าไม่พบใช้ขอบเขต 26 ตำบล
@@ -198,18 +197,9 @@
     renderLegend();
   }
 
-  /* ---------- ปุ่มโหมดและ legend ---------- */
-  function renderModes() {
-    $('modes').innerHTML = '';
-    modes.forEach(m => {
-      if (m.need && !m.need()) return;
-      const b = document.createElement('button');
-      b.textContent = m.label; b.className = m.id === mode ? 'on' : '';
-      b.setAttribute('aria-pressed', m.id === mode);
-      b.onclick = () => { mode = m.id; renderModes(); redraw(); };
-      $('modes').appendChild(b);
-    });
-  }
+  /* ---------- โหมดสีตำบล (ตัวเลือก radio อยู่ในแผงชั้นข้อมูล layers.js ใต้ "เขตตำบล/อำเภอ") และ legend ---------- */
+  const tambonModes = () => modes.filter(m => !m.need || m.need()).map(m => ({ id: m.id, label: m.label }));
+  function setMode(id) { if (modes.some(m => m.id === id)) { mode = id; redraw(); } }
   function renderLegend() {
     const row = (c, t) => `<div class="row"><span class="sw" style="background:${c}"></span>${t}</div>`;
     let h = '';
@@ -322,8 +312,8 @@
       <p>${cfg.matrix_verified ? '' : 'ค่าในเมทริกซ์เป็นข้อเสนอเบื้องต้น รอการ calibrate กับเหตุการณ์ปี 2564'}</p>`;
   }
 
-  renderModes(); redraw(); renderWatch(); renderKpi(); renderStatus(); renderMethod();
-  window.SDSS = { map, cfg, tambon, amphoe, hex, select, setTambonVisible };
+  redraw(); renderWatch(); renderKpi(); renderStatus(); renderMethod();
+  window.SDSS = { map, cfg, tambon, amphoe, hex, select, setTambonVisible, tambonModes, setMode, getMode: () => mode };
   document.dispatchEvent(new CustomEvent('sdss:ready'));
   const m = location.hash.match(/t=(\d{6})/);
   if (m && T[m[1]]) select(m[1]);
