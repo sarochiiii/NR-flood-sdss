@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.7 (รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.8 (รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -430,7 +430,7 @@ async function waterStatus() {
 // >>> situationReport
 function situationReport(D) {
   const tw = D.tw || {}, rid = D.rid || {}, gf = D.gf || {}, ec = D.ec || {}, cfg = D.cfg || {};
-  const AREA = ['โนนไทย', 'โนนสูง'], TCODE = '301010', SITE = 'https://sarochiiii.github.io/NR-flood-sdss/region/';
+  const TCODE = '301010', SITE = 'https://sarochiiii.github.io/NR-flood-sdss/region/';
   const f0 = (v) => v == null ? '—' : String(Math.round(v)), f1 = (v) => v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1);
   const tt = (s) => { if (!s) return '—';
     const d = new Date(/T/.test(s) ? s : String(s).replace(' ', 'T') + (String(s).length <= 10 ? 'T00:00' : '') + ':00+07:00');
@@ -438,15 +438,7 @@ function situationReport(D) {
   const dd = (s) => s ? new Date(s + 'T00:00:00+07:00').toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short' }) : '—';
   const bank = (p) => p == null ? 'ไม่มีข้อมูล' : p >= 100 ? 'ล้นตลิ่ง' : p >= 90 ? 'ใกล้ล้นตลิ่ง' : p >= 70 ? 'ค่อนข้างสูง' : 'ปกติ';
   const out = ['📋 รายงานสถานการณ์น้ำ ต.จันอัด อ.โนนสูง', `ข้อมูลรวบรวม ณ ${tt(tw.updated_at)}`];
-  // ① ฝนสถานีตรวจวัด 24 ชม. (ThaiWater) — ในพื้นที่ = สถานีใน อ.โนนไทย/โนนสูง
-  const rain = (tw.rain || []).filter(s => s.rain_24h != null).sort((a, b) => b.rain_24h - a.rain_24h);
-  const rIn = rain.filter(s => AREA.includes(s.amphoe)), rOut = rain.filter(s => !AREA.includes(s.amphoe));
-  const rT = rain.map(s => s.time).filter(Boolean).sort().pop();
-  out.push('', `🌧 ฝนสถานีตรวจวัด 24 ชม. (ถึง ${tt(rT)})`);
-  out.push(rIn.length ? `• สูงสุดในพื้นที่: ${rIn[0].name} อ.${rIn[0].amphoe} ${f1(rIn[0].rain_24h)} มม.` : '• ไม่มีข้อมูลสถานีในพื้นที่');
-  out.push(`• ฝนหนัก ≥ 35.1 มม.: ในพื้นที่ ${rIn.filter(s => s.rain_24h >= 35.1).length}/${rIn.length} สถานี · รอบพื้นที่ ${rOut.filter(s => s.rain_24h >= 35.1).length}/${rOut.length} สถานี`);
-  if (rOut.length && rOut[0].rain_24h >= 10.1) out.push(`• สูงสุดรอบพื้นที่: ${rOut[0].name} อ.${rOut[0].amphoe} ${f1(rOut[0].rain_24h)} มม.`);
-  // ①ข พยากรณ์อากาศ ECMWF IFS ที่ ต.จันอัด (Open-Meteo · ดึงโดย Actions ทุก 3 ชม.)
+  // ① พยากรณ์อากาศ ECMWF IFS ที่ ต.จันอัด (Open-Meteo · ดึงโดย Actions ทุก 3 ชม.)
   out.push('', `🌦 พยากรณ์อากาศ ECMWF ต.จันอัด (ดึงเมื่อ ${tt(ec.updated_at)}${ec.status === 'error' ? ' · รอบล่าสุดดึงไม่สำเร็จ' : ''})`);
   const ed = (ec.days || []).filter(x => x[1] != null);
   if (ed.length) {
