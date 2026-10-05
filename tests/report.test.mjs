@@ -13,13 +13,20 @@ assert.equal(cut(web), cut(wk), 'situationReport ใน report.js กับ work
 
 // รันฝั่งเว็บด้วยข้อมูลใน region/data
 const ctx = { window: {}, document: { addEventListener() {} } }; vm.createContext(ctx); vm.runInContext(web, ctx);
-const J = (p) => JSON.parse(R('region/' + p));
-const D = { tw: J('data/live/thaiwater_region.json'), prov: J('data/live/tw_province.json'), rid: J('data/live/rid_reservoir.json'),
-  gf: J('data/live/gistda_flood_7d.geojson'), cfg: J('config.json') };
+// ecmwf.json สร้างโดย Actions — ถ้ายังไม่มีในเครื่อง ใช้ค่าจำลองรูปแบบเดียวกับ scripts/region/fetch_ecmwf.py
+const EC = { status: 'ok', updated_at: '2026-10-05T06:00:00+00:00', model: 'ecmwf_ifs025', next24_mm: 12.3, next72_mm: 40.1,
+  days: [['2026-10-05', 10.2, 31.4, 23.9], ['2026-10-06', 25.0, 30.1, 23.5], ['2026-10-07', 4.9, 32.0, 24.1], ['2026-10-08', 0, 33, 24]] };
+const J = (p) => { try { return JSON.parse(R('region/' + p)); } catch (e) { if (p.endsWith('ecmwf.json')) return EC; throw e; } };
+const D = { tw: J('data/live/thaiwater_region.json'), rid: J('data/live/rid_reservoir.json'),
+  gf: J('data/live/gistda_flood_7d.geojson'), ec: J('data/live/ecmwf.json'), cfg: J('config.json') };
 const txt = ctx.window.SDSS_REPORT.situationReport(D);
-for (const k of ['ฝนสถานีตรวจวัด', 'ระดับน้ำสถานีตรวจวัด', 'M.188A', 'อ่างเก็บน้ำ', 'ลำเชียงไกรตอนบน', 'GISTDA', 'ไม่ใช่ประกาศเตือนภัยทางการ']) assert.ok(txt.includes(k), 'ไม่มี ' + k);
+for (const k of ['ฝนสถานีตรวจวัด', 'พยากรณ์อากาศ ECMWF', 'ฝน 24 ชม. ข้างหน้า', 'ระดับน้ำสถานีตรวจวัด', 'M.188A', 'อ่างเก็บน้ำ', 'ลำเชียงไกรตอนบน', 'ลำเชียงไกรตอนล่าง', 'GISTDA', 'ต.จันอัด:', 'ไม่ใช่ประกาศเตือนภัยทางการ']) assert.ok(txt.includes(k), 'ไม่มี ' + k);
 assert.ok(!/undefined|NaN|null/.test(txt), 'มีค่า undefined/NaN/null ในข้อความ');
 assert.ok(txt.length < 5000, 'ยาวเกินข้อจำกัด LINE 5000 ตัวอักษร');
+// อ่าง: เฉพาะลำเชียงไกร 2 อ่าง · GISTDA: เฉพาะ ต.จันอัด
+const sec = (h) => txt.split('\n\n').find(b => b.includes(h)).split('\n');
+assert.equal(sec('🏞').length, 3); assert.equal(sec('🛰').length, 2);
+assert.ok(!/ในจังหวัด|26 ตำบล|จากวันก่อน/.test(txt));
 // ข้อมูลว่างทั้งหมดต้องไม่ error
 assert.ok(!/undefined|NaN/.test(ctx.window.SDSS_REPORT.situationReport({})));
 

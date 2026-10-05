@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.6 (ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.7 (รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -421,15 +421,15 @@ async function getJson(p) {
   return r.ok ? r.json() : null;
 }
 async function waterStatus() {
-  const [tw, prov, rid, gf, cfg] = await Promise.all(['data/live/thaiwater_region.json', 'data/live/tw_province.json',
-    'data/live/rid_reservoir.json', 'data/live/gistda_flood_7d.geojson', 'config.json'].map(p => getJson(p).catch(() => null)));
+  const [tw, rid, gf, ec, cfg] = await Promise.all(['data/live/thaiwater_region.json', 'data/live/rid_reservoir.json',
+    'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(p => getJson(p).catch(() => null)));
   if (!tw && !rid && !gf) throw new Error('no data');
-  return situationReport({ tw, prov, rid, gf, cfg });
+  return situationReport({ tw, rid, gf, ec, cfg });
 }
 // รูปแบบรายงานเดียวกับปุ่ม "สร้างรายงานสถานการณ์สำหรับ LINE" บนเว็บ — แก้ที่ region/js/report.js แล้วคัดลอกมาทั้งฟังก์ชัน
 // >>> situationReport
 function situationReport(D) {
-  const tw = D.tw || {}, prov = D.prov || {}, rid = D.rid || {}, gf = D.gf || {}, cfg = D.cfg || {};
+  const tw = D.tw || {}, rid = D.rid || {}, gf = D.gf || {}, ec = D.ec || {}, cfg = D.cfg || {};
   const AREA = ['โนนไทย', 'โนนสูง'], TCODE = '301010', SITE = 'https://sarochiiii.github.io/NR-flood-sdss/region/';
   const f0 = (v) => v == null ? '—' : String(Math.round(v)), f1 = (v) => v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1);
   const tt = (s) => { if (!s) return '—';
@@ -446,6 +446,13 @@ function situationReport(D) {
   out.push(rIn.length ? `• สูงสุดในพื้นที่: ${rIn[0].name} อ.${rIn[0].amphoe} ${f1(rIn[0].rain_24h)} มม.` : '• ไม่มีข้อมูลสถานีในพื้นที่');
   out.push(`• ฝนหนัก ≥ 35.1 มม.: ในพื้นที่ ${rIn.filter(s => s.rain_24h >= 35.1).length}/${rIn.length} สถานี · รอบพื้นที่ ${rOut.filter(s => s.rain_24h >= 35.1).length}/${rOut.length} สถานี`);
   if (rOut.length && rOut[0].rain_24h >= 10.1) out.push(`• สูงสุดรอบพื้นที่: ${rOut[0].name} อ.${rOut[0].amphoe} ${f1(rOut[0].rain_24h)} มม.`);
+  // ①ข พยากรณ์อากาศ ECMWF IFS ที่ ต.จันอัด (Open-Meteo · ดึงโดย Actions ทุก 3 ชม.)
+  out.push('', `🌦 พยากรณ์อากาศ ECMWF ต.จันอัด (ดึงเมื่อ ${tt(ec.updated_at)}${ec.status === 'error' ? ' · รอบล่าสุดดึงไม่สำเร็จ' : ''})`);
+  const ed = (ec.days || []).filter(x => x[1] != null);
+  if (ed.length) {
+    out.push(`• ฝน 24 ชม. ข้างหน้า ${f1(ec.next24_mm)} มม. · 72 ชม. ${f1(ec.next72_mm)} มม.`);
+    out.push(...ed.slice(0, 3).map(x => `• ${dd(x[0])}: ฝน ${f1(x[1])} มม. · อุณหภูมิ ${f0(x[3])}–${f0(x[2])}°C`));
+  } else out.push('• ไม่มีข้อมูล');
   // ② ระดับน้ำสถานีตรวจวัด (% ของตลิ่ง ThaiWater)
   const wl = (tw.waterlevel || []).filter(s => s.storage_pct != null).sort((a, b) => b.storage_pct - a.storage_pct);
   const m = (tw.waterlevel || []).find(s => s.code === 'M.188A');
@@ -454,31 +461,24 @@ function situationReport(D) {
   const hi = wl.filter(s => s.storage_pct >= 90);
   out.push(hi.length ? `• ใกล้/ล้นตลิ่ง ≥ 90%: ${hi.slice(0, 4).map(s => `${s.code} ${s.name} อ.${s.amphoe} ${f0(s.storage_pct)}%`).join(' · ')}${hi.length > 4 ? ` และอีก ${hi.length - 4} สถานี` : ''}`
     : `• ไม่มีสถานีใกล้/ล้นตลิ่ง (จาก ${wl.length} สถานี)`);
-  // ③ อ่างเก็บน้ำ — ลำเชียงไกรจากกรมชลประทาน · ทั้งจังหวัดจาก ThaiWater + กรมชลประทาน
+  // ③ อ่างเก็บน้ำ — เฉพาะอ่างลำเชียงไกรตอนบน/ตอนล่าง (กรมชลประทาน)
   const items = rid.status === 'ok' ? (rid.items || []) : [];
   // อ่างลำเชียงไกร: ค่าล่าสุดใน hist ([วันที่, ล้าน ลบ.ม., %, ...]) เพราะค่าของวันนี้ใน items มักยังว่างจนกรมชลประทานรายงาน
   const lck = (code) => { const h = ((rid.hist || {})[code] || []).filter(r => r[2] != null), i = items.find(x => x.code === code);
-    if (i && i.pct != null && (!h.length || i.date >= h[h.length - 1][0])) return { pct: i.pct, date: i.date, d: h.length && h[h.length - 1][0] < i.date ? i.pct - h[h.length - 1][2] : null };
-    return h.length ? { pct: h[h.length - 1][2], date: h[h.length - 1][0], d: h.length > 1 ? h[h.length - 1][2] - h[h.length - 2][2] : null } : null; };
-  const ch = (x) => x.d != null && Math.abs(x.d) >= 0.05 ? ` (${x.d > 0 ? 'เพิ่ม' : 'ลด'} ${f1(Math.abs(x.d))}% จากวันก่อน)` : '';
+    if (i && i.pct != null && (!h.length || i.date >= h[h.length - 1][0])) return { pct: i.pct, date: i.date };
+    return h.length ? { pct: h[h.length - 1][2], date: h[h.length - 1][0] } : null; };
   const up = lck('rsv300'), lo = lck('rsv292');
   out.push('', `🏞 อ่างเก็บน้ำ (ข้อมูลวันที่ ${dd((lo && lo.date) || (up && up.date))})`);
-  out.push(`• ลำเชียงไกรตอนบน ${up ? `${f0(up.pct)}%${up.pct > 100 ? ' เกินความจุ' : ''}${ch(up)}` : '—'}`);
-  out.push(`• ลำเชียงไกรตอนล่าง ${lo ? `${f0(lo.pct)}%${lo.pct > 100 ? ' เกินความจุ' : ''}${ch(lo)}` : '—'}`);
-  const norm = (x) => String(x || '').replace(/\s+/g, '').replace(/^อ่างเก็บน้ำ/, '');
-  const dams = new Map();
-  (prov.dams || []).filter(d => !d.stale && d.pct != null).forEach(d => dams.set(norm(d.name), { name: d.name, pct: d.pct }));
-  items.filter(i => i.pct != null).forEach(i => dams.set(norm(i.name), { name: i.name.replace(/\s+/g, ''), pct: i.pct }));
-  const full = [...dams.values()].filter(d => d.pct >= 80).sort((a, b) => b.pct - a.pct);
-  out.push(full.length ? `• อ่างในจังหวัด ≥ 80%: ${full.length} แห่ง · ${full.slice(0, 3).map(d => `${d.name} ${f0(d.pct)}%`).join(' · ')}` : `• ไม่มีอ่างในจังหวัด ≥ 80% (จาก ${dams.size} อ่าง)`);
-  // ④ น้ำท่วมตรวจพบ (GISTDA 7 วัน)
+  out.push(`• ลำเชียงไกรตอนบน ${up ? `${f0(up.pct)}%${up.pct > 100 ? ' เกินความจุ' : ''}` : '—'}`);
+  out.push(`• ลำเชียงไกรตอนล่าง ${lo ? `${f0(lo.pct)}%${lo.pct > 100 ? ' เกินความจุ' : ''}` : '—'}`);
+  // ④ น้ำท่วมตรวจพบ (GISTDA 7 วัน) — เฉพาะ ต.จันอัด
   out.push('', `🛰 น้ำท่วมตรวจพบจากดาวเทียม (GISTDA 7 วัน · ${tt(gf.updated_at)})`);
   if (gf.status === 'ok') {
     const bt = gf.by_tambon || {}, c = Math.round(bt[TCODE] || 0);
-    out.push(`• ต.จันอัด: ${c ? `${c.toLocaleString('th-TH')} ไร่` : 'ไม่พบ'} · 26 ตำบล: ${Math.round(gf.total_rai || 0).toLocaleString('th-TH')} ไร่ (${Object.keys(bt).length} ตำบล)`);
+    out.push(`• ต.จันอัด: ${c ? `${c.toLocaleString('th-TH')} ไร่` : 'ไม่พบ'}`);
   } else out.push('• ไม่มีข้อมูล');
   out.push('', `⚠️ ${(cfg.bank || {}).verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.`,
-    'ที่มา: สสน. (ThaiWater) · กรมชลประทาน · GISTDA', `แผนที่: ${SITE}`);
+    'ที่มา: สสน. (ThaiWater) · ECMWF ผ่าน Open-Meteo · กรมชลประทาน · GISTDA', `แผนที่: ${SITE}`);
   return out.join('\n');
 }
 // <<< situationReport

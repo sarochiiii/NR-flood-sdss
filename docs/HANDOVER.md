@@ -14,7 +14,7 @@ description: คู่มือพัฒนาและดูแลระบบ 
 
 | ส่วน | ที่อยู่ | สถานะ |
 |---|---|---|
-| **เว็บสาธารณะ SDSS-ChanAT** | https://sarochiiii.github.io/NR-flood-sdss/region/ · หน้าลำเชียงไกร `…/region/lamchiangkrai.html` | ใช้งาน · `?v=36` |
+| **เว็บสาธารณะ SDSS-ChanAT** | https://sarochiiii.github.io/NR-flood-sdss/region/ · หน้าลำเชียงไกร `…/region/lamchiangkrai.html` | ใช้งาน · `?v=37` |
 | **LINE OA "จันอัดบ้านฉัน"** | Cloudflare Worker `chanat-line-webhook` (KV `LINE_USERS`) · โค้ด `line/kv/worker.js` (v4.4) | ใช้งาน · แพ็กเกจ Free |
 | **Sandbox บ้านด่านติง (จำกัดสิทธิ์)** | Cloudflare Pages + Cloudflare Access (≤ 5 อีเมล) · ไฟล์ชุด `sandbox-private` **ไม่อยู่ใน GitHub** | เตรียมไฟล์แล้ว · แสดงตำแหน่งบ้าน 97 หลัง |
 
