@@ -25,3 +25,4 @@
 | 6 ต.ค. | Worker v1.2 | `gistda-tile-proxy` เพิ่ม `TMS_Y` (path GISTDA เป็น tms) · บันทึก UPSTREAM flood-freq จากเอกสาร GISTDA |
 | 6 ต.ค. | chanat | เปิดใช้ภาพน้ำท่วมซ้ำซาก GISTDA ผ่าน Worker ที่ deploy แล้ว · multiply blend เพราะ tile พื้นเทาทึบ |
 | 6 ต.ค. | chanat | ปุ่มสลับภาพน้ำท่วมซ้ำซาก GISTDA ↔ Repeatarea (มี legend 1–7 ครั้ง) |
+| 7 ต.ค. | chanat | ภาพ GISTDA: ทำพื้นเทาโปร่งใสด้วย canvas แทน multiply (เห็นสีจริง) · บันทึกข้อค้นพบ Repeatarea คลุม ~96% ของตำบล ต่างจากภาพ GISTDA |
