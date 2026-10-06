@@ -1,0 +1,40 @@
+name: sandbox-layers
+# ชั้นสาธารณะของ ChanAT Sandbox (ไม่มีข้อมูลครัวเรือน): น้ำท่วมซ้ำซากจาก Earth Engine asset → region/data/sandbox/floodfreq.geojson
+# กดรันเอง (Actions → sandbox-layers → Run workflow) หรือรันเมื่อแก้สคริปต์บน main
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/region/build_sandbox_floodfreq.py]
+concurrency: { group: sandbox-layers, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - run: pip install --quiet earthengine-api
+      - name: น้ำท่วมซ้ำซาก (Earth Engine · GISTDA Repeatarea)
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: ee-sarochineek
+        run: python scripts/region/build_sandbox_floodfreq.py
+      - name: commit ผลลัพธ์
+        # เหมือน osm-rivers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          F=region/data/sandbox/floodfreq.geojson
+          [ -f "$F" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
+          cp "$F" /tmp/floodfreq.geojson
+          for i in 1 2 3 4; do
+            git fetch --quiet origin main && git reset --quiet --hard origin/main
+            mkdir -p region/data/sandbox && cp /tmp/floodfreq.geojson "$F" && git add "$F"
+            git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+            git commit --quiet -m "data(sandbox): น้ำท่วมซ้ำซาก $(date -u '+%Y-%m-%d')"
+            git push --quiet origin HEAD:main && exit 0
+            sleep $((i * 15))
+          done
+          exit 1

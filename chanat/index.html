@@ -1,622 +1,315 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SDSS จันอัด Sandbox — ระบบสนับสนุนการตัดสินใจเชิงพื้นที่</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1628">
+<title>ChanAT Sandbox — SDSS บ้านด่านติง ต.จันอัด</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-:root {
-  --navy:    #0A1628;
-  --navy2:   #112240;
-  --blue:    #1B4F8A;
-  --teal:    #0E7C7B;
-  --teal2:   #0D9488;
-  --white:   #FFFFFF;
-  --offwh:   #F8FAFC;
-  --panel:   #F1F5F9;
-  --red:     #C0392B;
-  --redlt:   #FEF2F2;
-  --amber:   #D68910;
-  --amberlt: #FFFBEB;
-  --green:   #1E8449;
-  --greenlt: #F0FDF4;
-  --border:  #E2E8F0;
-  --border2: #CBD5E1;
-  --text:    #0F172A;
-  --text2:   #334155;
-  --muted:   #64748B;
-  --font:    'IBM Plex Sans Thai', system-ui, sans-serif;
-  --mono:    'IBM Plex Mono', monospace;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: var(--font);
-  background: var(--offwh);
-  color: var(--text);
-  min-height: 100vh;
-  padding: 0;
-}
-
-/* ── HEADER ─────────────────────────────────────────────── */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: var(--navy);
-  border-bottom: 2px solid var(--teal);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.app-logo { display: flex; flex-direction: column; }
-.app-title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
-.app-sub   { font-size: 10px; color: #5EEAD4; margin-top: 2px; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.alert-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--red); color: #fff; font-size: 11px; font-weight: 600;
-  padding: 5px 12px; border-radius: 20px; letter-spacing: 0.04em;
-}
-.blink { width: 7px; height: 7px; border-radius: 50%; background: #fff;
-  animation: blink 1.2s ease-in-out infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-.ts { font-size: 10px; color: #5EEAD4; font-family: var(--mono); }
-
-/* ── NAV TABS ────────────────────────────────────────────── */
-.nav-bar {
-  display: flex;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px;
-  overflow-x: auto;
-}
-.nav-tab {
-  font-size: 11px; font-weight: 500;
-  padding: 9px 14px; color: var(--muted); cursor: pointer;
-  border-bottom: 2px solid transparent; white-space: nowrap;
-  transition: color .2s, border-color .2s;
-}
-.nav-tab:hover { color: var(--teal2); }
-.nav-tab.active { color: var(--teal2); border-bottom-color: var(--teal2); font-weight: 600; }
-
-/* ── LAYOUT ──────────────────────────────────────────────── */
-.app-body { display: flex; gap: 0; height: calc(100vh - 80px); overflow: hidden; background: var(--white); }
-
-.left-panel {
-  flex: 1; display: flex; flex-direction: column;
-  border-right: 1px solid var(--border);
-  overflow: hidden;
-  background: var(--white);
-}
-.right-panel {
-  width: 260px; display: flex; flex-direction: column;
-  background: var(--panel); overflow-y: auto;
-  border-left: 1px solid var(--border);
-}
-
-/* ── METRIC ROW ──────────────────────────────────────────── */
-.metric-row {
-  display: grid; grid-template-columns: repeat(4,1fr); gap: 1px;
-  background: var(--border);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.metric-card {
-  padding: 11px 14px; background: var(--white);
-}
-.metric-label {
-  font-size: 9px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted); margin-bottom: 4px;
-}
-.metric-value { font-size: 24px; font-weight: 700; line-height: 1; }
-.metric-unit  { font-size: 10px; color: var(--muted); margin-top: 3px; }
-.metric-delta { font-size: 10px; margin-top: 4px; }
-.val-red   { color: #DC2626; }
-.val-green { color: #16A34A; }
-.val-white { color: var(--text); }
-.delta-up   { color: #DC2626; }
-.delta-ok   { color: #16A34A; }
-
-/* ── MAP PANEL ───────────────────────────────────────────── */
-.map-section { flex: 1; padding: 12px; overflow: hidden; display: flex; flex-direction: column; background: var(--white); }
-.map-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 8px;
-}
-.map-label { font-size: 11px; font-weight: 600; color: var(--text); }
-.map-badge {
-  font-size: 9px; padding: 2px 8px; border-radius: 8px;
-  background: #CCFBF1; color: #0F766E;
-  border: 1px solid #99F6E4;
-}
-.map-container {
-  flex: 1; border-radius: 8px; overflow: hidden;
-  border: 1px solid var(--border);
-  background: #E8F5E9;
-}
-.map-container svg { display: block; width: 100%; height: 100%; }
-
-/* ── MAP ACTION BUTTONS ──────────────────────────────────── */
-.map-actions { display: flex; gap: 6px; margin-top: 8px; }
-.map-btn {
-  flex: 1; padding: 7px 10px; border-radius: 6px; cursor: pointer;
-  background: var(--white); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 10px; font-weight: 500;
-  text-align: center; font-family: var(--font);
-  transition: background .15s, border-color .15s, color .15s;
-}
-.map-btn:hover { background: #CCFBF1; border-color: var(--teal2); color: var(--teal2); }
-
-/* ── RIGHT PANEL SECTIONS ────────────────────────────────── */
-.rp-section { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--white); margin-bottom: 1px; }
-.rp-label {
-  font-size: 9px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted); margin-bottom: 8px;
-}
-
-/* Risk tiers */
-.risk-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.risk-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
-.risk-name { font-size: 10px; color: var(--text2); flex: 1; }
-.risk-bar-bg { flex: 2; height: 4px; background: var(--border); border-radius: 2px; }
-.risk-bar    { height: 4px; border-radius: 2px; }
-.risk-count  { font-size: 11px; font-weight: 600; color: var(--text); min-width: 28px; text-align: right; }
-
-/* Forecast bars */
-.fc-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
-.fc-day { font-size: 9px; color: var(--muted); width: 38px; flex-shrink: 0; }
-.fc-bar-bg { flex: 1; height: 5px; background: var(--border); border-radius: 3px; }
-.fc-bar { height: 5px; border-radius: 3px; transition: width .4s ease; }
-.fc-val { font-size: 10px; font-weight: 600; min-width: 32px; text-align: right; color: var(--text); }
-
-/* Agency rows */
-.ag-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
-.ag-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.ag-name { font-size: 10px; color: var(--text2); flex: 1; }
-.ag-status { font-size: 9px; padding: 2px 7px; border-radius: 8px; font-weight: 500; }
-.s-active  { background: #DCFCE7; color: #15803D; }
-.s-alert   { background: #FEF2F2; color: #B91C1C; }
-.s-standby { background: #FFFBEB; color: #92400E; }
-
-/* ── BOTTOM STRIP ────────────────────────────────────────── */
-.bottom-strip {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.bs-cell { padding: 9px 14px; background: var(--offwh); }
-.bs-cell:first-child { border-right: 1px solid var(--border); }
-.bs-section-label {
-  font-size: 9px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted); margin-bottom: 7px;
-}
-
-/* Alert feed */
-.alert-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; }
-.alert-item:last-child { margin-bottom: 0; }
-.alert-icon {
-  width: 18px; height: 18px; border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700; flex-shrink: 0;
-}
-.ic-red    { background: #FEE2E2; color: #B91C1C; }
-.ic-amber  { background: #FEF3C7; color: #92400E; }
-.ic-green  { background: #DCFCE7; color: #15803D; }
-.alert-text { font-size: 10px; color: var(--text2); line-height: 1.4; }
-.alert-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
-
-/* DSS actions */
-.dss-action {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 10px; border-radius: 6px;
-  background: var(--white); border: 1px solid var(--border);
-  margin-bottom: 5px; cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
-.dss-action:hover { background: #F0FDFA; border-color: #99F6E4; }
-.dss-action-label { font-size: 10px; color: var(--text2); font-weight: 500; }
-.dss-arrow { font-size: 11px; color: var(--teal2); }
-
-/* Footer tag */
-.sdk-tag {
-  margin-top: 7px; font-size: 9px; color: var(--muted);
-  padding: 5px 8px; border-radius: 5px;
-  background: var(--panel); border: 1px solid var(--border);
-  line-height: 1.5;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Fallback fonts if Google Fonts unavailable */
-@font-face {
-  font-family: 'IBM Plex Sans Thai Fallback';
-  src: local('Tahoma'), local('Arial');
-}
+:root{--navy:#0A1628;--teal:#0E7C7B;--teal2:#0D9488;--border:#E2E8F0;--text:#0F172A;--muted:#64748B;--panel:#F8FAFC;
+  --font:'IBM Plex Sans Thai',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;display:flex;flex-direction:column}
+.hdr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;background:var(--navy);color:#fff;border-bottom:2px solid var(--teal)}
+.hdr h1{font-size:15px;margin:0;font-weight:600}
+.hdr .sub{font-size:11.5px;color:#5EEAD4;margin-top:2px}
+.hdr a{color:#5EEAD4;font-size:12px;white-space:nowrap}
+.body{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 360px;min-height:0}
+.mapwrap{position:relative;min-height:420px}
+#map{position:absolute;inset:0;background:#E5E7EB}
+.panel{border-left:1px solid var(--border);overflow-y:auto;background:var(--panel);padding:12px 14px 24px}
+.panel h2{font-size:13px;margin:16px 0 6px;color:var(--teal);font-weight:600}
+.panel h2:first-child{margin-top:0}
+.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13px}
+.kv dd{margin:0;text-align:right;font-family:var(--mono);font-size:12.5px}
+.kv dt small,.muted{color:var(--muted);font-size:11.5px}
+.lyr label{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px;cursor:pointer}
+.lyr label.off{opacity:.45;cursor:not-allowed}
+.lyr i{display:inline-block;width:14px;height:10px;border-radius:2px;flex-shrink:0}
+.ctl{margin:8px 0}
+.ctl label{display:block;font-size:12.5px;margin-bottom:3px}
+.ctl input[type=range]{width:100%;accent-color:var(--teal)}
+.ctl select{font-family:var(--font);font-size:13px;padding:3px 6px;border:1px solid var(--border);border-radius:6px}
+.seg{display:flex;gap:4px;margin:4px 0 8px}
+.seg button{flex:1;font-family:var(--font);font-size:12px;padding:5px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer}
+.seg button.on{border-color:var(--teal);color:var(--teal);font-weight:600}
+.res{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;font-size:13px}
+.res .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
+.res b{font-family:var(--mono);text-align:right}
+.btn{display:block;width:100%;margin-top:8px;padding:7px;border:1px solid var(--teal);color:var(--teal);background:#fff;border-radius:6px;font-family:var(--font);font-size:13px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.note{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+.warn{background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:6px 8px;font-size:12px;color:#92400E;margin-top:6px}
+.disc{font-size:11.5px;color:var(--muted);line-height:1.55;border-top:1px solid var(--border);margin-top:14px;padding-top:10px}
+.legend{position:absolute;left:10px;bottom:22px;z-index:500;background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11.5px;max-width:240px}
+.legend .row{display:flex;align-items:center;gap:6px;margin:2px 0}
+.legend .sw{width:12px;height:10px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}
+.leaflet-container{font-family:var(--font)}
+@media (max-width:860px){.body{grid-template-columns:1fr;grid-template-rows:62vh auto}.panel{border-left:0;border-top:1px solid var(--border)}.mapwrap{min-height:0}}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header class="app-header">
-  <div class="app-logo">
-    <div class="app-title">SDSS จันอัด Sandbox — ระบบสนับสนุนการตัดสินใจเชิงพื้นที่</div>
-    <div class="app-sub">ต.จันอัด อ.โนนสูง จ.นครราชสีมา · GEE + ML Forecast (LSTM) · PPPConnext · Open-source</div>
+<header class="hdr">
+  <div>
+    <h1>ChanAT Sandbox · SDSS บ้านด่านติง ต.จันอัด</h1>
+    <div class="sub">แผนที่จากชั้นข้อมูลจริง: อาคาร (Open Buildings) · แม่น้ำ/ลำน้ำ · แหล่งน้ำผิวดิน (OSM) · น้ำท่วมซ้ำซาก (GISTDA)</div>
   </div>
-  <div class="header-right">
-    <div class="alert-pill"><div class="blink"></div>เตือนภัยระดับแดง · ลำเชียงไกร</div>
-    <div class="ts" id="ts">อัปเดต —</div>
-  </div>
+  <a href="../region/">← SDSS-ChanAT ภาพรวม</a>
 </header>
 
-<!-- NAV TABS -->
-<nav class="nav-bar">
-  <div class="nav-tab active">แผนที่ SDSS</div>
-  <div class="nav-tab">ครัวเรือน PPPConnext</div>
-  <div class="nav-tab">ML Forecast</div>
-  <div class="nav-tab">แผนเผชิญเหตุ</div>
-  <div class="nav-tab">ADM Network</div>
-</nav>
+<main class="body">
+  <div class="mapwrap"><div id="map"></div><div class="legend" id="legend"></div></div>
 
-<div class="app-body">
+  <aside class="panel" aria-label="แผงการทำงาน SDSS">
+    <h2>สถานการณ์ปัจจุบัน</h2>
+    <div class="card"><dl class="kv" id="now"><dt class="muted">กำลังโหลด…</dt><dd></dd></dl></div>
 
-  <!-- LEFT PANEL -->
-  <div class="left-panel">
+    <h2>ชั้นข้อมูล</h2>
+    <div class="card lyr" id="layers"></div>
 
-    <!-- METRIC ROW -->
-    <div class="metric-row">
-      <div class="metric-card">
-        <div class="metric-label">ครัวเรือนเสี่ยงภัย</div>
-        <div class="metric-value val-red">312</div>
-        <div class="metric-unit">จาก 977 ครัวเรือน 4 หมู่</div>
-        <div class="metric-delta delta-up">▲ 47 จากเมื่อวาน</div>
+    <h2>แผงการทำงาน SDSS · วิเคราะห์อาคารที่สัมผัสภัย</h2>
+    <div class="card">
+      <div class="muted" style="margin-bottom:4px">ขอบเขตการวิเคราะห์</div>
+      <div class="seg" id="scope">
+        <button data-v="village" class="on">รอบบ้านด่านติง <span id="rlab">1.5</span> กม.</button>
+        <button data-v="tambon">ทั้ง ต.จันอัด</button>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">ระดับน้ำ ลำเชียงไกร</div>
-        <div class="metric-value val-red">4.82</div>
-        <div class="metric-unit">ม. (เกณฑ์วิกฤต &gt;4.50 ม.)</div>
-        <div class="metric-delta delta-up">▲ 0.34 ม./6 ชม.</div>
+      <div class="ctl"><label for="buf">ระยะจากลำน้ำ ≤ <b id="bufv">300</b> ม.</label>
+        <input type="range" id="buf" min="50" max="1000" step="50" value="300">
+        <label style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" id="canal"> นับคลองด้วย (ไม่ใช่เฉพาะแม่น้ำ/ลำน้ำสายหลัก)</label>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">ADM ปฏิบัติการ</div>
-        <div class="metric-value val-green">28</div>
-        <div class="metric-unit">จาก 30 คน · 4 หมู่บ้าน</div>
-        <div class="metric-delta delta-ok">✓ ประจำจุด 7 จุด</div>
+      <div class="ctl"><label for="freq">น้ำท่วมซ้ำซาก ≥ <select id="freq"></select> ครั้ง</label>
+        <div class="warn" id="freq-warn" hidden></div>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">ML Confidence</div>
-        <div class="metric-value val-white">87%</div>
-        <div class="metric-unit">LSTM 7-day forecast</div>
-        <div class="metric-delta delta-up">▲ ระดับน้ำเพิ่มต่อเนื่อง</div>
-      </div>
+      <div class="res" id="res"></div>
+      <button class="btn" id="csv" type="button">⬇ ส่งออก CSV อาคารที่สัมผัสภัย</button>
+      <div class="note">แตะอาคารบนแผนที่เพื่อดูระยะจากลำน้ำและจำนวนครั้งน้ำท่วมซ้ำซาก · อาคารจาก Open Buildings คือรูปหลังคาที่ตรวจจากภาพดาวเทียม <b>ไม่ใช่ครัวเรือน</b> (ข้อมูลครัวเรือน PPPConnext อยู่ในระบบจำกัดสิทธิ์แยกต่างหาก)</div>
     </div>
 
-    <!-- MAP + ACTIONS -->
-    <div class="map-section">
-      <div class="map-header">
-        <span class="map-label">Interactive Risk Map · ตำบลจันอัด (Spatial Decision Layer)</span>
-        <span class="map-badge">GEE · ERA5 · PPPConnext</span>
-      </div>
-
-      <div class="map-container">
-        <svg viewBox="0 0 540 320" xmlns="http://www.w3.org/2000/svg" aria-label="แผนที่ความเสี่ยงภัยพิบัติตำบลจันอัด">
-          <defs>
-            <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
-              <path d="M22 0L0 0 0 22" fill="none" stroke="#C8DFC8" stroke-width="0.5"/>
-            </pattern>
-            <radialGradient id="grd" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#E8F5E9"/>
-              <stop offset="100%" stop-color="#D4EDDA"/>
-            </radialGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <!-- Background -->
-          <rect width="540" height="320" fill="url(#grd)"/>
-          <rect width="540" height="320" fill="url(#grid)" opacity="0.5"/>
-
-          <!-- Sub-district boundary -->
-          <path d="M80 72 Q100 50 140 58 Q185 44 220 64 Q265 52 305 68 Q345 58 390 76 Q430 82 462 108 Q455 138 448 162 Q468 184 458 218 Q428 252 386 262 Q344 278 302 268 Q258 274 224 260 Q178 266 148 246 Q112 224 118 192 Q100 160 110 126 Q114 96 80 72Z"
-                fill="rgba(180,220,180,0.45)" stroke="#5A9E5A" stroke-width="1.5"/>
-
-          <!-- Lam Chiang Krai river -->
-          <path d="M0 128 Q50 114 90 120 Q130 114 158 136 Q185 148 210 142 Q240 136 272 148 Q308 142 348 158 Q385 152 420 166 Q445 172 480 170 Q510 168 540 172"
-                fill="none" stroke="#2980B9" stroke-width="5" opacity="0.7"/>
-          <path d="M0 136 Q55 124 95 130 Q135 124 163 145 Q188 156 214 150 Q244 144 278 156 Q314 150 354 166 Q390 160 425 174 Q450 180 485 178 Q515 176 540 180"
-                fill="#AED6F1" stroke="none" opacity="0.45"/>
-          <text x="310" y="172" font-size="9" fill="#1A5276" font-family="IBM Plex Sans Thai, sans-serif" font-weight="600">ลำเชียงไกร</text>
-
-          <!-- Village 5: บ้านด่านติง (HIGH RISK - RED) -->
-          <ellipse cx="160" cy="180" rx="55" ry="33" fill="rgba(192,57,43,0.22)" stroke="#E74C3C" stroke-width="1.5"/>
-          <!-- Pulse animation -->
-          <ellipse cx="160" cy="175" rx="14" ry="14" fill="none" stroke="#E74C3C" stroke-width="1.5" opacity="0">
-            <animate attributeName="rx" from="12" to="30" dur="2.5s" repeatCount="indefinite"/>
-            <animate attributeName="ry" from="12" to="30" dur="2.5s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" from="0.6" to="0" dur="2.5s" repeatCount="indefinite"/>
-          </ellipse>
-          <circle cx="160" cy="175" r="12" fill="#C0392B" stroke="#fff" stroke-width="1.5"/>
-          <text x="160" y="179" font-size="10" fill="white" text-anchor="middle" font-weight="700">5</text>
-          <!-- HH dots -->
-          <rect x="136" y="163" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.8"/>
-          <rect x="150" y="168" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.7"/>
-          <rect x="172" y="165" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.8"/>
-          <rect x="184" y="170" width="4" height="4" rx="1" fill="#E74C3C" opacity="0.6"/>
-          <text x="160" y="205" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="600">บ้านด่านติง</text>
-          <text x="160" y="217" font-size="8"  fill="#B91C1C" text-anchor="middle">285 ครัวเรือน · เสี่ยงสูงสุด</text>
-
-          <!-- Village 2: บ้านจันอัด (HIGH - ORANGE) -->
-          <ellipse cx="300" cy="220" rx="50" ry="30" fill="rgba(214,137,16,0.2)" stroke="#F39C12" stroke-width="1.5"/>
-          <circle cx="300" cy="215" r="11" fill="#BA7517" stroke="#fff" stroke-width="1.5"/>
-          <text x="300" y="219" font-size="10" fill="white" text-anchor="middle" font-weight="700">2</text>
-          <rect x="278" y="204" width="4" height="4" rx="1" fill="#F39C12" opacity="0.8"/>
-          <rect x="292" y="200" width="4" height="4" rx="1" fill="#F39C12" opacity="0.7"/>
-          <rect x="312" y="205" width="4" height="4" rx="1" fill="#F39C12" opacity="0.8"/>
-          <text x="300" y="243" font-size="10" fill="#78350F" text-anchor="middle" font-weight="600">บ้านจันอัด</text>
-          <text x="300" y="254" font-size="8"  fill="#92400E" text-anchor="middle">287 ครัวเรือน</text>
-
-          <!-- Village 4: บ้านโค้งกระชาย (ORANGE) -->
-          <ellipse cx="400" cy="120" rx="46" ry="28" fill="rgba(214,137,16,0.18)" stroke="#F59E0B" stroke-width="1.2"/>
-          <circle cx="400" cy="115" r="11" fill="#BA7517" stroke="#fff" stroke-width="1.5"/>
-          <text x="400" y="119" font-size="10" fill="white" text-anchor="middle" font-weight="700">4</text>
-          <text x="400" y="142" font-size="10" fill="#78350F" text-anchor="middle" font-weight="600">บ้านโค้งกระชาย</text>
-          <text x="400" y="153" font-size="8"  fill="#92400E" text-anchor="middle">231 ครัวเรือน</text>
-
-          <!-- Village 1: บ้านสำโรง (LOW - GREEN) -->
-          <ellipse cx="218" cy="90" rx="42" ry="26" fill="rgba(39,174,96,0.2)" stroke="#16A34A" stroke-width="1.2"/>
-          <circle cx="218" cy="85" r="11" fill="#1E8449" stroke="#fff" stroke-width="1.5"/>
-          <text x="218" y="89" font-size="10" fill="white" text-anchor="middle" font-weight="700">1</text>
-          <text x="218" y="110" font-size="10" fill="#14532D" text-anchor="middle" font-weight="600">บ้านสำโรง</text>
-          <text x="218" y="121" font-size="8"  fill="#166534" text-anchor="middle">174 ครัวเรือน</text>
-
-          <!-- Shelter icon -->
-          <rect x="112" y="232" width="14" height="10" rx="2" fill="#DC2626" opacity="0.85"/>
-          <text x="119" y="252" font-size="7" fill="#7F1D1D" text-anchor="middle">ศูนย์พักพิง</text>
-          <text x="119" y="260" font-size="7" fill="#7F1D1D" text-anchor="middle">วัดด่านติง</text>
-
-          <!-- Water gauge -->
-          <rect x="368" y="70" width="10" height="16" rx="1" fill="#2980B9" opacity="0.9"/>
-          <text x="373" y="62" font-size="7" fill="#1A5276" text-anchor="middle">สถานีวัดน้ำ</text>
-
-          <!-- Legend -->
-          <rect x="16" y="260" width="100" height="52" rx="4" fill="rgba(255,255,255,0.92)" stroke="#CBD5E1" stroke-width="0.8"/>
-          <text x="22" y="274" font-size="8" fill="#0F172A" font-weight="600">ระดับความเสี่ยง</text>
-          <rect x="22" y="280" width="9" height="7" rx="1" fill="#DC2626"/>
-          <text x="35" y="287" font-size="7" fill="#334155">สูงมาก (แดง)</text>
-          <rect x="22" y="291" width="9" height="7" rx="1" fill="#F59E0B"/>
-          <text x="35" y="298" font-size="7" fill="#334155">สูง (ส้ม)</text>
-          <rect x="22" y="302" width="9" height="7" rx="1" fill="#16A34A"/>
-          <text x="35" y="309" font-size="7" fill="#334155">ต่ำ (เขียว)</text>
-
-          <!-- Compass -->
-          <text x="500" y="24" font-size="10" fill="#1A5276" text-anchor="middle">N ↑</text>
-          <text x="500" y="36" font-size="7" fill="#5D7A8A" text-anchor="middle">ต.จันอัด</text>
-        </svg>
-      </div>
-
-      <div class="map-actions">
-        <button class="map-btn" onclick="alert('PPPConnext Layer: แสดงครัวเรือนยากจนรายจุด บ้านด่านติง หมู่ 5')">PPPConnext Layer ↗</button>
-        <button class="map-btn" onclick="alert('Evacuation Route: คำนวณเส้นทางอพยพ GIS routing ไปวัดด่านติง')">Evacuation Route ↗</button>
-        <button class="map-btn" onclick="alert('ML Forecast: ดูผล LSTM 7 วันระดับน้ำลำเชียงไกร')">ML Forecast ↗</button>
-      </div>
+    <div class="disc">
+      <b>ไม่ใช่ระบบประกาศเตือนภัยทางการ</b> — การเตือนภัยเป็นอำนาจของ ปภ. ตาม พ.ร.บ.ป้องกันและบรรเทาสาธารณภัย พ.ศ. 2550 · ใช้เพื่อสนับสนุนการวางแผนของ ADM/อบต.
+      · ศูนย์กลางแผนที่ = กลุ่มอาคารหนาแน่นใกล้ "อาคารบังคับน้ำบ้านด่านติง" (ปภ./อบต.) — ยังไม่ได้ยืนยันขอบเขตหมู่บ้านกับ อบต.
+      · ระยะจากลำน้ำวัดเป็นเส้นตรงจากจุดกึ่งกลางอาคารถึงเส้นลำน้ำ OSM ไม่ใช่ระดับความสูงหรือทิศทางน้ำไหล
+      <div id="src" style="margin-top:6px"></div>
     </div>
+  </aside>
+</main>
 
-    <!-- BOTTOM STRIP -->
-    <div class="bottom-strip">
-      <div class="bs-cell">
-        <div class="bs-section-label">แจ้งเตือน Line OA · Feed อัตโนมัติ</div>
-
-        <div class="alert-item">
-          <div class="alert-icon ic-red">!</div>
-          <div>
-            <div class="alert-text">ระดับน้ำลำเชียงไกร 4.82 ม. เกินเกณฑ์วิกฤต — ส่งเตือน Line OA 977 ครัวเรือน</div>
-            <div class="alert-time">06:00 · ระดับแดง · LSTM confidence 87%</div>
-          </div>
-        </div>
-        <div class="alert-item">
-          <div class="alert-icon ic-red">!</div>
-          <div>
-            <div class="alert-text">บ้านด่านติง หมู่ 5 — เปิดศูนย์พักพิงวัดด่านติง · ADM 8 คน ประจำจุด</div>
-            <div class="alert-time">05:30 · อบต.จันอัด + ปภ.</div>
-          </div>
-        </div>
-        <div class="alert-item">
-          <div class="alert-icon ic-amber">~</div>
-          <div>
-            <div class="alert-text">บ้านจันอัด หมู่ 2 — ระดับส้ม เตรียมพร้อมอพยพครัวเรือนริมน้ำ 143 หลัง</div>
-            <div class="alert-time">04:45 · ADM ตรวจสอบแล้ว</div>
-          </div>
-        </div>
-        <div class="alert-item">
-          <div class="alert-icon ic-green">✓</div>
-          <div>
-            <div class="alert-text">บ้านสำโรง หมู่ 1 — ระดับเขียว ปกติ ไม่พบครัวเรือนเสี่ยงเพิ่ม</div>
-            <div class="alert-time">03:00 · ระบบอัตโนมัติ</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bs-cell">
-        <div class="bs-section-label">DSS — ระบบสนับสนุนการตัดสินใจ (อบต./ADM)</div>
-        <div class="dss-action" onclick="alert('แผนเผชิญเหตุ 3 ระยะ ระดับแดง: ก่อน / ระหว่าง / หลังเกิดภัย')">
-          <span class="dss-action-label">ดูแผนเผชิญเหตุ 3 ระยะ (วิกฤต-แดง)</span><span class="dss-arrow">↗</span>
-        </div>
-        <div class="dss-action" onclick="alert('คำนวณ Evacuation Route: GIS routing บ้านด่านติง → วัดด่านติง')">
-          <span class="dss-action-label">คำนวณ Evacuation Route (GIS)</span><span class="dss-arrow">↗</span>
-        </div>
-        <div class="dss-action" onclick="alert('ตรวจสอบ PPPConnext: ครัวเรือนยากจนเสี่ยงสูงที่ยังไม่ได้รับการช่วยเหลือ')">
-          <span class="dss-action-label">ตรวจสอบ PPPConnext Target HH</span><span class="dss-arrow">↗</span>
-        </div>
-        <div class="dss-action" onclick="alert('สร้างรายงาน After Action Review (AAR) อัตโนมัติ')">
-          <span class="dss-action-label">สร้างรายงาน AAR อัตโนมัติ</span><span class="dss-arrow">↗</span>
-        </div>
-        <div class="dss-action" onclick="alert('Temporal Analysis: เปรียบเทียบข้อมูลน้ำท่วม 2567–2569')">
-          <span class="dss-action-label">Temporal Analysis 2567–2569</span><span class="dss-arrow">↗</span>
-        </div>
-        <div class="sdk-tag">SDSS Engine: GEE (Qwen/KIMI Agent) · Open-source stack · ไม่มีค่า API รายเดือน</div>
-      </div>
-    </div>
-
-  </div><!-- end left-panel -->
-
-  <!-- RIGHT PANEL -->
-  <div class="right-panel">
-
-    <div class="rp-section">
-      <div class="rp-label">ระดับความเสี่ยง (Household Risk Tiers)</div>
-      <div class="risk-row">
-        <div class="risk-dot" style="background:#E74C3C;"></div>
-        <div class="risk-name">แดง — วิกฤต</div>
-        <div class="risk-bar-bg"><div class="risk-bar" style="background:#E74C3C;width:85%;"></div></div>
-        <div class="risk-count" style="color:#E74C3C;">84</div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-dot" style="background:#F39C12;"></div>
-        <div class="risk-name">ส้ม — สูง</div>
-        <div class="risk-bar-bg"><div class="risk-bar" style="background:#F39C12;width:65%;"></div></div>
-        <div class="risk-count" style="color:#F0B842;">143</div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-dot" style="background:#F1C40F;"></div>
-        <div class="risk-name">เหลือง — ปานกลาง</div>
-        <div class="risk-bar-bg"><div class="risk-bar" style="background:#F1C40F;width:45%;"></div></div>
-        <div class="risk-count">85</div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-dot" style="background:#27AE60;"></div>
-        <div class="risk-name">เขียว — ต่ำ</div>
-        <div class="risk-bar-bg"><div class="risk-bar" style="background:#27AE60;width:18%;"></div></div>
-        <div class="risk-count" style="color:#5DCA88;">665</div>
-      </div>
-      <div style="margin-top:6px;font-size:9px;color:var(--muted);">เป้าหมาย Sandbox 100 ครัวเรือน · ติดตามแล้ว 100%</div>
-    </div>
-
-    <div class="rp-section">
-      <div class="rp-label">ML Forecast · ระดับน้ำ 7 วัน (LSTM)</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:7px;">หน่วย: ม. AMSL · ERA5 + สสน. Real-time</div>
-      <div class="fc-row">
-        <div class="fc-day">พ. 4 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#E74C3C;width:96%;"></div></div>
-        <div class="fc-val" style="color:#E74C3C;">4.82</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">พฤ. 5 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#E74C3C;width:91%;"></div></div>
-        <div class="fc-val" style="color:#E74C3C;">4.63</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">ศ. 6 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F39C12;width:79%;"></div></div>
-        <div class="fc-val" style="color:#F0B842;">4.02</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">ส. 7 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F39C12;width:67%;"></div></div>
-        <div class="fc-val" style="color:#F0B842;">3.41</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">อา. 8 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#F1C40F;width:54%;"></div></div>
-        <div class="fc-val" style="color:#F1C40F;">2.69</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">จ. 9 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#27AE60;width:38%;"></div></div>
-        <div class="fc-val" style="color:#5DCA88;">1.91</div>
-      </div>
-      <div class="fc-row">
-        <div class="fc-day">อ. 10 พ.</div>
-        <div class="fc-bar-bg"><div class="fc-bar" style="background:#27AE60;width:22%;"></div></div>
-        <div class="fc-val" style="color:#5DCA88;">1.12</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
-          <div style="width:8px;height:8px;border-radius:2px;background:#E74C3C;"></div>&gt;4.50 วิกฤต
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
-          <div style="width:8px;height:8px;border-radius:2px;background:#F39C12;"></div>3.00–4.50 สูง
-        </div>
-      </div>
-    </div>
-
-    <div class="rp-section">
-      <div class="rp-label">ภาคีจัดการภัยพิบัติ (7 หน่วยงาน)</div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#27AE60;"></div>
-        <div class="ag-name">อบต.จันอัด (IC)</div>
-        <div class="ag-status s-alert">สั่งการ</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#E74C3C;"></div>
-        <div class="ag-name">ปภ. นครราชสีมา</div>
-        <div class="ag-status s-alert">ประกาศแดง</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#3498DB;"></div>
-        <div class="ag-name">สสน. (Water RT)</div>
-        <div class="ag-status s-active">streaming</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#F39C12;"></div>
-        <div class="ag-name">กรมชลประทาน</div>
-        <div class="ag-status s-standby">standby</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#27AE60;"></div>
-        <div class="ag-name">อสม. 4 หมู่บ้าน</div>
-        <div class="ag-status s-alert">ปฏิบัติการ</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#9B59B6;"></div>
-        <div class="ag-name">กำนัน/ผู้ใหญ่บ้าน</div>
-        <div class="ag-status s-alert">ประสานงาน</div>
-      </div>
-      <div class="ag-row">
-        <div class="ag-dot" style="background:#0E7C7B;"></div>
-        <div class="ag-name">สนง.เกษตรอำเภอ</div>
-        <div class="ag-status s-standby">standby</div>
-      </div>
-    </div>
-
-  </div><!-- end right-panel -->
-</div><!-- end app-body -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-// Timestamp
-function updateTs() {
-  const now = new Date();
-  const opts = { timeZone: 'Asia/Bangkok', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false };
-  const t = new Intl.DateTimeFormat('th-TH', opts).format(now);
-  document.getElementById('ts').textContent = 'อัปเดต ' + t + ' ICT';
-}
-updateTs();
-setInterval(updateTs, 1000);
+(async () => {
+  'use strict';
+  const D = '../region/data/', TCODE = '301010';
+  // กลุ่มอาคารหนาแน่นที่สุดใกล้ "อาคารบังคับน้ำบ้านด่านติง" (102.12961, 15.13600 · structures.geojson seq 34)
+  // คำนวณจาก Open Buildings tile 301010: 578 หลังในรัศมี 600 ม. · ห่างประตูน้ำ 0.8 กม. — ยังไม่ได้ยืนยันกับ อบต.
+  const DT = { lat: 15.14223, lon: 102.13359, name: 'บ้านด่านติง (ประมาณจากกลุ่มอาคาร)' }, RADIUS_KM = 1.5;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const get = (p) => fetch(p, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  const fmt = (v, d = 0) => v == null || Number.isNaN(v) ? '—' : Number(v).toLocaleString('th-TH', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const tt = (s) => { if (!s) return '—'; const d = new Date(/T/.test(s) ? s : String(s).replace(' ', 'T') + (String(s).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+    return isNaN(d.getTime()) ? String(s) : d.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+  // ระยะทาง (ม.) แบบ equirectangular รอบละติจูดพื้นที่ — พอสำหรับระยะไม่กี่กิโลเมตร
+  const KX = 111320 * Math.cos(15.15 * Math.PI / 180), KY = 110540;
+  const dist = (a, b, c, d) => Math.hypot((c - a) * KX, (d - b) * KY);
+  const segDist = (px, py, ax, ay, bx, by) => {
+    const x = (px - ax) * KX, y = (py - ay) * KY, dx = (bx - ax) * KX, dy = (by - ay) * KY, L2 = dx * dx + dy * dy;
+    const t = L2 ? Math.max(0, Math.min(1, (x * dx + y * dy) / L2)) : 0;
+    return Math.hypot(x - t * dx, y - t * dy);
+  };
+  const inRing = (x, y, r) => { let c = false; for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const polysOf = (g) => g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+  const inPolys = (x, y, P) => P.some(p => inRing(x, y, p[0]) && !p.slice(1).some(h => inRing(x, y, h)));
 
-// Nav tab switching
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
+  /* ---------- แผนที่ ---------- */
+  const map = L.map('map', { preferCanvas: true }).setView([DT.lat, DT.lon], 15);
+  const base = {
+    'ภาพดาวเทียม': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Esri World Imagery' }),
+    'OSM': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' })
+  };
+  base['ภาพดาวเทียม'].addTo(map);
+  L.control.layers(base, null, { position: 'topright' }).addTo(map);
+  L.control.scale({ imperial: false }).addTo(map);
+  const rend = L.canvas({ padding: 0.3 });
 
-// Animate forecast bars on load
-window.addEventListener('load', () => {
-  document.querySelectorAll('.fc-bar').forEach((bar, i) => {
-    const w = bar.style.width;
-    bar.style.width = '0%';
-    setTimeout(() => { bar.style.width = w; }, 200 + i * 80);
+  const [tambon, idx, rivers, water, ff, structs, tw, rid, ec, gf, cfg] = await Promise.all([
+    get(D + 'tambon.geojson'), get(D + 'bldg/index.json'), get(D + 'osm_rivers.geojson'), get(D + 'osm_water.geojson'),
+    get(D + 'sandbox/floodfreq.geojson'), get(D + 'structures.geojson'), get(D + 'live/thaiwater_region.json'),
+    get(D + 'live/rid_reservoir.json'), get(D + 'live/ecmwf.json'), get(D + 'live/gistda_flood_7d.geojson'), get('../region/config.json')]);
+
+  const tb = tambon && tambon.features.find(f => f.properties.tcode === TCODE);
+  const TB = tb ? polysOf(tb.geometry) : [];
+  const L_ = {};   // ชั้นข้อมูลบนแผนที่ {key: {lyr, label, color, on, ok}}
+
+  // ขอบเขต ต.จันอัด + ตำบลข้างเคียง (เส้นจาง)
+  if (tambon) L_.bnd = { label: 'ขอบเขต ต.จันอัด', color: '#FDE68A', on: true, ok: true, lyr: L.layerGroup([
+    L.geoJSON({ type: 'FeatureCollection', features: tambon.features.filter(f => f.properties.tcode !== TCODE) },
+      { interactive: false, style: { color: '#F8FAFC', weight: 1, opacity: 0.6, fill: false, dashArray: '3 3' } }),
+    L.geoJSON(tb, { interactive: false, style: { color: '#FDE68A', weight: 3, fill: false } })]) };
+
+  // น้ำท่วมซ้ำซาก (GISTDA) — สีน้ำเงินเข้มตามจำนวนครั้ง
+  const FF_COL = ['#C6DBEF', '#9ECAE1', '#6BAED6', '#4292C6', '#2171B5', '#08519C', '#08306B'];
+  const ffCol = (n) => FF_COL[Math.min(FF_COL.length, Math.max(1, n)) - 1];
+  const FF = ff && ff.features && ff.features.length ? ff.features.map(f => ({ freq: f.properties.freq, P: polysOf(f.geometry),
+    bb: L.geoJSON(f).getBounds() })) : null;
+  L_.ff = { label: 'น้ำท่วมซ้ำซาก (GISTDA)', color: '#2171B5', on: !!FF, ok: !!FF,
+    lyr: FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
+      onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null };
+
+  // แหล่งน้ำผิวดิน OSM
+  const WT = { reservoir: 'อ่างเก็บน้ำ', lake: 'หนอง/บึง', oxbow: 'กุด', pond: 'สระ/บ่อ', wetland: 'พื้นที่ชุ่มน้ำ', basin: 'บ่อพัก/บ่อบำบัด', other: 'แหล่งน้ำ (OSM ไม่ระบุประเภท)' };
+  L_.water = { label: 'แหล่งน้ำผิวดิน (OSM)', color: '#0EA5E9', on: true, ok: !!water, lyr: water ? L.geoJSON(water, { renderer: rend,
+    style: f => ({ color: '#0369A1', weight: 1, fillColor: f.properties.type === 'wetland' ? '#14B8A6' : '#38BDF8', fillOpacity: 0.6 }),
+    onEachFeature: (f, l) => l.bindTooltip(`${esc(f.properties.name || 'ไม่มีชื่อใน OSM')} · ${WT[f.properties.type] || WT.other} · ${fmt(f.properties.area_rai, 1)} ไร่`, { sticky: true }) }) : null };
+
+  // แม่น้ำ/ลำน้ำ OSM
+  const RT = { river: 'แม่น้ำ/ลำน้ำสายหลัก', canal: 'คลอง/คลองส่งน้ำ', stream: 'ลำห้วย' };
+  L_.river = { label: 'แม่น้ำ/ลำน้ำ (OSM)', color: '#1D4ED8', on: true, ok: !!rivers, lyr: rivers ? L.geoJSON(rivers, { renderer: rend,
+    style: f => f.properties.type === 'river' ? { color: '#1D4ED8', weight: 4 } : f.properties.type === 'canal' ? { color: '#22D3EE', weight: 2, dashArray: '5 3' } : { color: '#60A5FA', weight: 1.5 },
+    onEachFeature: (f, l) => l.bindTooltip(`${esc(f.properties.name || 'ไม่มีชื่อใน OSM')} · ${RT[f.properties.type] || f.properties.type}`, { sticky: true }) }) : null };
+
+  // อาคารชลศาสตร์ (ปภ./อบต.) — จุดอ้างอิงประตูน้ำบ้านด่านติง
+  const ST = structs ? structs.features.filter(f => { const [x, y] = f.geometry.coordinates; return dist(DT.lon, DT.lat, x, y) < 6000; }) : [];
+  L_.struct = { label: 'อาคารชลศาสตร์ (ปภ./อบต.)', color: '#DB2777', on: true, ok: ST.length > 0, lyr: L.layerGroup(ST.map(f =>
+    L.circleMarker([f.geometry.coordinates[1], f.geometry.coordinates[0]], { renderer: rend, radius: 6, color: '#fff', weight: 2, fillColor: '#DB2777', fillOpacity: 1 })
+      .bindTooltip(esc(f.properties.name)))) };
+
+  // น้ำท่วมตรวจพบ GISTDA 7 วัน (ถ้ามี)
+  const gfx = gf && gf.status === 'ok' ? (gf.features || []).filter(f => { const c = L.geoJSON(f).getBounds().getCenter(); return dist(DT.lon, DT.lat, c.lng, c.lat) < 8000; }) : [];
+  L_.gistda = { label: 'น้ำท่วมตรวจพบ 7 วัน (GISTDA)', color: '#00E5FF', on: true, ok: !!(gf && gf.status === 'ok'),
+    lyr: L.geoJSON({ type: 'FeatureCollection', features: gfx }, { renderer: rend, style: { color: '#0369A1', weight: 1, fillColor: '#00E5FF', fillOpacity: 0.8 } }) };
+
+  /* ---------- อาคาร Open Buildings (tile รายตำบลที่ตัดกับพื้นที่วิเคราะห์) ---------- */
+  const tbBB = tb ? L.geoJSON(tb).getBounds() : map.getBounds();
+  const cBB = L.latLng(DT.lat, DT.lon).toBounds(RADIUS_KM * 2000);
+  const want = idx ? Object.entries(idx.tiles).filter(([, v]) => { const b = v.bbox;
+    return [tbBB, cBB].some(bb => !(b[2] < bb.getWest() || b[0] > bb.getEast() || b[3] < bb.getSouth() || b[1] > bb.getNorth())); }).map(([c]) => c) : [];
+  const tiles = await Promise.all(want.map(c => get(D + `bldg/${c}.json`).then(t => [c, t])));
+  const B = [];   // {ring:[[lat,lon]], x, y (centroid), area, inTb, inC}
+  tiles.forEach(([code, t]) => { if (!t) return; t.p.forEach(e => {
+    let x = e[0], y = e[1]; const r = [[y / t.s, x / t.s]];
+    for (let i = 2; i < e.length; i += 2) { x += e[i]; y += e[i + 1]; r.push([y / t.s, x / t.s]); }
+    const cx = r.reduce((a, p) => a + p[1], 0) / r.length, cy = r.reduce((a, p) => a + p[0], 0) / r.length;
+    const inTb = inPolys(cx, cy, TB), inC = dist(DT.lon, DT.lat, cx, cy) <= RADIUS_KM * 1000;
+    if (!inTb && !inC) return;
+    let a = 0; for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[j][1] * KX) * (r[i][0] * KY) - (r[i][1] * KX) * (r[j][0] * KY);
+    B.push({ ring: r, x: cx, y: cy, area: Math.abs(a) / 2, inTb, inC, tile: code });
+  }); });
+
+  // ระยะถึงลำน้ำ (ม.) — คำนวณครั้งเดียวต่อประเภท (สายหลัก / รวมคลอง)
+  const segs = (types) => { const S = [], pad = 0.03, bb = L.latLngBounds(B.map(b => [b.y, b.x])).pad(0.1);
+    (rivers ? rivers.features : []).filter(f => types.includes(f.properties.type)).forEach(f => { const c = f.geometry.coordinates;
+      for (let i = 1; i < c.length; i++) { const [ax, ay] = c[i - 1], [bx, by] = c[i];
+        if (Math.max(ax, bx) < bb.getWest() - pad || Math.min(ax, bx) > bb.getEast() + pad || Math.max(ay, by) < bb.getSouth() - pad || Math.min(ay, by) > bb.getNorth() + pad) continue;
+        S.push([ax, ay, bx, by]); } });
+    return S; };
+  const S1 = B.length ? segs(['river']) : [], S2 = B.length ? segs(['river', 'canal']) : [];
+  B.forEach(b => {
+    b.dRiver = S1.reduce((m, s) => Math.min(m, segDist(b.x, b.y, ...s)), Infinity);
+    b.dAll = S2.reduce((m, s) => Math.min(m, segDist(b.x, b.y, ...s)), Infinity);
+    b.freq = FF ? FF.reduce((m, f) => f.freq > m && f.bb.contains([b.y, b.x]) && inPolys(b.x, b.y, f.P) ? f.freq : m, 0) : null;
   });
-});
+
+  /* ---------- การวิเคราะห์ (SDSS) ---------- */
+  const st = { scope: 'village', buf: 300, canal: false, freq: 1 };
+  const CLS = { both: ['#DC2626', 'ใกล้ลำน้ำ + น้ำท่วมซ้ำซาก (ลำดับแรก)'], ff: ['#F97316', 'น้ำท่วมซ้ำซากอย่างเดียว'],
+    buf: ['#FACC15', 'ใกล้ลำน้ำอย่างเดียว'], none: ['#E5E7EB', 'นอกเกณฑ์ที่เลือก'] };
+  const classify = (b) => { const near = (st.canal ? b.dAll : b.dRiver) <= st.buf, fl = b.freq != null && b.freq >= st.freq;
+    return near && fl ? 'both' : fl ? 'ff' : near ? 'buf' : 'none'; };
+  const inScope = (b) => st.scope === 'village' ? b.inC : b.inTb;
+  const bLyr = L.layerGroup();
+  B.forEach(b => { b.poly = L.polygon(b.ring, { renderer: rend, weight: 0.6, color: '#111827', fillOpacity: 0.9 })
+    .on('click', () => b.poly.bindPopup(`<b>อาคาร (Open Buildings)</b><br>พื้นที่หลังคา ~${fmt(b.area)} ตร.ม.
+      <br>ระยะถึงแม่น้ำ/ลำน้ำสายหลัก <b>${fmt(b.dRiver)}</b> ม.${S2.length !== S1.length ? `<br>ระยะถึงลำน้ำรวมคลอง ${fmt(b.dAll)} ม.` : ''}
+      <br>น้ำท่วมซ้ำซาก <b>${b.freq == null ? 'ยังไม่มีข้อมูล' : b.freq ? b.freq + ' ครั้ง' : 'ไม่อยู่ในพื้นที่'}</b>
+      <br>${b.inTb ? 'ใน ต.จันอัด' : 'นอกขอบเขต ต.จันอัด'}${b.inC ? ` · ในรัศมี ${RADIUS_KM} กม. จากบ้านด่านติง` : ''}
+      <div class="muted">${b.y.toFixed(5)}, ${b.x.toFixed(5)} · ไม่ใช่ข้อมูลครัวเรือน</div>`).openPopup()); });
+  L_.bldg = { label: 'อาคาร/สิ่งปลูกสร้าง (Open Buildings)', color: '#DC2626', on: true, ok: B.length > 0, lyr: bLyr };
+  const circle = L.circle([DT.lat, DT.lon], { radius: RADIUS_KM * 1000, color: '#FDE68A', weight: 1.5, dashArray: '6 4', fill: false, interactive: false });
+
+  function analyse() {
+    const cnt = { both: 0, ff: 0, buf: 0, none: 0 }; let n = 0;
+    bLyr.clearLayers();
+    B.forEach(b => { if (!inScope(b)) return; n++; b.cls = classify(b); cnt[b.cls]++;
+      b.poly.setStyle({ fillColor: CLS[b.cls][0], weight: b.cls === 'none' ? 0.3 : 0.6 }); bLyr.addLayer(b.poly); });
+    if (st.scope === 'village') circle.addTo(map); else circle.remove();
+    $('res').innerHTML = `<span></span><span>อาคารในขอบเขต</span><b>${fmt(n)}</b>` + Object.entries(CLS).map(([k, [c, t]]) =>
+      `<span class="sw" style="background:${c}"></span><span>${t}</span><b>${fmt(cnt[k])}${n ? ` <small class="muted">${fmt(cnt[k] * 100 / n)}%</small>` : ''}</b>`).join('');
+    $('csv').disabled = !(cnt.both + cnt.ff + cnt.buf);
+    renderLegend();
+  }
+  $('rlab').textContent = RADIUS_KM;
+  $('scope').querySelectorAll('button').forEach(b => b.onclick = () => { st.scope = b.dataset.v;
+    $('scope').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    map.fitBounds(st.scope === 'village' ? circle.getBounds() : tbBB, { padding: [10, 10] }); analyse(); });
+  $('buf').oninput = (e) => { st.buf = +e.target.value; $('bufv').textContent = st.buf; analyse(); };
+  $('canal').onchange = (e) => { st.canal = e.target.checked; analyse(); };
+  const maxF = FF ? Math.max(...FF.map(f => f.freq)) : 0;
+  $('freq').innerHTML = FF ? Array.from({ length: maxF }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('') : '<option>—</option>';
+  $('freq').disabled = !FF;
+  $('freq').onchange = (e) => { st.freq = +e.target.value; analyse(); };
+  if (!FF) { $('freq-warn').hidden = false;
+    $('freq-warn').textContent = 'ยังไม่มีชั้นน้ำท่วมซ้ำซาก — รอ workflow sandbox-layers ดึงจาก Earth Engine (asset Repeatarea) · ตอนนี้วิเคราะห์ได้เฉพาะระยะจากลำน้ำ'; }
+
+  $('csv').onclick = () => {
+    const rows = [['lat', 'lon', 'roof_area_m2', 'dist_river_m', 'dist_river_canal_m', 'flood_freq', 'class', 'in_chanat']];
+    B.filter(b => inScope(b) && b.cls !== 'none').forEach(b => rows.push([b.y.toFixed(6), b.x.toFixed(6), Math.round(b.area),
+      Math.round(b.dRiver), Math.round(b.dAll), b.freq ?? '', b.cls, b.inTb ? 1 : 0]));
+    const blob = new Blob(['﻿' + rows.map(r => r.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `chanat_exposure_${st.scope}_buf${st.buf}${FF ? '_ff' + st.freq : ''}.csv`; a.click();
+  };
+
+  /* ---------- สวิตช์ชั้นข้อมูล + legend ---------- */
+  const ORDER = ['bldg', 'ff', 'gistda', 'water', 'river', 'struct', 'bnd'];
+  function renderLayers() {
+    $('layers').innerHTML = ORDER.filter(k => L_[k]).map(k => { const o = L_[k];
+      return `<label class="${o.ok ? '' : 'off'}"><input type="checkbox" data-k="${k}" ${o.on && o.ok ? 'checked' : ''} ${o.ok ? '' : 'disabled'}>
+        <i style="background:${o.color}"></i>${o.label}${o.ok ? '' : ' <span class="muted">(ยังไม่มีข้อมูล)</span>'}</label>`; }).join('');
+    $('layers').querySelectorAll('input').forEach(i => i.onchange = () => { const o = L_[i.dataset.k]; o.on = i.checked; sync(); });
+  }
+  function sync() {
+    [...ORDER].reverse().forEach(k => { const o = L_[k]; if (!o || !o.lyr) return;
+      if (o.on && o.ok && !map.hasLayer(o.lyr)) o.lyr.addTo(map); if (!(o.on && o.ok) && map.hasLayer(o.lyr)) map.removeLayer(o.lyr); });
+    if (map.hasLayer(bLyr)) bLyr.eachLayer(l => l.bringToFront());
+    renderLegend();
+  }
+  function renderLegend() {
+    const row = (c, t, s) => `<div class="row"><span class="sw" style="background:${c};${s || ''}"></span>${t}</div>`;
+    let h = '';
+    if (L_.bldg.on && L_.bldg.ok) h += '<b>อาคาร</b>' + Object.values(CLS).map(([c, t]) => row(c, t)).join('');
+    if (L_.ff.on && L_.ff.ok) h += '<b>น้ำท่วมซ้ำซาก (ครั้ง)</b>' + Array.from({ length: maxF }, (_, i) => row(ffCol(i + 1), `${i + 1}${i + 1 === FF_COL.length ? '+' : ''}`)).join('');
+    if (L_.river.on && L_.river.ok) h += row('#1D4ED8', 'แม่น้ำ/ลำน้ำสายหลัก', 'height:4px') + row('#22D3EE', 'คลอง', 'height:3px');
+    $('legend').innerHTML = h || '<span class="muted">ไม่มีชั้นที่เปิด</span>';
+  }
+
+  /* ---------- สถานการณ์ปัจจุบัน (ข้อมูลสดชุดเดียวกับหน้าภาพรวม) ---------- */
+  const m = tw && (tw.waterlevel || []).find(s => s.code === 'M.188A');
+  const lck = (code) => { const h = ((rid && rid.hist) || {})[code] || []; const r = h.filter(x => x[2] != null).pop(); return r ? { pct: r[2], date: r[0] } : null; };
+  const lo = lck('rsv292'), up = lck('rsv300');
+  const fl = gf && gf.status === 'ok' ? Math.round((gf.by_tambon || {})[TCODE] || 0) : null;
+  const bank = (p) => p == null ? '' : p >= 100 ? 'ล้นตลิ่ง' : p >= 90 ? 'ใกล้ล้นตลิ่ง' : p >= 70 ? 'ค่อนข้างสูง' : 'ปกติ';
+  $('now').innerHTML = [
+    ['ระดับน้ำ M.188A ลำเชียงไกร', m && m.storage_pct != null ? `${fmt(m.storage_pct)}% ${bank(m.storage_pct)}` : '—', m && tt(m.measured_at)],
+    ['อ่างลำเชียงไกรตอนล่าง', lo ? `${fmt(lo.pct)}%` : '—', lo && 'ข้อมูลวันที่ ' + lo.date],
+    ['อ่างลำเชียงไกรตอนบน', up ? `${fmt(up.pct)}%` : '—', up && 'ข้อมูลวันที่ ' + up.date],
+    ['ฝน 24 ชม. ข้างหน้า (ECMWF)', ec && ec.days ? `${fmt(ec.next24_mm, 1)} มม.` : '—', ec && 'ดึงเมื่อ ' + tt(ec.updated_at)],
+    ['น้ำท่วมตรวจพบ ต.จันอัด (GISTDA 7 วัน)', fl == null ? '—' : fl ? `${fmt(fl)} ไร่` : 'ไม่พบ', gf && tt(gf.updated_at)]
+  ].map(([k, v, s]) => `<dt>${k}${s ? `<br><small>${esc(s)}</small>` : ''}</dt><dd>${esc(v)}</dd>`).join('')
+    + `<dt class="muted" style="grid-column:1/-1">${cfg && cfg.bank && cfg.bank.verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}รายละเอียดเพิ่มเติมที่หน้า <a href="../region/">SDSS-ChanAT</a></dt>`;
+
+  $('src').innerHTML = `ที่มา: อาคาร © Google Open Buildings (CC BY 4.0) ${fmt(B.length)} หลัง · แม่น้ำ/แหล่งน้ำ © OpenStreetMap (ODbL)${rivers ? ' ' + tt(rivers.updated_at) : ''}
+    · น้ำท่วมซ้ำซาก ${FF ? 'GISTDA ' + tt(ff.updated_at) : '(ยังไม่มี)'} · ขอบเขตตำบล NR_admin3 · อาคารชลศาสตร์ ปภ./อบต. · สถานการณ์ สสน./กรมชลประทาน/ECMWF/GISTDA`;
+  map.attributionControl.addAttribution('อาคาร © Google Open Buildings · ลำน้ำ © OpenStreetMap' + (FF ? ' · น้ำท่วมซ้ำซาก © GISTDA' : ''));
+
+  renderLayers(); sync(); analyse();
+})();
 </script>
 </body>
 </html>
