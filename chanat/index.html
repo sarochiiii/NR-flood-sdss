@@ -50,6 +50,8 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 .legend .row{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .sw{width:12px;height:10px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}
 .leaflet-container{font-family:var(--font)}
+/* tile GISTDA มีพื้นเทาทึบนอกพื้นที่ท่วม → multiply ให้พื้นเทาจางลงและเห็นภาพดาวเทียมด้านล่าง */
+.gistda-ff{mix-blend-mode:multiply}
 @media (max-width:860px){.body{grid-template-columns:1fr;grid-template-rows:62vh auto}.panel{border-left:0;border-top:1px solid var(--border)}.mapwrap{min-height:0}}
 </style>
 </head>
@@ -110,7 +112,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   const DT = { lat: 15.14223, lon: 102.13359, name: 'บ้านด่านติง (ประมาณจากกลุ่มอาคาร)' }, RADIUS_KM = 1.5;
   // URL ของ Cloudflare Worker gistda-tile-proxy (workers/gistda-tile-proxy.js) เช่น https://<ชื่อ>.workers.dev
   // ว่าง = ยังไม่ deploy → แสดงชั้น Repeatarea (GEE) ทั้งภาพและการวิเคราะห์ · ห้ามใส่ API key ที่นี่ (key อยู่ใน Secret ของ Worker)
-  const GISTDA_TILE_WORKER = '';
+  const GISTDA_TILE_WORKER = 'https://gistda-tile-proxy.sarochinee-k.workers.dev';   // ทดสอบ 14/12840/7494 ได้ภาพแล้ว (6 ต.ค.)
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const get = (p) => fetch(p, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -165,7 +167,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   const ffVec = FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
     onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null;
   const ffTile = GISTDA_TILE_WORKER ? L.tileLayer(GISTDA_TILE_WORKER.replace(/\/$/, '') + '/floodfreq/{z}/{x}/{y}.png', { minZoom: 8, maxZoom: 19,
-    maxNativeZoom: 17, opacity: 0.7, attribution: 'น้ำท่วมซ้ำซาก © GISTDA', crossOrigin: 'anonymous' }) : null;
+    maxNativeZoom: 17, opacity: 0.7, attribution: 'น้ำท่วมซ้ำซาก © GISTDA', crossOrigin: 'anonymous', className: 'gistda-ff' }) : null;
   L_.ff = { label: 'น้ำท่วมซ้ำซาก (GISTDA)', color: '#2171B5', on: !!(ffTile || FF), ok: !!(ffTile || FF),
     mode: ffTile ? 'tile' : 'vector', lyr: ffTile || ffVec };
   // Fallback: tile โหลดไม่ได้เลย (Worker ไม่ตอบ / 500 not_configured / upstream ผิด) → กลับไปแสดง vector GEE
