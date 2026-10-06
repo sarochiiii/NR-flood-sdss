@@ -53,8 +53,6 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 .legend .row{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .sw{width:12px;height:10px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}
 .leaflet-container{font-family:var(--font)}
-/* tile GISTDA มีพื้นเทาทึบนอกพื้นที่ท่วม → multiply ให้พื้นเทาจางลงและเห็นภาพดาวเทียมด้านล่าง */
-.gistda-ff{mix-blend-mode:multiply}
 @media (max-width:860px){.body{grid-template-columns:1fr;grid-template-rows:62vh auto}.panel{border-left:0;border-top:1px solid var(--border)}.mapwrap{min-height:0}}
 </style>
 </head>
@@ -169,8 +167,25 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   // ภาพแผนที่: tile GISTDA ผ่าน Worker (ถ้าตั้ง GISTDA_TILE_WORKER) · การวิเคราะห์อาคารใช้ vector Repeatarea (GEE) เสมอ
   const ffVec = FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
     onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null;
-  const ffTile = GISTDA_TILE_WORKER ? L.tileLayer(GISTDA_TILE_WORKER.replace(/\/$/, '') + '/floodfreq/{z}/{x}/{y}.png', { minZoom: 8, maxZoom: 19,
-    maxNativeZoom: 17, opacity: 0.7, attribution: 'น้ำท่วมซ้ำซาก © GISTDA', crossOrigin: 'anonymous', className: 'gistda-ff' }) : null;
+  // tile GISTDA มีพื้นเทาอ่อนทึบนอกพื้นที่ท่วม → วาดลง canvas แล้วทำพิกเซลเทาอ่อน/ขาวให้โปร่งใส เห็นสีจริงของ GISTDA บนภาพดาวเทียม
+  // (Worker ส่ง CORS ให้ sarochiiii.github.io จึงอ่านพิกเซลได้ · ถ้าอ่านไม่ได้ จะแสดงภาพเดิมทั้งแผ่น)
+  const isBg = (r, g, b) => r > 200 && g > 200 && b > 200 && Math.max(r, g, b) - Math.min(r, g, b) < 14;
+  const GistdaLayer = L.GridLayer.extend({
+    createTile(c, done) {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = () => { const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, 256, 256);
+        try { const d = ctx.getImageData(0, 0, 256, 256), p = d.data;
+          for (let i = 0; i < p.length; i += 4) if (isBg(p[i], p[i + 1], p[i + 2])) p[i + 3] = 0;
+          ctx.putImageData(d, 0, 0); } catch (e) { /* อ่านพิกเซลไม่ได้ → คงภาพเดิม */ }
+        done(null, cv); };
+      img.onerror = () => done(new Error('tile'), cv);
+      img.src = `${GISTDA_TILE_WORKER.replace(/\/$/, '')}/floodfreq/${c.z}/${c.x}/${c.y}.png`;
+      return cv;
+    }
+  });
+  const ffTile = GISTDA_TILE_WORKER ? new GistdaLayer({ minZoom: 8, maxZoom: 19, maxNativeZoom: 17, opacity: 0.8,
+    attribution: 'น้ำท่วมซ้ำซาก © GISTDA' }) : null;
   L_.ff = { label: 'น้ำท่วมซ้ำซาก (GISTDA)', color: '#2171B5', on: !!(ffTile || FF), ok: !!(ffTile || FF),
     mode: ffTile ? 'tile' : 'vector', lyr: ffTile || ffVec };
   // Fallback: tile โหลดไม่ได้เลย (Worker ไม่ตอบ / 500 not_configured / upstream ผิด) → กลับไปแสดง vector GEE
