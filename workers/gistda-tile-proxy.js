@@ -1,9 +1,11 @@
-// gistda-tile-proxy · Cloudflare Worker (v1.1 · เพิ่ม SWAP_XY)
+// gistda-tile-proxy · Cloudflare Worker (v1.2 · เพิ่ม TMS_Y)
 // ส่งต่อ tile น้ำท่วมซ้ำซากของ GISTDA โดยเก็บ API key ไว้ฝั่ง Worker เท่านั้น
 // ตั้งค่าใน Cloudflare → Worker → Settings → Variables and Secrets
 //   GISTDA_API_KEY  (Secret)  key ของ GISTDA
-//   UPSTREAM        (Text)    URL tile จากเอกสาร GISTDA ที่มี {z} {x} {y} เช่น https://.../{z}/{x}/{y}
+//   UPSTREAM        (Text)    URL tile จากเอกสาร GISTDA ที่มี {z} {x} {y}
+//                             น้ำท่วมซ้ำซาก: https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood-freq/tms/{z}/{x}/{y}
 //   ALLOWED_ORIGIN  (Text)    https://sarochiiii.github.io
+//   TMS_Y           (Text)    "true" = แปลงแถวเป็นแบบ TMS (นับจากล่าง: y_tms = 2^z − 1 − y) — path ของ GISTDA มีคำว่า tms
 //   SWAP_XY         (Text)    "true" = สลับ {x}/{y} ก่อนส่งต่อ (เอกสาร GISTDA เรียก x = row, y = column — ยังไม่ยืนยันกับ tile จริง)
 // เรียกใช้: https://<worker>.workers.dev/floodfreq/{z}/{x}/{y}.png
 
@@ -53,8 +55,9 @@ export default {
     const hit = await cache.match(key);
     if (hit) return new Response(hit.body, { status: hit.status, headers: { ...Object.fromEntries(hit.headers), ...h, 'X-Cache': 'HIT' } });
 
-    // เส้นทางฝั่งเว็บเป็น XYZ มาตรฐานเสมอ · สลับเฉพาะตอนส่งต่อ upstream เมื่อ SWAP_XY = "true"
-    const [ux, uy] = env.SWAP_XY === 'true' ? [y, x] : [x, y];
+    // เส้นทางฝั่งเว็บเป็น XYZ มาตรฐานเสมอ · แปลงเฉพาะตอนส่งต่อ upstream (TMS_Y ก่อน แล้วจึง SWAP_XY)
+    const yy = env.TMS_Y === 'true' ? 2 ** z - 1 - y : y;          // XYZ → TMS (กลับแกน y)
+    const [ux, uy] = env.SWAP_XY === 'true' ? [yy, x] : [x, yy];
     const up = env.UPSTREAM.replace('{z}', String(z)).replace('{x}', String(ux)).replace('{y}', String(uy));
     let r;
     try {

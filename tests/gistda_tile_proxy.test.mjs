@@ -20,6 +20,9 @@ r = await go('/floodfreq/14/12840/7494.png'); assert.equal(r.status, 200); asser
 assert.equal(seen.length, 1, 'HIT ต้องไม่เรียก upstream');
 // SWAP_XY
 r = await go('/floodfreq/14/12841/7494.png', { ...env, SWAP_XY: 'true' }); assert.equal(seen.at(-1).u, 'https://up.example/t/14/7494/12841');
+// TMS_Y: y_tms = 2^14 − 1 − 7494 = 8889 · รวมกับ SWAP_XY
+r = await go('/floodfreq/14/12842/7494.png', { ...env, TMS_Y: 'true' }); assert.equal(seen.at(-1).u, 'https://up.example/t/14/12842/8889');
+r = await go('/floodfreq/14/12843/7494.png', { ...env, TMS_Y: 'true', SWAP_XY: 'true' }); assert.equal(seen.at(-1).u, 'https://up.example/t/14/8889/12843');
 // นอก bbox → 204 · zoom เกิน → 400 · path ผิด → 404 · ไม่ตั้งค่า → 500 · method → 405 · OPTIONS → 204
 assert.equal((await go('/floodfreq/14/0/0.png')).status, 204);
 assert.equal((await go('/floodfreq/18/205440/119904.png')).status, 400);

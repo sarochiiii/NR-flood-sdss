@@ -22,3 +22,4 @@
 | 5 ต.ค. | v=40 | ย้ายปุ่มโหมดสีตำบลจากมุมขวาบนแผนที่ไปเป็น radio "การแสดงผลตำบล" ในแผงชั้นข้อมูล กลุ่มพื้นฐาน ใต้เขตตำบล/อำเภอ |
 | 6 ต.ค. | chanat | ChanAT Sandbox ใหม่จากชั้นข้อมูลจริง (Leaflet): อาคาร Open Buildings · ลำน้ำ/แหล่งน้ำ OSM · น้ำท่วมซ้ำซาก (workflow `sandbox-layers`) · ศูนย์กลางบ้านด่านติง · แผง SDSS วิเคราะห์อาคารที่สัมผัสภัย + CSV · เอาตัวเลขสมมติเดิมออก |
 | 6 ต.ค. | chanat · update-36 | ภาพน้ำท่วมซ้ำซากจาก GISTDA tile ผ่าน Worker `gistda-tile-proxy` (v1.1 + SWAP_XY) · การวิเคราะห์ยังใช้ Repeatarea (GEE) · fallback เป็น vector เมื่อ tile โหลดไม่ได้ · ยังไม่ deploy/ยืนยัน UPSTREAM, x/y, legend |
+| 6 ต.ค. | Worker v1.2 | `gistda-tile-proxy` เพิ่ม `TMS_Y` (path GISTDA เป็น tms) · บันทึก UPSTREAM flood-freq จากเอกสาร GISTDA |

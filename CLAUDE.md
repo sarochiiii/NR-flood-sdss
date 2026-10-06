@@ -14,7 +14,7 @@
 | ข้อมูลสด | `scripts/region/*.py` → `region/data/live/` | `.github/workflows/region-live.yml` ทุกชั่วโมง :15 |
 | LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.8, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
 | ChanAT Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (EE asset `Repeatarea`) |
-| Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ยังไม่ deploy** | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
+| Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ยังไม่ deploy** | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
 | LINE ระยะสอง (D1 + LIFF) — **ยังไม่ใช้** | `line/worker.js`, `line/schema.sql`, `region/liff/*` | — |
 | Sandbox บ้านด่านติง (ข้อมูลครัวเรือน) | **ไม่อยู่ใน repo** — โฟลเดอร์ `sandbox-private` แยก | Cloudflare Pages + Access |
 
