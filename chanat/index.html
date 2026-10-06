@@ -108,6 +108,9 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   // กลุ่มอาคารหนาแน่นที่สุดใกล้ "อาคารบังคับน้ำบ้านด่านติง" (102.12961, 15.13600 · structures.geojson seq 34)
   // คำนวณจาก Open Buildings tile 301010: 578 หลังในรัศมี 600 ม. · ห่างประตูน้ำ 0.8 กม. — ยังไม่ได้ยืนยันกับ อบต.
   const DT = { lat: 15.14223, lon: 102.13359, name: 'บ้านด่านติง (ประมาณจากกลุ่มอาคาร)' }, RADIUS_KM = 1.5;
+  // URL ของ Cloudflare Worker gistda-tile-proxy (workers/gistda-tile-proxy.js) เช่น https://<ชื่อ>.workers.dev
+  // ว่าง = ยังไม่ deploy → แสดงชั้น Repeatarea (GEE) ทั้งภาพและการวิเคราะห์ · ห้ามใส่ API key ที่นี่ (key อยู่ใน Secret ของ Worker)
+  const GISTDA_TILE_WORKER = '';
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const get = (p) => fetch(p, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -158,9 +161,25 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   const ffCol = (n) => FF_COL[Math.min(FF_COL.length, Math.max(1, n)) - 1];
   const FF = ff && ff.features && ff.features.length ? ff.features.map(f => ({ freq: f.properties.freq, P: polysOf(f.geometry),
     bb: L.geoJSON(f).getBounds() })) : null;
-  L_.ff = { label: 'น้ำท่วมซ้ำซาก (GISTDA)', color: '#2171B5', on: !!FF, ok: !!FF,
-    lyr: FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
-      onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null };
+  // ภาพแผนที่: tile GISTDA ผ่าน Worker (ถ้าตั้ง GISTDA_TILE_WORKER) · การวิเคราะห์อาคารใช้ vector Repeatarea (GEE) เสมอ
+  const ffVec = FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
+    onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null;
+  const ffTile = GISTDA_TILE_WORKER ? L.tileLayer(GISTDA_TILE_WORKER.replace(/\/$/, '') + '/floodfreq/{z}/{x}/{y}.png', { minZoom: 8, maxZoom: 19,
+    maxNativeZoom: 17, opacity: 0.7, attribution: 'น้ำท่วมซ้ำซาก © GISTDA', crossOrigin: 'anonymous' }) : null;
+  L_.ff = { label: 'น้ำท่วมซ้ำซาก (GISTDA)', color: '#2171B5', on: !!(ffTile || FF), ok: !!(ffTile || FF),
+    mode: ffTile ? 'tile' : 'vector', lyr: ffTile || ffVec };
+  // Fallback: tile โหลดไม่ได้เลย (Worker ไม่ตอบ / 500 not_configured / upstream ผิด) → กลับไปแสดง vector GEE
+  if (ffTile) { let ok = 0, bad = 0;
+    ffTile.on('tileload', () => { ok++; });
+    ffTile.on('tileerror', () => { if (++bad >= 4 && !ok && L_.ff.mode === 'tile') ffFallback(); }); }
+  function ffFallback() {
+    if (map.hasLayer(ffTile)) map.removeLayer(ffTile);
+    Object.assign(L_.ff, { mode: 'vector', lyr: ffVec, ok: !!FF });
+    $('freq-warn').hidden = false;
+    $('freq-warn').textContent = 'โหลดภาพน้ำท่วมซ้ำซากจาก GISTDA API ไม่ได้ — แสดงชั้น Repeatarea (GEE) แทน'
+      + (FF ? '' : ' แต่ยังไม่มีไฟล์ชั้นนี้ จึงวิเคราะห์ได้เฉพาะระยะจากลำน้ำ');
+    renderSrc(); renderLayers(); sync();
+  }
 
   // แหล่งน้ำผิวดิน OSM
   const WT = { reservoir: 'อ่างเก็บน้ำ', lake: 'หนอง/บึง', oxbow: 'กุด', pond: 'สระ/บ่อ', wetland: 'พื้นที่ชุ่มน้ำ', basin: 'บ่อพัก/บ่อบำบัด', other: 'แหล่งน้ำ (OSM ไม่ระบุประเภท)' };
@@ -284,7 +303,11 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     const row = (c, t, s) => `<div class="row"><span class="sw" style="background:${c};${s || ''}"></span>${t}</div>`;
     let h = '';
     if (L_.bldg.on && L_.bldg.ok) h += '<b>อาคาร</b>' + Object.values(CLS).map(([c, t]) => row(c, t)).join('');
-    if (L_.ff.on && L_.ff.ok) h += '<b>น้ำท่วมซ้ำซาก (ครั้ง)</b>' + Array.from({ length: maxF }, (_, i) => row(ffCol(i + 1), `${i + 1}${i + 1 === FF_COL.length ? '+' : ''}`)).join('');
+    if (L_.ff.on && L_.ff.ok) h += L_.ff.mode === 'tile'
+      ? '<b>น้ำท่วมซ้ำซาก</b><div class="muted">ภาพแผนที่จาก GISTDA API (สีตามรูปแบบของ GISTDA · ยังไม่มีตาราง legend)'
+        + (FF ? '<br>การวิเคราะห์อาคารใช้ชั้น Repeatarea (GEE)' : '') + '</div>'
+      : '<b>น้ำท่วมซ้ำซาก (ครั้ง)</b>' + Array.from({ length: maxF }, (_, i) => row(ffCol(i + 1), `${i + 1}${i + 1 === FF_COL.length ? '+' : ''}`)).join('')
+        + '<div class="muted">ภาพและการวิเคราะห์จากชั้น Repeatarea (GEE)</div>';
     if (L_.river.on && L_.river.ok) h += row('#1D4ED8', 'แม่น้ำ/ลำน้ำสายหลัก', 'height:4px') + row('#22D3EE', 'คลอง', 'height:3px');
     $('legend').innerHTML = h || '<span class="muted">ไม่มีชั้นที่เปิด</span>';
   }
@@ -304,11 +327,15 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   ].map(([k, v, s]) => `<dt>${k}${s ? `<br><small>${esc(s)}</small>` : ''}</dt><dd>${esc(v)}</dd>`).join('')
     + `<dt class="muted" style="grid-column:1/-1">${cfg && cfg.bank && cfg.bank.verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}รายละเอียดเพิ่มเติมที่หน้า <a href="../region/">SDSS-ChanAT</a></dt>`;
 
-  $('src').innerHTML = `ที่มา: อาคาร © Google Open Buildings (CC BY 4.0) ${fmt(B.length)} หลัง · แม่น้ำ/แหล่งน้ำ © OpenStreetMap (ODbL)${rivers ? ' ' + tt(rivers.updated_at) : ''}
-    · น้ำท่วมซ้ำซาก ${FF ? 'GISTDA ' + tt(ff.updated_at) : '(ยังไม่มี)'} · ขอบเขตตำบล NR_admin3 · อาคารชลศาสตร์ ปภ./อบต. · สถานการณ์ สสน./กรมชลประทาน/ECMWF/GISTDA`;
-  map.attributionControl.addAttribution('อาคาร © Google Open Buildings · ลำน้ำ © OpenStreetMap' + (FF ? ' · น้ำท่วมซ้ำซาก © GISTDA' : ''));
+  function renderSrc() {
+    const tileOn = L_.ff.mode === 'tile';
+    $('src').innerHTML = `ที่มา: อาคาร © Google Open Buildings (CC BY 4.0) ${fmt(B.length)} หลัง · แม่น้ำ/แหล่งน้ำ © OpenStreetMap (ODbL)${rivers ? ' ' + tt(rivers.updated_at) : ''}
+    · น้ำท่วมซ้ำซาก: ${tileOn ? 'ภาพแผนที่จาก GISTDA API (ผ่าน Worker) · ' : ''}${FF ? `ชั้น Repeatarea ของ GISTDA ผ่าน Earth Engine ${tt(ff.updated_at)}${tileOn ? ' (ใช้วิเคราะห์อาคาร)' : ''}` : '(ยังไม่มีชั้น Repeatarea)'} · ขอบเขตตำบล NR_admin3 · อาคารชลศาสตร์ ปภ./อบต. · สถานการณ์ สสน./กรมชลประทาน/ECMWF/GISTDA`;
+  }
+  map.attributionControl.addAttribution('อาคาร © Google Open Buildings · ลำน้ำ © OpenStreetMap');
+  if (ffVec) ffVec.getAttribution = () => 'น้ำท่วมซ้ำซาก © GISTDA (Repeatarea ผ่าน Earth Engine)';   // แสดงเมื่อชั้น vector อยู่บนแผนที่
 
-  renderLayers(); sync(); analyse();
+  renderSrc(); renderLayers(); sync(); analyse();
 })();
 </script>
 </body>

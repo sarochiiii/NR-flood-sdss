@@ -23,6 +23,8 @@
 - ศูนย์กลาง = กลุ่มอาคารหนาแน่นที่สุดใกล้ "อาคารบังคับน้ำบ้านด่านติง" (structures seq 34 · 102.12961, 15.13600) → **15.14223, 102.13359** (578 หลังในรัศมี 600 ม. · ห่างประตูน้ำ 0.8 กม.) — ยังไม่ยืนยันขอบเขตหมู่บ้านกับ อบต.
 - แผง SDSS: ขอบเขต (รัศมี 1.5 กม. / ทั้งตำบล) · ระยะจากลำน้ำสายหลัก (± คลอง) 50–1000 ม. · น้ำท่วมซ้ำซาก ≥ N ครั้ง → จัดอาคาร 4 กลุ่ม (ทั้งสอง / ซ้ำซาก / ใกล้ลำน้ำ / นอกเกณฑ์) · ส่งออก CSV (พิกัดจุดกึ่งกลางอาคาร ไม่ใช่ครัวเรือน)
 - น้ำท่วมซ้ำซาก: `scripts/region/build_sandbox_floodfreq.py` ผ่าน workflow **`sandbox-layers`** (กดรันเอง) อ่าน EE asset `Repeatarea` ด้วย service account → `region/data/sandbox/floodfreq.geojson` · ถ้า error "permission" ให้แชร์ asset ให้อีเมล service account
+- ภาพน้ำท่วมซ้ำซากจาก GISTDA API (ทางเลือก): Worker `workers/gistda-tile-proxy.js` ซ่อน key · ตั้ง `GISTDA_TILE_WORKER` ใน `chanat/index.html` → แสดง tile (z8–17, opacity 0.7) **แต่การวิเคราะห์อาคาร/ตัวกรอง/CSV ยังใช้ vector Repeatarea (GEE)** · tile โหลดไม่ได้ ≥ 4 ครั้งโดยไม่มีสำเร็จ → กลับไปแสดง vector + ข้อความใน `freq-warn`
+  - ยังไม่ยืนยัน: URL `UPSTREAM` · ลำดับ x/y (เอกสาร GISTDA เรียก x=row, y=column → ทดสอบ z14 x12840 y7494 = บ้านด่านติง ถ้าภาพผิดตำแหน่งตั้ง `SWAP_XY=true`) · ตาราง legend สี→จำนวนครั้ง · เงื่อนไขการเผยแพร่ tile สาธารณะของ GISTDA
 - อาคาร Open Buildings มีเฉพาะ 26 ตำบล — บ้านที่อยู่นอกสองอำเภอจะไม่มีรูปอาคาร
 
 ## ชั้นภัย S1 (ยังไม่ได้รัน)
