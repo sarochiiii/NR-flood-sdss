@@ -24,3 +24,4 @@
 | 6 ต.ค. | chanat · update-36 | ภาพน้ำท่วมซ้ำซากจาก GISTDA tile ผ่าน Worker `gistda-tile-proxy` (v1.1 + SWAP_XY) · การวิเคราะห์ยังใช้ Repeatarea (GEE) · fallback เป็น vector เมื่อ tile โหลดไม่ได้ · ยังไม่ deploy/ยืนยัน UPSTREAM, x/y, legend |
 | 6 ต.ค. | Worker v1.2 | `gistda-tile-proxy` เพิ่ม `TMS_Y` (path GISTDA เป็น tms) · บันทึก UPSTREAM flood-freq จากเอกสาร GISTDA |
 | 6 ต.ค. | chanat | เปิดใช้ภาพน้ำท่วมซ้ำซาก GISTDA ผ่าน Worker ที่ deploy แล้ว · multiply blend เพราะ tile พื้นเทาทึบ |
+| 6 ต.ค. | chanat | ปุ่มสลับภาพน้ำท่วมซ้ำซาก GISTDA ↔ Repeatarea (มี legend 1–7 ครั้ง) |
