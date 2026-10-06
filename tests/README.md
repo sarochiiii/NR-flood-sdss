@@ -12,3 +12,6 @@
 
 ## รายงานสถานการณ์สำหรับ LINE
 `node --no-warnings tests/report.test.mjs` — `situationReport` ใน `region/js/report.js` ต้องตรงกับ `line/kv/worker.js` ทุกตัวอักษร · สร้างข้อความจาก `region/data/live` ได้ ไม่มี undefined/NaN · คำสั่ง "สถานการณ์น้ำ" ใน worker ได้ข้อความเดียวกับเว็บ
+
+## Worker gistda-tile-proxy
+`node --no-warnings tests/gistda_tile_proxy.test.mjs` — 200 MISS→HIT (cache) · ส่ง key ใน header ไม่หลุดใน response · SWAP_XY · 204 นอก bbox · 400 zoom นอก 8–17 · 404 path ผิด · 500 not_configured · 405 · upstream error → 502 ไม่ส่งข้อความต่อ
