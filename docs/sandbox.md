@@ -25,6 +25,7 @@
 - น้ำท่วมซ้ำซาก: `scripts/region/build_sandbox_floodfreq.py` ผ่าน workflow **`sandbox-layers`** (กดรันเอง) อ่าน EE asset `Repeatarea` ด้วย service account → `region/data/sandbox/floodfreq.geojson` · ถ้า error "permission" ให้แชร์ asset ให้อีเมล service account
 - ภาพน้ำท่วมซ้ำซากจาก GISTDA API (ทางเลือก): Worker `workers/gistda-tile-proxy.js` ซ่อน key · ตั้ง `GISTDA_TILE_WORKER` ใน `chanat/index.html` → แสดง tile (z8–17, opacity 0.7) **แต่การวิเคราะห์อาคาร/ตัวกรอง/CSV ยังใช้ vector Repeatarea (GEE)** · tile โหลดไม่ได้ ≥ 4 ครั้งโดยไม่มีสำเร็จ → กลับไปแสดง vector + ข้อความใน `freq-warn`
   - `UPSTREAM` = `https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood-freq/tms/{z}/{x}/{y}` (จากหน้าเอกสาร GISTDA · ลำดับ {z}/{x}/{y} ยังไม่ยืนยัน) · path เป็น **tms** → ถ้าภาพกลับหัวหรือว่าง ลอง `TMS_Y=true` (y = 2^z−1−y) ก่อน `SWAP_XY`
+  - **deploy แล้ว 6 ต.ค.**: https://gistda-tile-proxy.sarochinee-k.workers.dev · `/floodfreq/14/12840/7494.png` ได้ภาพข้อมูลไทยและแนวลำน้ำสอดคล้องกับ Repeatarea → ลำดับ {z}/{x}/{y} ใช้ได้ · tile มีพื้นเทาทึบนอกพื้นที่ท่วม → หน้าเว็บใช้ `mix-blend-mode: multiply`
   - ยังไม่ยืนยัน: URL `UPSTREAM` · ลำดับ x/y (เอกสาร GISTDA เรียก x=row, y=column → ทดสอบ z14 x12840 y7494 = บ้านด่านติง ถ้าภาพผิดตำแหน่งตั้ง `SWAP_XY=true`) · ตาราง legend สี→จำนวนครั้ง · เงื่อนไขการเผยแพร่ tile สาธารณะของ GISTDA
 - อาคาร Open Buildings มีเฉพาะ 26 ตำบล — บ้านที่อยู่นอกสองอำเภอจะไม่มีรูปอาคาร
 
