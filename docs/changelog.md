@@ -26,3 +26,4 @@
 | 6 ต.ค. | chanat | เปิดใช้ภาพน้ำท่วมซ้ำซาก GISTDA ผ่าน Worker ที่ deploy แล้ว · multiply blend เพราะ tile พื้นเทาทึบ |
 | 6 ต.ค. | chanat | ปุ่มสลับภาพน้ำท่วมซ้ำซาก GISTDA ↔ Repeatarea (มี legend 1–7 ครั้ง) |
 | 7 ต.ค. | chanat | ภาพ GISTDA: ทำพื้นเทาโปร่งใสด้วย canvas แทน multiply (เห็นสีจริง) · บันทึกข้อค้นพบ Repeatarea คลุม ~96% ของตำบล ต่างจากภาพ GISTDA |
+| 7 ต.ค. | chanat · sandbox-layers | ชั้นน้ำท่วมซ้ำซากเปลี่ยนจาก Repeatarea เป็น EE asset `FloodGCS` (gap ในตำบล 0.84 จาก 2.35 ตร.กม.) · workflow รับ asset/field/inspect |

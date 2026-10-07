@@ -10,12 +10,12 @@
 var A = 'projects/ee-sarochineek/assets/';
 var boundary = ee.FeatureCollection(A + 'ChanAtOSM');        // [ตรวจ] ขอบเขตตำบล
 var river    = ee.FeatureCollection(A + 'ChiangKriFull');    // เส้นลำเชียงไกรเต็มเส้น (ใช้ก่อน clip ตามข้อตกลงเดิม)
-var freqFC   = ee.FeatureCollection(A + 'Repeatarea');       // น้ำท่วมซ้ำซากเฉพาะจันอัด
+var freqFC   = ee.FeatureCollection(A + 'FloodGCS');         // น้ำท่วมซ้ำซาก GISTDA เฉพาะจันอัด (ตรงขอบเขตตำบลกว่า Repeatarea)
 var WATER_ASSETS = ['ChanAtWaterLine', 'ChanAtWaterArea'];   // [ตรวจชื่อ] ถ้าไม่มีให้ลบออกจากรายการ
 
 print('boundary', boundary.first());
 print('river', river.first());
-print('Repeatarea ตัวอย่าง properties (ดูชื่อ field ความถี่):', freqFC.first().toDictionary());
+print('FloodGCS ตัวอย่าง properties (ดูชื่อ field ความถี่):', freqFC.first().toDictionary());
 
 var region = boundary.geometry();
 var aoi = region.buffer(3000);                                // พื้นที่รอบตำบล 3 กม. ให้เห็นต้นน้ำ-ท้ายน้ำ

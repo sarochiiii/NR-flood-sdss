@@ -112,7 +112,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   // คำนวณจาก Open Buildings tile 301010: 578 หลังในรัศมี 600 ม. · ห่างประตูน้ำ 0.8 กม. — ยังไม่ได้ยืนยันกับ อบต.
   const DT = { lat: 15.14223, lon: 102.13359, name: 'บ้านด่านติง (ประมาณจากกลุ่มอาคาร)' }, RADIUS_KM = 1.5;
   // URL ของ Cloudflare Worker gistda-tile-proxy (workers/gistda-tile-proxy.js) เช่น https://<ชื่อ>.workers.dev
-  // ว่าง = ยังไม่ deploy → แสดงชั้น Repeatarea (GEE) ทั้งภาพและการวิเคราะห์ · ห้ามใส่ API key ที่นี่ (key อยู่ใน Secret ของ Worker)
+  // ว่าง = ยังไม่ deploy → แสดงชั้น FloodGCS (GEE) ทั้งภาพและการวิเคราะห์ · ห้ามใส่ API key ที่นี่ (key อยู่ใน Secret ของ Worker)
   const GISTDA_TILE_WORKER = 'https://gistda-tile-proxy.sarochinee-k.workers.dev';   // ทดสอบ 14/12840/7494 ได้ภาพแล้ว (6 ต.ค.)
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -164,7 +164,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   const ffCol = (n) => FF_COL[Math.min(FF_COL.length, Math.max(1, n)) - 1];
   const FF = ff && ff.features && ff.features.length ? ff.features.map(f => ({ freq: f.properties.freq, P: polysOf(f.geometry),
     bb: L.geoJSON(f).getBounds() })) : null;
-  // ภาพแผนที่: tile GISTDA ผ่าน Worker (ถ้าตั้ง GISTDA_TILE_WORKER) · การวิเคราะห์อาคารใช้ vector Repeatarea (GEE) เสมอ
+  // ภาพแผนที่: tile GISTDA ผ่าน Worker (ถ้าตั้ง GISTDA_TILE_WORKER) · การวิเคราะห์อาคารใช้ vector FloodGCS (GEE) เสมอ
   const ffVec = FF ? L.geoJSON(ff, { renderer: rend, style: f => ({ stroke: false, fillColor: ffCol(f.properties.freq), fillOpacity: 0.55 }),
     onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null;
   // tile GISTDA มีพื้นเทาอ่อนทึบนอกพื้นที่ท่วม → วาดลง canvas แล้วทำพิกเซลเทาอ่อน/ขาวให้โปร่งใส เห็นสีจริงของ GISTDA บนภาพดาวเทียม
@@ -198,7 +198,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     if (map.hasLayer(ffTile)) map.removeLayer(ffTile);
     Object.assign(L_.ff, { mode: 'vector', lyr: ffVec, ok: !!FF });
     $('freq-warn').hidden = false;
-    $('freq-warn').textContent = 'โหลดภาพน้ำท่วมซ้ำซากจาก GISTDA API ไม่ได้ — แสดงชั้น Repeatarea (GEE) แทน'
+    $('freq-warn').textContent = 'โหลดภาพน้ำท่วมซ้ำซากจาก GISTDA API ไม่ได้ — แสดงชั้น FloodGCS (GEE) แทน'
       + (FF ? '' : ' แต่ยังไม่มีไฟล์ชั้นนี้ จึงวิเคราะห์ได้เฉพาะระยะจากลำน้ำ');
     renderSrc(); renderLayers(); sync();
   }
@@ -296,7 +296,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   $('freq').disabled = !FF;
   $('freq').onchange = (e) => { st.freq = +e.target.value; analyse(); };
   if (!FF) { $('freq-warn').hidden = false;
-    $('freq-warn').textContent = 'ยังไม่มีชั้นน้ำท่วมซ้ำซาก — รอ workflow sandbox-layers ดึงจาก Earth Engine (asset Repeatarea) · ตอนนี้วิเคราะห์ได้เฉพาะระยะจากลำน้ำ'; }
+    $('freq-warn').textContent = 'ยังไม่มีชั้นน้ำท่วมซ้ำซาก — รอ workflow sandbox-layers ดึงจาก Earth Engine (asset FloodGCS) · ตอนนี้วิเคราะห์ได้เฉพาะระยะจากลำน้ำ'; }
 
   $('csv').onclick = () => {
     const rows = [['lat', 'lon', 'roof_area_m2', 'dist_river_m', 'dist_river_canal_m', 'flood_freq', 'class', 'in_chanat']];
@@ -315,9 +315,9 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
         <i style="background:${o.color}"></i>${o.label}${o.ok ? '' : ' <span class="muted">(ยังไม่มีข้อมูล)</span>'}</label>`
         + (k === 'ff' && ffTile && FF && !ffDead && o.on ? `<div class="ffsrc" role="group" aria-label="ภาพน้ำท่วมซ้ำซาก">
             <button type="button" data-m="tile" class="${o.mode === 'tile' ? 'on' : ''}">ภาพ GISTDA</button>
-            <button type="button" data-m="vector" class="${o.mode === 'vector' ? 'on' : ''}">Repeatarea 1–${maxF} ครั้ง</button></div>` : ''); }).join('');
+            <button type="button" data-m="vector" class="${o.mode === 'vector' ? 'on' : ''}">FloodGCS 1–${maxF} ครั้ง</button></div>` : ''); }).join('');
     $('layers').querySelectorAll('input').forEach(i => i.onchange = () => { const o = L_[i.dataset.k]; o.on = i.checked; renderLayers(); sync(); });
-    // สลับภาพน้ำท่วมซ้ำซาก: tile GISTDA (ยังไม่มี legend) ↔ vector Repeatarea (มี legend จำนวนครั้ง) — การวิเคราะห์ใช้ Repeatarea เสมอ
+    // สลับภาพน้ำท่วมซ้ำซาก: tile GISTDA (ยังไม่มี legend) ↔ vector FloodGCS (มี legend จำนวนครั้ง) — การวิเคราะห์ใช้ FloodGCS เสมอ
     $('layers').querySelectorAll('.ffsrc button').forEach(b => b.onclick = () => {
       if (b.dataset.m === L_.ff.mode) return;
       if (map.hasLayer(L_.ff.lyr)) map.removeLayer(L_.ff.lyr);
@@ -336,9 +336,9 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     if (L_.bldg.on && L_.bldg.ok) h += '<b>อาคาร</b>' + Object.values(CLS).map(([c, t]) => row(c, t)).join('');
     if (L_.ff.on && L_.ff.ok) h += L_.ff.mode === 'tile'
       ? '<b>น้ำท่วมซ้ำซาก</b><div class="muted">ภาพแผนที่จาก GISTDA API (สีตามรูปแบบของ GISTDA · ยังไม่มีตาราง legend)'
-        + (FF ? '<br>การวิเคราะห์อาคารใช้ชั้น Repeatarea (GEE)' : '') + '</div>'
+        + (FF ? '<br>การวิเคราะห์อาคารใช้ชั้น FloodGCS (GEE)' : '') + '</div>'
       : '<b>น้ำท่วมซ้ำซาก (ครั้ง)</b>' + Array.from({ length: maxF }, (_, i) => row(ffCol(i + 1), `${i + 1}${i + 1 === FF_COL.length ? '+' : ''}`)).join('')
-        + '<div class="muted">ภาพและการวิเคราะห์จากชั้น Repeatarea (GEE)</div>';
+        + '<div class="muted">ภาพและการวิเคราะห์จากชั้น FloodGCS (GEE)</div>';
     if (L_.river.on && L_.river.ok) h += row('#1D4ED8', 'แม่น้ำ/ลำน้ำสายหลัก', 'height:4px') + row('#22D3EE', 'คลอง', 'height:3px');
     $('legend').innerHTML = h || '<span class="muted">ไม่มีชั้นที่เปิด</span>';
   }
@@ -361,10 +361,10 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   function renderSrc() {
     const tileOn = L_.ff.mode === 'tile';
     $('src').innerHTML = `ที่มา: อาคาร © Google Open Buildings (CC BY 4.0) ${fmt(B.length)} หลัง · แม่น้ำ/แหล่งน้ำ © OpenStreetMap (ODbL)${rivers ? ' ' + tt(rivers.updated_at) : ''}
-    · น้ำท่วมซ้ำซาก: ${tileOn ? 'ภาพแผนที่จาก GISTDA API (ผ่าน Worker) · ' : ''}${FF ? `ชั้น Repeatarea ของ GISTDA ผ่าน Earth Engine ${tt(ff.updated_at)}${tileOn ? ' (ใช้วิเคราะห์อาคาร)' : ''}` : '(ยังไม่มีชั้น Repeatarea)'} · ขอบเขตตำบล NR_admin3 · อาคารชลศาสตร์ ปภ./อบต. · สถานการณ์ สสน./กรมชลประทาน/ECMWF/GISTDA`;
+    · น้ำท่วมซ้ำซาก: ${tileOn ? 'ภาพแผนที่จาก GISTDA API (ผ่าน Worker) · ' : ''}${FF ? `ชั้น FloodGCS ของ GISTDA ผ่าน Earth Engine ${tt(ff.updated_at)}${tileOn ? ' (ใช้วิเคราะห์อาคาร)' : ''}` : '(ยังไม่มีชั้น FloodGCS)'} · ขอบเขตตำบล NR_admin3 · อาคารชลศาสตร์ ปภ./อบต. · สถานการณ์ สสน./กรมชลประทาน/ECMWF/GISTDA`;
   }
   map.attributionControl.addAttribution('อาคาร © Google Open Buildings · ลำน้ำ © OpenStreetMap');
-  if (ffVec) ffVec.getAttribution = () => 'น้ำท่วมซ้ำซาก © GISTDA (Repeatarea ผ่าน Earth Engine)';   // แสดงเมื่อชั้น vector อยู่บนแผนที่
+  if (ffVec) ffVec.getAttribution = () => 'น้ำท่วมซ้ำซาก © GISTDA (FloodGCS ผ่าน Earth Engine)';   // แสดงเมื่อชั้น vector อยู่บนแผนที่
 
   renderSrc(); renderLayers(); sync(); analyse();
 })();
