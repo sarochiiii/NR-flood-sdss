@@ -1,7 +1,9 @@
 """น้ำท่วมซ้ำซาก (GISTDA) รอบ ต.จันอัด จาก Earth Engine asset → region/data/sandbox/floodfreq.geojson
 
 ทำซ้ำส่วนที่ 2 ของ gee/sandbox_layers.js แต่รันผ่าน service account ใน Actions (workflow sandbox-layers) แทนการ export ลง Drive
-  asset: projects/ee-sarochineek/assets/Repeatarea · field ความถี่ 'Repeating' หรือ 'freq' (ตรวจจากข้อมูลจริง ไม่เดา)
+  asset: env FF_ASSET (ค่าเริ่มต้น projects/ee-sarochineek/assets/FloodGCS — ต้นฉบับ GISTDA · Repeatarea เดิมถูกตัดขอบ)
+  field ความถี่: env FF_FIELD หรือค้นจากชื่อที่รู้จัก (ตรวจจากข้อมูลจริง ไม่เดา)
+  FF_INSPECT=1 → พิมพ์โครงสร้าง asset (ชนิด · field · ค่าที่พบ · ชนิด geometry ในพื้นที่) แล้วจบ ไม่เขียนไฟล์
   แตก GeometryCollection เก็บเฉพาะ polygon → raster ค่าสูงสุด (10 ม.) → polygon ตามจำนวนครั้ง (dissolve) ในพื้นที่ ต.จันอัด + 3 กม.
 ผลลัพธ์: FeatureCollection {properties: {freq}} · ไม่มีข้อมูลครัวเรือน เผยแพร่ได้
 ต้องมี Secret EE_SERVICE_ACCOUNT_KEY และ service account ต้องอ่าน asset ได้ (แชร์ asset ให้อีเมล service account)
@@ -10,9 +12,42 @@
 import json, os
 from _common import ROOT, now_iso
 
-ASSET = "projects/ee-sarochineek/assets/Repeatarea"
+ASSET = os.environ.get("FF_ASSET", "").strip() or "projects/ee-sarochineek/assets/FloodGCS"
+FIELDS = ("Repeating", "freq", "FREQ", "repeat", "Repeat", "REPEAT", "frequency", "count")
 TCODE = "301010"
 OUT = ROOT / "data/sandbox/floodfreq.geojson"
+
+
+def inspect(ee, asset, kind, aoi):
+    """พิมพ์โครงสร้าง asset เพื่อเลือก field/วิธีแปลงจากข้อมูลจริง (ไม่เขียนไฟล์)"""
+    if kind in ("TABLE", "FEATURE_COLLECTION"):
+        fc = ee.FeatureCollection(asset)
+        sub = fc.filterBounds(aoi)
+        print("จำนวน feature ทั้งหมด", fc.size().getInfo(), "· ในพื้นที่ ต.จันอัด + 3 กม.", sub.size().getInfo())
+        names = [n for n in fc.first().propertyNames().getInfo() if n != "system:index"]
+        print("field:", names)
+        print("ตัวอย่าง properties:", json.dumps(fc.first().toDictionary().getInfo(), ensure_ascii=False)[:800])
+        gt = sub.map(lambda f: f.set("_t", f.geometry().type())).aggregate_histogram("_t").getInfo()
+        print("ชนิด geometry ในพื้นที่:", gt)
+        for n in names:
+            try:
+                h = sub.aggregate_histogram(n).getInfo()
+                ks = list(h)
+                print(f"  {n}: {len(ks)} ค่า · {json.dumps(dict(list(h.items())[:15]), ensure_ascii=False)[:400]}")
+            except Exception as e:
+                print(f"  {n}: อ่าน histogram ไม่ได้ ({str(e)[:80]})")
+        try:
+            a = sub.map(lambda f: f.set("_a", f.geometry().intersection(aoi, 1).area(1))).aggregate_sum("_a").getInfo()
+            print(f"พื้นที่รวมในพื้นที่ (ทับซ้อนนับซ้ำ) {a / 1e6:.2f} ตร.กม.")
+        except Exception as e:
+            print("คำนวณพื้นที่ไม่ได้:", str(e)[:120])
+    elif kind == "IMAGE":
+        img = ee.Image(asset)
+        print("band:", img.bandNames().getInfo(), "· scale", img.projection().nominalScale().getInfo(), "ม.")
+        print("properties:", json.dumps(img.toDictionary().getInfo(), ensure_ascii=False)[:600])
+        print("histogram ค่าพิกเซลในพื้นที่:", json.dumps(img.reduceRegion(ee.Reducer.frequencyHistogram(), aoi, 30, maxPixels=1e9).getInfo(), ensure_ascii=False)[:1500])
+    else:
+        print("ชนิดที่ยังไม่รองรับ:", kind)
 
 
 def main():
@@ -27,9 +62,16 @@ def main():
         tb = next(f for f in json.loads((ROOT / "data/tambon.geojson").read_text(encoding="utf-8"))["features"]
                   if f["properties"]["tcode"] == TCODE)
         aoi = ee.Geometry(tb["geometry"]).buffer(3000)
+        kind = ee.data.getAsset(ASSET).get("type")
+        print("asset =", ASSET, "· ชนิด =", kind)
+        if os.environ.get("FF_INSPECT") == "1":
+            inspect(ee, ASSET, kind, aoi); return
+        if kind not in ("TABLE", "FEATURE_COLLECTION"):
+            print(f"::error::{ASSET} เป็น {kind} — สคริปต์รองรับเฉพาะ FeatureCollection · รัน FF_INSPECT=1 แล้วส่งผลให้ผู้พัฒนา"); return
         fc = ee.FeatureCollection(ASSET)
         names = fc.first().propertyNames().getInfo()
-        field = next((n for n in ("Repeating", "freq", "FREQ", "repeat") if n in names), None)
+        want = os.environ.get("FF_FIELD", "").strip()
+        field = want if want in names else None if want else next((n for n in FIELDS if n in names), None)
         if not field:
             print(f"::error::ไม่พบ field ความถี่ใน {ASSET} — field ที่มี: {names}"); return
         print("ใช้ field ความถี่ =", field, "· จำนวน feature ทั้งหมด", fc.size().getInfo())
