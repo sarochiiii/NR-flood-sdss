@@ -18,7 +18,7 @@ TCODE = "301010"
 OUT = ROOT / "data/sandbox/floodfreq.geojson"
 
 
-def inspect(ee, asset, kind, aoi):
+def inspect(ee, asset, kind, aoi, tg=None):
     """พิมพ์โครงสร้าง asset เพื่อเลือก field/วิธีแปลงจากข้อมูลจริง (ไม่เขียนไฟล์)"""
     if kind in ("TABLE", "FEATURE_COLLECTION"):
         fc = ee.FeatureCollection(asset)
@@ -41,6 +41,20 @@ def inspect(ee, asset, kind, aoi):
             print(f"พื้นที่รวมในพื้นที่ (ทับซ้อนนับซ้ำ) {a / 1e6:.2f} ตร.กม.")
         except Exception as e:
             print("คำนวณพื้นที่ไม่ได้:", str(e)[:120])
+        try:   # เทียบกับขอบเขตตำบลทางการ (NR_admin3) — union เฉพาะ polygon
+            def polys(f):
+                gs = ee.List(f.geometry().geometries())
+                return ee.FeatureCollection(gs.map(lambda g: ee.Feature(ee.Geometry(g), {"t": ee.Geometry(g).type(), "L": f.get("Label")})))
+            pf = sub.map(polys).flatten().filter(ee.Filter.inList("t", ["Polygon", "MultiPolygon"]))
+            u = pf.geometry(1).dissolve(1)
+            km = lambda g: g.area(1).divide(1e6)
+            r = ee.Dictionary({"tambon": km(tg), "union": km(u), "inside": km(u.intersection(tg, 1)),
+                               "gap": km(tg.difference(u, 1)), "outside": km(u.difference(tg, 1))}).getInfo()
+            print("เทียบขอบเขตตำบล (ตร.กม.):", {k: round(v, 2) for k, v in r.items()})
+            for lb in ("0", "1", "2"):
+                print(f"  Label {lb}: {km(pf.filter(ee.Filter.eq('L', lb)).geometry(1).dissolve(1)).getInfo():.2f} ตร.กม. (union)")
+        except Exception as e:
+            print("เทียบขอบเขตไม่ได้:", str(e)[:200])
     elif kind == "IMAGE":
         img = ee.Image(asset)
         print("band:", img.bandNames().getInfo(), "· scale", img.projection().nominalScale().getInfo(), "ม.")
@@ -65,7 +79,7 @@ def main():
         kind = ee.data.getAsset(ASSET).get("type")
         print("asset =", ASSET, "· ชนิด =", kind)
         if os.environ.get("FF_INSPECT") == "1":
-            inspect(ee, ASSET, kind, aoi); return
+            inspect(ee, ASSET, kind, aoi, ee.Geometry(tb["geometry"])); return
         if kind not in ("TABLE", "FEATURE_COLLECTION"):
             print(f"::error::{ASSET} เป็น {kind} — สคริปต์รองรับเฉพาะ FeatureCollection · รัน FF_INSPECT=1 แล้วส่งผลให้ผู้พัฒนา"); return
         fc = ee.FeatureCollection(ASSET)
