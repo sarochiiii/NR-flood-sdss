@@ -51,5 +51,5 @@ fetch: `fetch_rain` · `fetch_basin_rain` · `fetch_thaiwater` · `fetch_tw_prov
 Secrets: `GISTDA_API_KEY` · `EE_SERVICE_ACCOUNT_KEY` (service account `github-actions-ee@ee-sarochineek` · Earth Engine Resource Writer + Service Usage Consumer)
 
 ## GEE (project ee-sarochineek) · `gee/`
-assets: `NR_hex_res8_shp` · `NR_FloodFreq` · `Repeatarea` (จันอัด) · `ChanAtOSM` · `ChiangKri` · `ChiangKriFull`
+assets: `NR_hex_res8_shp` · `NR_FloodFreq` · `FloodGCS` (น้ำท่วมซ้ำซากจันอัด · ใช้งาน) · `Repeatarea` (ชุดเดิม ขอบไม่ตรงตำบล) · `ChanAtOSM` · `ChiangKri` · `ChiangKriFull`
 สคริปต์: `region_buildings(_poly).js` · `basins_hydrosheds.js` · `sandbox_layers.js` (S1 Sandbox — ยังไม่ได้รัน) · `region_susceptibility.js` (พักไว้)

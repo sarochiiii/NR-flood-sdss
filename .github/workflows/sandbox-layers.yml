@@ -3,6 +3,17 @@ name: sandbox-layers
 # กดรันเอง (Actions → sandbox-layers → Run workflow) หรือรันเมื่อแก้สคริปต์บน main
 on:
   workflow_dispatch:
+    inputs:
+      asset:
+        description: 'EE asset น้ำท่วมซ้ำซาก'
+        default: 'projects/ee-sarochineek/assets/FloodGCS'
+      field:
+        description: 'ชื่อ field ความถี่ (ว่าง = ค้นอัตโนมัติ)'
+        default: ''
+      inspect:
+        description: 'ตรวจโครงสร้าง asset อย่างเดียว ไม่เขียน/ไม่ commit'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths: [scripts/region/build_sandbox_floodfreq.py]
@@ -16,12 +27,16 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: '3.11' }
       - run: pip install --quiet earthengine-api
-      - name: น้ำท่วมซ้ำซาก (Earth Engine · GISTDA Repeatarea)
+      - name: น้ำท่วมซ้ำซาก (Earth Engine · GISTDA FloodGCS)
         env:
           EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
           EE_PROJECT: ee-sarochineek
+          FF_ASSET: ${{ inputs.asset }}
+          FF_FIELD: ${{ inputs.field }}
+          FF_INSPECT: ${{ inputs.inspect && '1' || '0' }}
         run: python scripts/region/build_sandbox_floodfreq.py
       - name: commit ผลลัพธ์
+        if: ${{ !inputs.inspect }}
         # เหมือน osm-rivers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
         run: |
           git config user.name "github-actions[bot]"
