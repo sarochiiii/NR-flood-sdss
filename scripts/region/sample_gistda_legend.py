@@ -84,6 +84,7 @@ def main():
 
     print(f"tile z{Z} x {x0}–{x1} · y {y0}–{y1} ({(x1 - x0 + 1) * (y1 - y0 + 1)} แผ่น) · ตัวอย่างทุก {STEP} พิกเซล")
     colors, bycol, samples, modes, nok = Counter(), defaultdict(Counter), defaultdict(list), Counter(), 0
+    alphas = defaultdict(Counter)
     for tx in range(x0, x1 + 1):
         for ty in range(y0, y1 + 1):
             try:
@@ -103,6 +104,7 @@ def main():
                     r, g, b, a = px[pxx, py]
                     key = "transparent" if a < 20 else "bg" if is_bg(r, g, b) else hexc((r, g, b))
                     colors[key] += 1
+                    alphas[key][a // 32 * 32] += 1
                     bycol[key][ff_at(lon, lat)] += 1
                     if key not in ("transparent", "bg") and len(samples[key]) < 40:
                         samples[key].append((round(lat, 6), round(lon, 6)))
@@ -114,7 +116,8 @@ def main():
     for k in top:
         d = bycol[k]; n = sum(d.values())
         mode = max(d, key=d.get)
-        print(f"{k:12s} {colors[k] * 100 / tot:5.1f}%  ฐานนิยม freq={mode} ({d[mode] * 100 / n:.0f}%) · " + " ".join(f"{f}:{c}" for f, c in sorted(d.items())))
+        print(f"{k:12s} {colors[k] * 100 / tot:5.1f}%  ฐานนิยม freq={mode} ({d[mode] * 100 / n:.0f}%) · " + " ".join(f"{f}:{c}" for f, c in sorted(d.items()))
+              + f" · alpha {dict(sorted(alphas[k].items()))}")
     print("\n=== ก. กลับด้าน: แต่ละ freq ของ FloodGCS เห็นเป็นสีใดบนภาพ GISTDA ===")
     byf = defaultdict(Counter)
     for k, d in bycol.items():
@@ -126,6 +129,31 @@ def main():
 
     out = {"zoom": Z, "step": STEP, "tiles_ok": nok, "colors": dict(colors.most_common(60)),
            "by_color_floodgcs": {k: dict(bycol[k]) for k in top}, "point_api": {}}
+    # หา path จริงของ API จุดพิกัดจากหน้า opendata ของ GISTDA (เครื่องผู้พัฒนาเข้าไม่ได้ · Actions เข้าได้)
+    print("\n=== URL ของ api-gateway ที่พบในหน้า opendata.gistda.or.th (dataset disasters-01) ===")
+    found = []
+    for pg in ["https://opendata.gistda.or.th/dataset/disasters-01",
+               "https://opendata.gistda.or.th/dataset/disasters-01/resource/6533f035-7b40-47ba-ad62-5d99fa4969e4",
+               "https://opendata.gistda.or.th/dataset/disasters-01/resource/4e84d399-740b-48d9-a8d9-6a0a556f3464",
+               "https://opendata.gistda.or.th/dataset/disasters-01/resource/bd53012a-7e73-4170-beaa-18980396d923",
+               "https://opendata.gistda.or.th/api/3/action/package_show?id=disasters-01"]:
+        try:
+            st, ct, body = get(pg)
+            txt = body.decode("utf-8", "replace").replace("\\/", "/").replace("&amp;", "&")
+            urls = sorted(set(re.findall(r"https?://api-gateway\.gistda\.or\.th[^\s\"'<>]+", txt)))
+            print(f"[{st}] {pg} · {len(urls)} URL"); [print("   ", red(u)[:220]) for u in urls[:20]]
+            found += urls
+            for m in re.finditer(r"(?i)(legend|สัญลักษณ์|ระดับ|ครั้ง)[^<]{0,160}", txt):
+                print("    ข้อความ:", red(m.group(0))[:160])
+        except Exception as e:
+            print(f"[ERR] {pg} · {red(e)[:150]}")
+    for u in sorted(set(found)):
+        if "recurr" in u or "repeat" in u or "flood-freq" in u:
+            q = re.sub(r"(?i)(lat(?:itude)?=)[^&]*", r"\g<1>{lat}", u)
+            q = re.sub(r"(?i)((?:lon|lng|longitude)=)[^&]*", r"\g<1>{lon}", q)
+            q = re.sub(r"(?i)(api[-_]?key=)[^&]*&?", "", q).rstrip("?&")
+            if "{lat}" in q and q not in POINT_URLS:
+                POINT_URLS.insert(0, q)
     if not KEY:
         print("\n(ข้าม ข. — ไม่มี GISTDA_API_KEY)")
     else:
