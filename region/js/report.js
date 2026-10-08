@@ -50,7 +50,50 @@
     return out.join('\n');
   }
   // <<< situationReport
-  window.SDSS_REPORT = { situationReport };
+  // รายงาน SDSS บ้านด่านติง (คำสั่ง "รายงานบ้านด่านติง" ใน LINE OA + ปุ่มในหน้า /chanat/) — ต้องเหมือนใน line/kv/worker.js เช่นกัน
+  // sb = region/data/sandbox/summary.json (scripts/region/build_sandbox_summary.py · วิธีเดียวกับแผง SDSS) · ที่เหลือ = ไฟล์ live ชุดเดียวกับ situationReport
+  // >>> sandboxReport
+  function sandboxReport(D) {
+    const sb = D.sb || {}, tw = D.tw || {}, rid = D.rid || {}, gf = D.gf || {}, ec = D.ec || {}, cfg = D.cfg || {};
+    const TCODE = '301010', SITE = 'https://sarochiiii.github.io/NR-flood-sdss/chanat/';
+    const n0 = (v) => v == null ? '—' : Math.round(v).toLocaleString('th-TH'), f1 = (v) => v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1);
+    const tt = (s) => { if (!s) return '—';
+      const d = new Date(/T/.test(s) ? s : String(s).replace(' ', 'T') + (String(s).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+      return isNaN(d.getTime()) ? String(s) : d.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' น.'; };
+    const dd = (s) => { if (!s) return '—'; const d = new Date(/T/.test(s) ? s : s + 'T00:00:00+07:00');
+      return isNaN(d.getTime()) ? String(s) : d.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: '2-digit' }); };
+    const bank = (p) => p >= 100 ? 'ล้นตลิ่ง' : p >= 90 ? 'ใกล้ล้นตลิ่ง' : p >= 70 ? 'ค่อนข้างสูง' : 'ปกติ';
+    const out = ['📋 รายงาน SDSS บ้านด่านติง ต.จันอัด อ.โนนสูง', `ข้อมูลรวบรวม ณ ${tt(tw.updated_at)}`];
+    // ① อาคารที่สัมผัสภัย (ข้อมูลคงที่ คำนวณล่วงหน้า)
+    const v = sb.village, t = sb.tambon, nr = (o, k) => o && o.near_river ? o.near_river[k] : null, fg = (o, k) => o && o.ff_ge ? o.ff_ge[k] : null;
+    out.push('', `🏘 อาคารรอบบ้านด่านติง (รัศมี ${sb.radius_km || '—'} กม.) ${v ? n0(v.n) + ' หลัง' : '— ยังไม่มีข้อมูลสรุปอาคาร'}`);
+    if (v) {
+      out.push(`• ใกล้แม่น้ำ/ลำน้ำสายหลัก ≤ 100 ม.: ${n0(nr(v, '100'))} หลัง · ≤ 300 ม.: ${n0(nr(v, '300'))} หลัง`);
+      if (v.ff_ge) {
+        out.push(`• ในพื้นที่น้ำท่วมซ้ำซาก ≥ 3 ครั้ง: ${n0(fg(v, '3'))} หลัง · ≥ 5 ครั้ง: ${n0(fg(v, '5'))} หลัง`);
+        out.push(`• ใกล้ลำน้ำ ≤ 300 ม. และท่วมซ้ำ ≥ 3 ครั้ง: ${n0(v.near300_ff3)} หลัง (ควรตรวจสอบก่อน)`);
+      } else out.push('• ยังไม่มีชั้นน้ำท่วมซ้ำซาก');
+    }
+    if (t) out.push(`• ทั้ง ต.จันอัด ${n0(t.n)} หลัง: ท่วมซ้ำ ≥ 3 ครั้ง ${n0(fg(t, '3'))} หลัง · ใกล้ลำน้ำ ≤ 300 ม. และท่วมซ้ำ ≥ 3 ครั้ง ${n0(t.near300_ff3)} หลัง`);
+    if (v || t) out.push(`(ข้อมูลคงที่ · น้ำท่วมซ้ำซาก GISTDA ${dd((sb.inputs || {}).floodfreq_updated_at)} · คำนวณ ${dd(sb.updated_at)})`);
+    // ② สถานการณ์ลำเชียงไกรตอนนี้ (ไฟล์ live ชุดเดียวกับ "สถานการณ์น้ำ")
+    const m = (tw.waterlevel || []).find(s => s.code === 'M.188A');
+    const lck = (code) => { const h = ((rid.hist || {})[code] || []).filter(r => r[2] != null), i = (rid.status === 'ok' ? rid.items || [] : []).find(x => x.code === code);
+      if (i && i.pct != null && (!h.length || i.date >= h[h.length - 1][0])) return { pct: i.pct, date: i.date };
+      return h.length ? { pct: h[h.length - 1][2], date: h[h.length - 1][0] } : null; };
+    const up = lck('rsv300'), lo = lck('rsv292'), ed = (ec.days || []).filter(x => x[1] != null);
+    out.push('', '🌊 สถานการณ์ลำเชียงไกรตอนนี้');
+    out.push(`• ระดับน้ำ M.188A${m ? ' ' + m.name : ''}: ${m && m.storage_pct != null ? `${n0(m.storage_pct)}% ของตลิ่ง · ${bank(m.storage_pct)} (${tt(m.measured_at)})` : 'ไม่มีข้อมูล'}`);
+    out.push(`• อ่างลำเชียงไกรตอนบน ${up ? n0(up.pct) + '%' : '—'} · ตอนล่าง ${lo ? n0(lo.pct) + '%' : '—'} (ข้อมูลวันที่ ${dd((lo && lo.date) || (up && up.date))})`);
+    out.push(`• ฝนข้างหน้า ECMWF: 24 ชม. ${ed.length ? f1(ec.next24_mm) : '—'} มม. · 72 ชม. ${ed.length ? f1(ec.next72_mm) : '—'} มม.`);
+    out.push(`• น้ำท่วมตรวจพบ ต.จันอัด (GISTDA 7 วัน): ${gf.status === 'ok' ? (Math.round((gf.by_tambon || {})[TCODE] || 0) ? `${n0((gf.by_tambon || {})[TCODE])} ไร่` : 'ไม่พบ') : 'ไม่มีข้อมูล'}`);
+    out.push('', '⚠️ อาคารคือรูปหลังคาจากภาพดาวเทียม ไม่ใช่ครัวเรือน · ตำแหน่งบ้านด่านติงประมาณจากกลุ่มอาคาร ยังไม่ยืนยันกับ อบต. · '
+      + `${(cfg.bank || {}).verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.`,
+      'ที่มา: Google Open Buildings · OpenStreetMap · GISTDA · สสน. (ThaiWater) · กรมชลประทาน · ECMWF', `แผนที่ Sandbox: ${SITE}`);
+    return out.join('\n');
+  }
+  // <<< sandboxReport
+  window.SDSS_REPORT = { situationReport, sandboxReport };
 
   /* ---------- ปุ่มบนเว็บ: สร้าง → คัดลอก / แชร์เข้า LINE (ไม่ผ่าน OA จึงไม่เสียโควตา) ---------- */
   document.addEventListener('DOMContentLoaded', () => {

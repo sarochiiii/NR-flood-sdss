@@ -1,0 +1,81 @@
+{
+ "updated_at": "2026-10-08T18:09:39+00:00",
+ "tcode": "301010",
+ "center": {
+  "lat": 15.14223,
+  "lon": 102.13359,
+  "name": "บ้านด่านติง (ประมาณจากกลุ่มอาคาร)"
+ },
+ "radius_km": 1.5,
+ "params": {
+  "buf_m": 300,
+  "freq_min": 1,
+  "river_types": [
+   "river"
+  ],
+  "near_m": [
+   100,
+   300
+  ]
+ },
+ "inputs": {
+  "buildings": "Google Open Buildings V3 (confidence ≥ 0.70)",
+  "rivers_updated_at": "2026-10-05T02:02:58+00:00",
+  "floodfreq_updated_at": "2026-10-07T03:13:49+00:00",
+  "floodfreq_source": "GISTDA น้ำท่วมซ้ำซาก (projects/ee-sarochineek/assets/FloodGCS, field Repeating)",
+  "max_freq": 7
+ },
+ "village": {
+  "n": 1142,
+  "near_river": {
+   "100": 205,
+   "300": 704
+  },
+  "near300_ff3": 133,
+  "ff_ge": {
+   "1": 1133,
+   "3": 199,
+   "5": 3
+  },
+  "freq_hist": {
+   "2": 934,
+   "3": 168,
+   "4": 28,
+   "5": 3
+  },
+  "cls": {
+   "both": 702,
+   "ff": 431,
+   "buf": 2,
+   "none": 7
+  }
+ },
+ "tambon": {
+  "n": 4024,
+  "near_river": {
+   "100": 431,
+   "300": 1463
+  },
+  "near300_ff3": 163,
+  "ff_ge": {
+   "1": 4016,
+   "3": 344,
+   "5": 7
+  },
+  "freq_hist": {
+   "1": 7,
+   "2": 3665,
+   "3": 279,
+   "4": 58,
+   "5": 6,
+   "6": 1
+  },
+  "cls": {
+   "both": 1455,
+   "ff": 2561,
+   "buf": 8,
+   "none": 0
+  }
+ },
+ "note": "อาคาร = รูปหลังคาจากภาพดาวเทียม (Open Buildings) ไม่ใช่ครัวเรือน · ศูนย์กลางบ้านด่านติงประมาณจากกลุ่มอาคาร ยังไม่ยืนยันกับ อบต."
+}
