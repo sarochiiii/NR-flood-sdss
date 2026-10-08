@@ -572,7 +572,7 @@ document.addEventListener('sdss:ready', async () => {
     ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'water', 'basins']]];
   // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
   const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
-    ['reports', 'จุดแจ้งเหตุ'], ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล']];
+    ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['reports', 'จุดแจ้งเหตุ']];
   function renderQuick() {
     const el = $('qlayers'); if (!el) return;
     el.innerHTML = QUICK.filter(([id]) => state[id]).map(([id, lab]) => { const s = state[id];
