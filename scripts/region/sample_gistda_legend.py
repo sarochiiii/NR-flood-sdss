@@ -106,7 +106,7 @@ def main():
                     colors[key] += 1
                     alphas[key][a // 32 * 32] += 1
                     bycol[key][ff_at(lon, lat)] += 1
-                    if key not in ("transparent", "bg") and len(samples[key]) < 40:
+                    if key not in ("transparent", "bg") and len(samples[key]) < 60:
                         samples[key].append((round(lat, 6), round(lon, 6)))
     print(f"โหลด tile ได้ {nok} แผ่น · โหมดภาพ {dict(modes)}")
     tot = sum(colors.values()) or 1
@@ -173,17 +173,26 @@ def main():
             except Exception as e:
                 print(f"[ERR] {red(url)} · {red(e)[:200]}")
         if good:
-            print("\nเรียก API ที่จุดตัวอย่าง 4 จุดต่อสี (สีที่พบมากสุด 12 สี) — พิมพ์ผลดิบย่อเพื่อเทียบเอง")
-            for k in [c for c in top if c not in ("transparent", "bg")][:12]:
-                res = []
-                for lat, lon in samples[k][:: max(1, len(samples[k]) // 4)][:4]:
+            print("\nเรียก API ที่จุดตัวอย่างสูงสุด 10 จุดต่อสี (สีที่มี ≥ 15 พิกเซล) → นับค่า total")
+            raw_shown = False
+            for k in [c for c in top if c not in ("transparent", "bg") and colors[c] >= 15] + \
+                     [c for c in colors if c not in top and c not in ("transparent", "bg") and colors[c] >= 15]:
+                tl = Counter()
+                pts = samples[k][:: max(1, len(samples[k]) // 10)][:10]
+                for lat, lon in pts:
                     try:
                         st, ct, body = get(good.format(lat=lat, lon=lon), {"API-Key": KEY})
-                        res.append(red(body.decode("utf-8", "replace"))[:260])
+                        j = json.loads(body.decode("utf-8", "replace"))
+                        if isinstance(j, list) and j and "total" in j[0]:
+                            tl[j[0]["total"]] += 1
+                            if not raw_shown:
+                                print("ตัวอย่างผลเต็ม 1 รายการ:", red(json.dumps(j[0], ensure_ascii=False))[:900]); raw_shown = True
+                        else:
+                            tl["ไม่พบ"] += 1
                     except Exception as e:
-                        res.append(f"ERR {red(e)[:80]}")
-                out["point_api"][k] = res
-                print(f"{k}:"); [print("   ", r) for r in res]
+                        tl["ERR"] += 1
+                out["point_api"][k] = dict(tl)
+                print(f"  {k} ({colors[k]} px · alpha {dict(alphas[k])}): total {dict(sorted(tl.items(), key=lambda x: str(x[0])))}")
     p = os.environ.get("OUT", "/tmp/gistda_legend.json")
     with open(p, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, indent=1)
