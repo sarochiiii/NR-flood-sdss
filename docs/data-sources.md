@@ -91,3 +91,6 @@
 ## 10. RainViewer (ตรวจเอกสาร 28 ก.ย. 69)
 - `radar.past` = 2 ชม. ทุก 10 นาที → ระบบทำภาพเคลื่อนไหว (ตัวควบคุมกลางบนของแผนที่) · zoom สูงสุด 7
 - หน้ากากพื้นที่ครอบคลุม `{host}/v2/coverage/0/256/{z}/{x}/{y}/0/0_0.png` (ดำ = เรดาร์ไม่ครอบคลุม) → ช่อง "พื้นที่ครอบคลุม"
+
+## GISTDA น้ำท่วมซ้ำซาก — API จุดพิกัด (ตรวจแล้ว 8 ต.ค. 69)
+`GET https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/flood-recurrence?lat={lat}&lon={lon}` · header `API-Key` (Secret `GISTDA_API_KEY`) · ตอบ `[{subdistrict_name, district_name, province_name, total, detail:[{year:"2023".."2011", freq}]}]` หรือ `{"result":"not found"}` (ไม่เคยท่วม) · v1.0 ตอบ 404 · ใช้ยืนยัน legend ของ tile `flood-freq/tms`
