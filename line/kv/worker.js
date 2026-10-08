@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.8 (รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.9 (รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -35,6 +35,8 @@ const ABT_PHONE = '';   // เบอร์ อบต.จันอัด ที�
 const VILLAGES = [];    // รายชื่อหมู่บ้านสำหรับปุ่มเลือก ไม่เกิน 12 รายการ (ว่าง = ให้พิมพ์เอง)
 // ปิด "ติดต่อ อบต." และ "ขอความช่วยเหลือ" ไว้ก่อน (ยังไม่เกิดเหตุ · ป้องกันการกดเล่น) — เปิดใหม่ = true
 const HELP_ENABLED = false;
+// รายงาน SDSS บ้านด่านติง — ข้อความที่ปุ่มที่ 4 ของ rich menu ส่ง (แทน "ติดต่อ อบต." เดิม) + คำพิมพ์อื่นที่ยอมรับ
+const SANDBOX_CMDS = ['รายงานบ้านด่านติง', 'รายงานด่านติง', 'บ้านด่านติง'];
 // ─────────────────────────────────────────────────────────────────
 
 const DISCLAIMER =
@@ -157,6 +159,12 @@ async function handleText(ev, env, userId, t) {
     return reply(ev, env, [text(msg)]);
   }
 
+  if (SANDBOX_CMDS.includes(t)) {                           // ตอบกลับ = ไม่เสียโควตา · เฉพาะแชท 1:1 (กลุ่มยังตอบเฉพาะ 3 คำสั่งเดิม)
+    let msg;
+    try { msg = await sandboxStatus(); } catch (e) { console.error('sandbox', e && e.message); msg = `ดึงข้อมูลรายงานบ้านด่านติงไม่สำเร็จชั่วคราว\nดูแผนที่: ${SITE_URL}chanat/\n\n${DISCLAIMER}`; }
+    return reply(ev, env, [text(msg)]);
+  }
+
   if (t === 'ติดต่อ อบต.') {
     if (!HELP_ENABLED) return reply(ev, env, [text(HELP_OFF)]);
     return reply(ev, env, [text(ABT_PHONE
@@ -188,7 +196,7 @@ async function handleText(ev, env, userId, t) {
   if (s && s.step === 'invite') return handleInvite(ev, env, userId, t);
   if (s) return handleReportStep(ev, env, userId, s, t);
 
-  return reply(ev, env, [text('กดปุ่มในเมนูด้านล่าง หรือพิมพ์ "สถานการณ์น้ำ" / "รายงานเหตุ"')]);
+  return reply(ev, env, [text('กดปุ่มในเมนูด้านล่าง หรือพิมพ์ "สถานการณ์น้ำ" / "รายงานบ้านด่านติง" / "รายงานเหตุ"')]);
 }
 
 // ─── รหัสเชิญ ADM ─────────────────────────────────────────────────
@@ -474,6 +482,55 @@ function situationReport(D) {
   return out.join('\n');
 }
 // <<< situationReport
+
+// รายงาน SDSS บ้านด่านติง (คำสั่ง "รายงานบ้านด่านติง" · ปุ่มที่ 4 ของ rich menu) — แก้ที่ region/js/report.js แล้วคัดลอกมาทั้งฟังก์ชัน
+async function sandboxStatus() {
+  const [sb, tw, rid, gf, ec, cfg] = await Promise.all(['data/sandbox/summary.json', 'data/live/thaiwater_region.json', 'data/live/rid_reservoir.json',
+    'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(p => getJson(p).catch(() => null)));
+  if (!sb && !tw && !rid) throw new Error('no data');
+  return sandboxReport({ sb, tw, rid, gf, ec, cfg });
+}
+// >>> sandboxReport
+function sandboxReport(D) {
+  const sb = D.sb || {}, tw = D.tw || {}, rid = D.rid || {}, gf = D.gf || {}, ec = D.ec || {}, cfg = D.cfg || {};
+  const TCODE = '301010', SITE = 'https://sarochiiii.github.io/NR-flood-sdss/chanat/';
+  const n0 = (v) => v == null ? '—' : Math.round(v).toLocaleString('th-TH'), f1 = (v) => v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1);
+  const tt = (s) => { if (!s) return '—';
+    const d = new Date(/T/.test(s) ? s : String(s).replace(' ', 'T') + (String(s).length <= 10 ? 'T00:00' : '') + ':00+07:00');
+    return isNaN(d.getTime()) ? String(s) : d.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' น.'; };
+  const dd = (s) => { if (!s) return '—'; const d = new Date(/T/.test(s) ? s : s + 'T00:00:00+07:00');
+    return isNaN(d.getTime()) ? String(s) : d.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: '2-digit' }); };
+  const bank = (p) => p >= 100 ? 'ล้นตลิ่ง' : p >= 90 ? 'ใกล้ล้นตลิ่ง' : p >= 70 ? 'ค่อนข้างสูง' : 'ปกติ';
+  const out = ['📋 รายงาน SDSS บ้านด่านติง ต.จันอัด อ.โนนสูง', `ข้อมูลรวบรวม ณ ${tt(tw.updated_at)}`];
+  // ① อาคารที่สัมผัสภัย (ข้อมูลคงที่ คำนวณล่วงหน้า)
+  const v = sb.village, t = sb.tambon, nr = (o, k) => o && o.near_river ? o.near_river[k] : null, fg = (o, k) => o && o.ff_ge ? o.ff_ge[k] : null;
+  out.push('', `🏘 อาคารรอบบ้านด่านติง (รัศมี ${sb.radius_km || '—'} กม.) ${v ? n0(v.n) + ' หลัง' : '— ยังไม่มีข้อมูลสรุปอาคาร'}`);
+  if (v) {
+    out.push(`• ใกล้แม่น้ำ/ลำน้ำสายหลัก ≤ 100 ม.: ${n0(nr(v, '100'))} หลัง · ≤ 300 ม.: ${n0(nr(v, '300'))} หลัง`);
+    if (v.ff_ge) {
+      out.push(`• ในพื้นที่น้ำท่วมซ้ำซาก ≥ 3 ครั้ง: ${n0(fg(v, '3'))} หลัง · ≥ 5 ครั้ง: ${n0(fg(v, '5'))} หลัง`);
+      out.push(`• ใกล้ลำน้ำ ≤ 300 ม. และท่วมซ้ำ ≥ 3 ครั้ง: ${n0(v.near300_ff3)} หลัง (ควรตรวจสอบก่อน)`);
+    } else out.push('• ยังไม่มีชั้นน้ำท่วมซ้ำซาก');
+  }
+  if (t) out.push(`• ทั้ง ต.จันอัด ${n0(t.n)} หลัง: ท่วมซ้ำ ≥ 3 ครั้ง ${n0(fg(t, '3'))} หลัง · ใกล้ลำน้ำ ≤ 300 ม. และท่วมซ้ำ ≥ 3 ครั้ง ${n0(t.near300_ff3)} หลัง`);
+  if (v || t) out.push(`(ข้อมูลคงที่ · น้ำท่วมซ้ำซาก GISTDA ${dd((sb.inputs || {}).floodfreq_updated_at)} · คำนวณ ${dd(sb.updated_at)})`);
+  // ② สถานการณ์ลำเชียงไกรตอนนี้ (ไฟล์ live ชุดเดียวกับ "สถานการณ์น้ำ")
+  const m = (tw.waterlevel || []).find(s => s.code === 'M.188A');
+  const lck = (code) => { const h = ((rid.hist || {})[code] || []).filter(r => r[2] != null), i = (rid.status === 'ok' ? rid.items || [] : []).find(x => x.code === code);
+    if (i && i.pct != null && (!h.length || i.date >= h[h.length - 1][0])) return { pct: i.pct, date: i.date };
+    return h.length ? { pct: h[h.length - 1][2], date: h[h.length - 1][0] } : null; };
+  const up = lck('rsv300'), lo = lck('rsv292'), ed = (ec.days || []).filter(x => x[1] != null);
+  out.push('', '🌊 สถานการณ์ลำเชียงไกรตอนนี้');
+  out.push(`• ระดับน้ำ M.188A${m ? ' ' + m.name : ''}: ${m && m.storage_pct != null ? `${n0(m.storage_pct)}% ของตลิ่ง · ${bank(m.storage_pct)} (${tt(m.measured_at)})` : 'ไม่มีข้อมูล'}`);
+  out.push(`• อ่างลำเชียงไกรตอนบน ${up ? n0(up.pct) + '%' : '—'} · ตอนล่าง ${lo ? n0(lo.pct) + '%' : '—'} (ข้อมูลวันที่ ${dd((lo && lo.date) || (up && up.date))})`);
+  out.push(`• ฝนข้างหน้า ECMWF: 24 ชม. ${ed.length ? f1(ec.next24_mm) : '—'} มม. · 72 ชม. ${ed.length ? f1(ec.next72_mm) : '—'} มม.`);
+  out.push(`• น้ำท่วมตรวจพบ ต.จันอัด (GISTDA 7 วัน): ${gf.status === 'ok' ? (Math.round((gf.by_tambon || {})[TCODE] || 0) ? `${n0((gf.by_tambon || {})[TCODE])} ไร่` : 'ไม่พบ') : 'ไม่มีข้อมูล'}`);
+  out.push('', '⚠️ อาคารคือรูปหลังคาจากภาพดาวเทียม ไม่ใช่ครัวเรือน · ตำแหน่งบ้านด่านติงประมาณจากกลุ่มอาคาร ยังไม่ยืนยันกับ อบต. · '
+    + `${(cfg.bank || {}).verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.`,
+    'ที่มา: Google Open Buildings · OpenStreetMap · GISTDA · สสน. (ThaiWater) · กรมชลประทาน · ECMWF', `แผนที่ Sandbox: ${SITE}`);
+  return out.join('\n');
+}
+// <<< sandboxReport
 
 // ─── ผู้ใช้ที่ใช้งาน (สำหรับนับผู้ใช้จริง) ─────────────────────────────
 async function touch(env, userId) {

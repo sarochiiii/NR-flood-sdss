@@ -54,6 +54,20 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 .legend .sw{width:12px;height:10px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}
 .leaflet-container{font-family:var(--font)}
 @media (max-width:860px){.body{grid-template-columns:1fr;grid-template-rows:62vh auto}.panel{border-left:0;border-top:1px solid var(--border)}.mapwrap{min-height:0}}
+/* tick box ชั้นข้อมูลบนแผนที่ (เหมือนหน้า region · มือถือเลื่อนแนวนอน) — สถานะตรงกับแผง "ชั้นข้อมูล" */
+.qlayers{position:absolute;top:10px;left:54px;right:56px;z-index:600;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.qchip{pointer-events:auto;display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:3px 11px 3px 8px;background:rgba(255,255,255,.95);
+  border:1px solid var(--border);border-radius:16px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25);user-select:none}
+.qchip input{width:17px;height:17px;margin:0;accent-color:var(--teal2);cursor:pointer}
+.qchip.on{border-color:var(--teal2);background:#CCFBF1;color:#134E4A;font-weight:600}
+.qchip.off{opacity:.5;cursor:not-allowed}
+@media (max-width:860px){.qlayers{pointer-events:auto;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .qlayers::-webkit-scrollbar{display:none}.qchip{min-height:36px;font-size:13.5px}
+  .legend{max-height:34%;overflow:auto;font-size:10.5px;padding:4px 6px;max-width:190px}}
+/* รายงานบ้านด่านติงสำหรับ LINE */
+.lrep pre{white-space:pre-wrap;word-break:break-word;font-family:var(--font);font-size:12.5px;line-height:1.55;margin:0 0 8px;max-height:320px;overflow:auto}
+.lrep-act{display:flex;gap:6px}.lrep-act>*{flex:1;padding:6px;border-radius:6px;font-size:13px;font-weight:500;font-family:var(--font);text-align:center;cursor:pointer;text-decoration:none}
+.lrep-act button{background:#fff;border:1px solid var(--teal);color:var(--teal)}.lrep-act a{background:#06C755;color:#fff;border:1px solid #06C755}
 </style>
 </head>
 <body>
@@ -66,11 +80,21 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 </header>
 
 <main class="body">
-  <div class="mapwrap"><div id="map"></div><div class="legend" id="legend"></div></div>
+  <div class="mapwrap"><div id="map"></div>
+    <div class="qlayers" id="qlayers" role="group" aria-label="เปิด/ปิดชั้นข้อมูล"></div>
+    <div class="legend" id="legend"></div></div>
 
   <aside class="panel" aria-label="แผงการทำงาน SDSS">
     <h2>สถานการณ์ปัจจุบัน</h2>
     <div class="card"><dl class="kv" id="now"><dt class="muted">กำลังโหลด…</dt><dd></dd></dl></div>
+
+    <button class="btn" id="btn-sbrep" type="button" style="margin:0 0 8px">📋 สร้างรายงานบ้านด่านติงสำหรับ LINE</button>
+    <div class="card lrep" id="sbrep" hidden>
+      <pre id="sbrep-text"></pre>
+      <div class="lrep-act"><button type="button" id="sbrep-copy">คัดลอกข้อความ</button>
+        <a id="sbrep-share" href="#" target="_blank" rel="noopener">แชร์เข้า LINE</a></div>
+      <div class="note">ข้อความเดียวกับเมนู "รายงานบ้านด่านติง" ใน LINE OA จันอัดบ้านฉัน · สรุปอาคารใช้ค่าเริ่มต้นของแผง SDSS (คำนวณล่วงหน้าโดย GitHub Actions)</div>
+    </div>
 
     <h2>ชั้นข้อมูล</h2>
     <div class="card lyr" id="layers"></div>
@@ -104,6 +128,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../region/js/report.js?v=43"></script>
 <script>
 (async () => {
   'use strict';
@@ -309,7 +334,16 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 
   /* ---------- สวิตช์ชั้นข้อมูล + legend ---------- */
   const ORDER = ['bldg', 'ff', 'gistda', 'water', 'river', 'struct', 'bnd'];
+  // tick box บนแผนที่ (ชื่อสั้น) — ใช้สถานะ L_ เดียวกับแผง "ชั้นข้อมูล"
+  const QUICK = { bldg: 'อาคาร', ff: 'น้ำท่วมซ้ำซาก', gistda: 'น้ำท่วม 7 วัน', river: 'ลำน้ำ', water: 'แหล่งน้ำ', struct: 'อาคารชลศาสตร์', bnd: 'ขอบเขตตำบล' };
+  function renderQuick() {
+    $('qlayers').innerHTML = Object.keys(QUICK).filter(k => L_[k]).map(k => { const o = L_[k], on = o.on && o.ok;
+      return `<label class="qchip${on ? ' on' : ''}${o.ok ? '' : ' off'}" title="${esc(o.label)}${o.ok ? '' : ' (ยังไม่มีข้อมูล)'}">
+        <input type="checkbox" data-k="${k}" ${on ? 'checked' : ''} ${o.ok ? '' : 'disabled'}> ${QUICK[k]}</label>`; }).join('');
+    $('qlayers').querySelectorAll('input').forEach(i => i.onchange = () => { L_[i.dataset.k].on = i.checked; renderLayers(); sync(); });
+  }
   function renderLayers() {
+    renderQuick();
     $('layers').innerHTML = ORDER.filter(k => L_[k]).map(k => { const o = L_[k];
       return `<label class="${o.ok ? '' : 'off'}"><input type="checkbox" data-k="${k}" ${o.on && o.ok ? 'checked' : ''} ${o.ok ? '' : 'disabled'}>
         <i style="background:${o.color}"></i>${o.label}${o.ok ? '' : ' <span class="muted">(ยังไม่มีข้อมูล)</span>'}</label>`
@@ -365,6 +399,22 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   }
   map.attributionControl.addAttribution('อาคาร © Google Open Buildings · ลำน้ำ © OpenStreetMap');
   if (ffVec) ffVec.getAttribution = () => 'น้ำท่วมซ้ำซาก © GISTDA (FloodGCS ผ่าน Earth Engine)';   // แสดงเมื่อชั้น vector อยู่บนแผนที่
+
+  /* ---------- รายงานบ้านด่านติงสำหรับ LINE (ฟังก์ชันเดียวกับ worker: region/js/report.js sandboxReport) ---------- */
+  $('btn-sbrep').onclick = async () => {
+    const R = window.SDSS_REPORT; if (!R || !R.sandboxReport) return;
+    $('btn-sbrep').disabled = true;
+    const sb = await get(D + 'sandbox/summary.json');
+    const txt = R.sandboxReport({ sb, tw, rid, gf, ec, cfg });
+    $('sbrep-text').textContent = txt;
+    $('sbrep-share').href = 'https://line.me/R/share?text=' + encodeURIComponent(txt);
+    $('sbrep').hidden = false; $('btn-sbrep').disabled = false; $('btn-sbrep').textContent = '📋 สร้างรายงานใหม่';
+  };
+  $('sbrep-copy').onclick = async () => {
+    try { await navigator.clipboard.writeText($('sbrep-text').textContent); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($('sbrep-text')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); }
+    $('sbrep-copy').textContent = 'คัดลอกแล้ว ✓'; setTimeout(() => $('sbrep-copy').textContent = 'คัดลอกข้อความ', 2000);
+  };
 
   renderSrc(); renderLayers(); sync(); analyse();
 })();

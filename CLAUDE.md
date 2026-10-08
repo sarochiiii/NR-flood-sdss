@@ -12,8 +12,8 @@
 |---|---|---|
 | เว็บสาธารณะ | `region/` → https://sarochiiii.github.io/NR-flood-sdss/region/ | push `main` → GitHub Pages |
 | ข้อมูลสด | `scripts/region/*.py` → `region/data/live/` | `.github/workflows/region-live.yml` ทุกชั่วโมง :15 |
-| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.8, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
-| ChanAT Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (EE asset `FloodGCS`) |
+| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.9, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
+| ChanAT Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS · รายงานบ้านด่านติง) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (EE asset `FloodGCS`) → `sandbox-summary` (`data/sandbox/summary.json`) |
 | Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ใช้งาน** https://gistda-tile-proxy.sarochinee-k.workers.dev | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
 | LINE ระยะสอง (D1 + LIFF) — **ยังไม่ใช้** | `line/worker.js`, `line/schema.sql`, `region/liff/*` | — |
 | Sandbox บ้านด่านติง (ข้อมูลครัวเรือน) | **ไม่อยู่ใน repo** — โฟลเดอร์ `sandbox-private` แยก | Cloudflare Pages + Access |
@@ -37,12 +37,12 @@ docs/                        คู่มือส่งมอบ
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
 2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=42**
-4. **รายงานสถานการณ์มี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` (ระหว่าง `// >>> situationReport` … `// <<<`) — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=43**
+4. **รายงานมี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` — `situationReport` ("สถานการณ์น้ำ") และ `sandboxReport` ("รายงานบ้านด่านติง") ระหว่าง `// >>> ชื่อฟังก์ชัน` … `// <<<` — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
 7. เกณฑ์ที่ยังไม่ยืนยันกับชลประทาน/ปภ. ต้องคง `verified: false` และแสดงป้ายบนหน้าเว็บ
-8. LINE: "ติดต่อ อบต."/"ขอความช่วยเหลือ" **ปิดชั่วคราว** (`HELP_ENABLED = false`) · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงเป็นจุดแดงกระพริบบนแผนที่ · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>`) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ผู้รายงาน และปัดตำแหน่ง ~100 ม.
+8. LINE: "ติดต่อ อบต."/"ขอความช่วยเหลือ" **ปิดชั่วคราว** (`HELP_ENABLED = false`) · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงเป็นจุดแดงกระพริบบนแผนที่ · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>`) · "รายงานบ้านด่านติง" เฉพาะแชท 1:1 (ปุ่มที่ 4 ของ rich menu) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ผู้รายงาน และปัดตำแหน่ง ~100 ม.
 9. โควตา LINE Free 300 push/เดือน (กลุ่มนับตามจำนวนสมาชิก) — ห้ามเพิ่ม push/broadcast โดยไม่คำนวณโควตา · reply ไม่นับโควตา
 
 ## แหล่งข้อมูล (ตรวจแล้ว)
@@ -56,7 +56,7 @@ RainViewer (zoom ≤ 7, past 2 ชม.) · OSM Overpass (ลำน้ำ/แห�
 - JS: `node --check region/js/*.js` · ทดสอบหน้าเว็บด้วย jsdom + leaflet (mock `fetch` ชี้ไปไฟล์ใน `region/data`) — ดู `tests/README.md`
 - รายงาน: `node --no-warnings tests/report.test.mjs` (ฟังก์ชันเว็บ = worker · สร้างข้อความจาก `region/data/live`)
 - Worker tile: `node --no-warnings tests/gistda_tile_proxy.test.mjs` (mock caches.default + fetch)
-- Worker: `node --no-warnings tests/worker_kv.test.mjs` (mock KV + LINE API) · type check: `npx tsc --allowJs --checkJs --noEmit --target es2022 --lib es2022,dom line/kv/worker.js`
+- Worker: `node --no-warnings tests/worker_kv.test.mjs` (mock KV + LINE API) · type check: `npx tsc --allowJs --checkJs --noEmit --strict false --target es2022 --lib es2022,dom line/kv/worker.js`
 - Python: รันสคริปต์ใน `scripts/region/` ได้แบบ offline — ต้องจบ exit 0 แม้เครือข่ายล้มเหลว (เขียน `status: error` แทน)
 - ข้อมูลภูมิสารสนเทศ: ตรวจจำนวน feature, พิกัดอยู่ใน 26 ตำบล, พื้นที่ลุ่มเทียบ D.A กรมชลประทาน
 

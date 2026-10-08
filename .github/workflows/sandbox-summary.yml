@@ -1,0 +1,45 @@
+name: sandbox-summary
+# สรุปอาคารที่สัมผัสภัย บ้านด่านติง / ต.จันอัด → region/data/sandbox/summary.json (รายงาน "รายงานบ้านด่านติง" ใน LINE OA และหน้า /chanat/)
+# รันต่อจาก sandbox-layers (น้ำท่วมซ้ำซาก) และ osm-rivers (ลำน้ำ) ทุกครั้ง · หรือเมื่อแก้สคริปต์บน main · หรือกดรันเอง
+# หมายเหตุ: commit ที่ Actions push ด้วย GITHUB_TOKEN ไม่ทริกเกอร์ push workflow อื่น จึงใช้ workflow_run แทน
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [sandbox-layers, osm-rivers]
+    types: [completed]
+  push:
+    branches: [main]
+    paths: [scripts/region/build_sandbox_summary.py]
+concurrency: { group: sandbox-summary, cancel-in-progress: false }
+jobs:
+  build:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v6
+        with: { ref: main }
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - name: สรุปอาคารที่สัมผัสภัย (ไม่ใช้เครือข่าย)
+        run: python scripts/region/build_sandbox_summary.py
+      - name: commit ผลลัพธ์
+        # เหมือน sandbox-layers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          F=region/data/sandbox/summary.json
+          [ -f "$F" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
+          cp "$F" /tmp/summary.json
+          for i in 1 2 3 4; do
+            git fetch --quiet origin main && git reset --quiet --hard origin/main
+            mkdir -p region/data/sandbox && cp /tmp/summary.json "$F"
+            # updated_at เปลี่ยนทุกครั้ง — commit เฉพาะเมื่อตัวเลขเปลี่ยน
+            if git cat-file -e "HEAD:$F" 2>/dev/null && diff <(git show "HEAD:$F" | grep -v '"updated_at"') <(grep -v '"updated_at"' "$F") >/dev/null; then
+              echo "ตัวเลขไม่เปลี่ยน"; exit 0; fi
+            git add "$F"
+            git commit --quiet -m "data(sandbox): สรุปอาคารที่สัมผัสภัย $(date -u '+%Y-%m-%d')"
+            git push --quiet origin HEAD:main && exit 0
+            sleep $((i * 15))
+          done
+          exit 1

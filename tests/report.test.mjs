@@ -5,11 +5,12 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const R = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
-const cut = (s) => { const a = s.indexOf('// >>> situationReport'), b = s.indexOf('// <<< situationReport');
-  assert.ok(a >= 0 && b > a, 'ไม่พบเครื่องหมาย >>> / <<<');
+const cut = (s, fn = 'situationReport') => { const a = s.indexOf('// >>> ' + fn), b = s.indexOf('// <<< ' + fn);
+  assert.ok(a >= 0 && b > a, 'ไม่พบเครื่องหมาย >>> / <<< ของ ' + fn);
   return s.slice(a, b).split('\n').map(l => l.trim()).join('\n'); };
 const web = R('region/js/report.js'), wk = R('line/kv/worker.js');
-assert.equal(cut(web), cut(wk), 'situationReport ใน report.js กับ worker.js ไม่ตรงกัน — คัดลอกทั้งฟังก์ชันอีกครั้ง');
+for (const fn of ['situationReport', 'sandboxReport'])
+  assert.equal(cut(web, fn), cut(wk, fn), `${fn} ใน report.js กับ worker.js ไม่ตรงกัน — คัดลอกทั้งฟังก์ชันอีกครั้ง`);
 
 // รันฝั่งเว็บด้วยข้อมูลใน region/data
 const ctx = { window: {}, document: { addEventListener() {} } }; vm.createContext(ctx); vm.runInContext(web, ctx);
@@ -45,4 +46,24 @@ const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('s'), 
 const sig = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body)))));
 await w.fetch(new Request('https://x', { method: 'POST', body, headers: { 'x-line-signature': sig } }), env, { waitUntil() {} });
 assert.equal(sent.at(-1).messages[0].text, txt);
-console.log(txt + '\n\nreport: ผ่านทุกกรณี');
+
+// รายงาน SDSS บ้านด่านติง: ข้อความจากข้อมูลจริง · ข้อมูลว่างไม่ error · คำสั่ง LINE ได้ข้อความเดียวกับเว็บ
+const SB = { ...D, sb: J('data/sandbox/summary.json') };
+const sbt = ctx.window.SDSS_REPORT.sandboxReport(SB);
+for (const k of ['บ้านด่านติง', 'อาคารรอบบ้านด่านติง', 'ท่วมซ้ำ ≥ 3 ครั้ง', 'ทั้ง ต.จันอัด', 'M.188A', 'ลำเชียงไกรตอนบน', 'ECMWF', 'GISTDA 7 วัน', 'ไม่ใช่ครัวเรือน', 'ไม่ใช่ประกาศเตือนภัยทางการ', '/chanat/'])
+  assert.ok(sbt.includes(k), 'รายงานบ้านด่านติงไม่มี ' + k);
+assert.ok(!/undefined|NaN|null/.test(sbt), 'รายงานบ้านด่านติงมี undefined/NaN/null'); assert.ok(sbt.length < 5000);
+assert.ok(!/undefined|NaN/.test(ctx.window.SDSS_REPORT.sandboxReport({})));
+for (const cmd of ['รายงานบ้านด่านติง', 'รายงานด่านติง']) {
+  const b2 = JSON.stringify({ events: [{ type: 'message', replyToken: 'r2', source: { type: 'user', userId: 'U1' }, message: { type: 'text', text: cmd } }] });
+  const s2 = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(b2)))));
+  await w.fetch(new Request('https://x', { method: 'POST', body: b2, headers: { 'x-line-signature': s2 } }), env, { waitUntil() {} });
+  assert.equal(sent.at(-1).messages[0].text, sbt, `คำสั่ง "${cmd}" ได้ข้อความไม่ตรงกับเว็บ`);
+}
+// ในกลุ่ม LINE คำสั่งนี้ต้องไม่ตอบ (กลุ่มตอบเฉพาะ 3 คำสั่ง)
+const n0 = sent.length;
+const b3 = JSON.stringify({ events: [{ type: 'message', replyToken: 'r3', source: { type: 'group', groupId: 'G1', userId: 'U1' }, message: { type: 'text', text: 'รายงานบ้านด่านติง' } }] });
+const s3 = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(b3)))));
+await w.fetch(new Request('https://x', { method: 'POST', body: b3, headers: { 'x-line-signature': s3 } }), env, { waitUntil() {} });
+assert.equal(sent.length, n0, 'กลุ่ม LINE ไม่ควรตอบคำสั่งรายงานบ้านด่านติง');
+console.log(txt + '\n\n' + sbt + '\n\nreport: ผ่านทุกกรณี');
