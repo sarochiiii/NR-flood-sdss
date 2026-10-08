@@ -180,3 +180,41 @@ button.btn{background:#fff;font-family:inherit;cursor:pointer}button.btn:disable
 .tmode label{display:flex;align-items:center;gap:6px;cursor:pointer}
 .tmode input{accent-color:var(--teal);margin:0}
 .tmode.off{opacity:.4}.tmode.off label{cursor:not-allowed}
+/* v1.0: ปุ่ม Dan Ting Sandbox บนแถบหัว */
+.hdr-ver{font-size:11px;font-weight:500;color:#5EEAD4;border:1px solid #5EEAD4;border-radius:8px;padding:0 6px;margin-left:4px;vertical-align:2px}
+.hdr-sbx{display:inline-flex;align-items:center;gap:5px;background:#0D9488;color:#fff;text-decoration:none;font-size:13px;font-weight:600;
+  padding:5px 12px;border-radius:16px;white-space:nowrap;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset}
+.hdr-sbx:hover,.hdr-sbx:focus-visible{background:#14B8A6}
+.hdr-sbx .ti{font-size:16px}
+/* v1.0: tick box ชั้นข้อมูลสำคัญบนแผนที่ (เหมาะกับมือถือ) */
+.qlayers{position:absolute;top:10px;left:54px;right:10px;z-index:600;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.body.lp-hidden .qlayers{left:150px}
+.qchip{pointer-events:auto;display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:3px 11px 3px 8px;background:rgba(255,255,255,.95);
+  border:1px solid var(--border);border-radius:16px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25);user-select:none}
+.qchip input{width:17px;height:17px;margin:0;accent-color:var(--teal2);cursor:pointer}
+.qchip.on{border-color:var(--teal2);background:#CCFBF1;color:#134E4A;font-weight:600}
+.qchip.busy{opacity:.65}.qchip.err{border-color:var(--amber)}
+.rv-ctl{top:54px}
+@media (max-width:820px){
+  .hdr{flex-wrap:wrap}
+  .hdr-sub{font-size:11px}
+  .qlayers{pointer-events:auto;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .qlayers::-webkit-scrollbar{display:none}
+  .body.lp-hidden .qlayers{left:54px}
+  .qchip{min-height:36px;font-size:13.5px}
+  .rv-ctl{top:auto}
+}
+/* v1.0: ข้อมูลรองในการ์ดตำบล/จุดที่แตะ พับไว้เป็นปุ่ม */
+.more-d{margin-top:8px;font-size:13px}
+.more-d summary{cursor:pointer;color:var(--teal);font-weight:500;padding:6px 0;list-style:none}
+.more-d summary::-webkit-details-marker{display:none}
+.more-d summary::before{content:"▸ ";}
+.more-d[open] summary::before{content:"▾ ";}
+.more-d .kv{margin-top:4px}
+/* v1.0 มือถือ: KPI เป็นแถบเลื่อนแนวนอนแถวเดียว ให้แผนที่อยู่ในจอแรก */
+@media (max-width:820px){
+  .kpi{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:8px;padding:8px 12px}
+  .kpi::-webkit-scrollbar{display:none}
+  .kpi-card{flex:0 0 148px;padding:6px 9px}
+  .kpi-val{font-size:18px}
+}

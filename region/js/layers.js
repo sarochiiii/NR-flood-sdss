@@ -570,7 +570,18 @@ document.addEventListener('sdss:ready', async () => {
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'structures', 'glofas']],
     ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'water', 'basins']]];
+  // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
+  const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
+    ['reports', 'จุดแจ้งเหตุ'], ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล']];
+  function renderQuick() {
+    const el = $('qlayers'); if (!el) return;
+    el.innerHTML = QUICK.filter(([id]) => state[id]).map(([id, lab]) => { const s = state[id];
+      return `<label class="qchip${s.on ? ' on' : ''}${s.loading ? ' busy' : ''}${s.err ? ' err' : ''}" title="${esc(s.err || lab)}">
+        <input type="checkbox" data-id="${id}" ${s.on ? 'checked' : ''}> ${lab}</label>`; }).join('');
+    el.querySelectorAll('input').forEach(cb => cb.onchange = () => setOn(cb.dataset.id, cb.checked));
+  }
   function render() {
+    renderQuick();
     $('layers').innerHTML = GROUPS.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);
       return rows.length ? `<div class="lgrp">${g}</div>` + rows.map(row).join('') : '';
@@ -728,13 +739,17 @@ document.addEventListener('sdss:ready', async () => {
     const dm = p && nearest(p.dams || [], la, lo, x => !x.stale && x.pct != null);
     const block = `<div class="probe">
       <div class="probe-h">จุดที่แตะ <span class="mono">${la.toFixed(4)}, ${lo.toFixed(4)}</span></div>
-      <dl class="kv">
+      <dl class="kv kv-main">
         ${fl}
-        ${row('ฝน 24 ชม. ใกล้สุด', rs, s => `<span class="mono">${fmt(s.rain_24h)} มม.</span>`)}
-        ${row('ฝนสะสม 7 วัน ใกล้สุด', r7, s => `<span class="mono">${fmt(s.v)} มม.</span>`)}
         ${row('ระดับน้ำ ใกล้สุด', ws, s => `<span class="bk" style="background:${bankStatus(s, trendWL(h, s)).color}">${bankStatus(s, trendWL(h, s)).label}</span> <span class="mono">${fmt(s.storage_pct, 0)}%</span>${arrowShort((trendWL(h, s) || {}).d, 'cm')}`)}
-        ${row('อ่างเก็บน้ำ ใกล้สุด', dm, d => `<span class="mono">${fmt(d.pct, 0)}%</span>${arrowShort(trendDam(h, d).d, '%')}`)}
       </dl>
+      <details class="more-d"><summary>สถานีฝนและอ่างใกล้จุดนี้</summary>
+        <dl class="kv">
+          ${row('ฝน 24 ชม. ใกล้สุด', rs, s => `<span class="mono">${fmt(s.rain_24h)} มม.</span>`)}
+          ${row('ฝนสะสม 7 วัน ใกล้สุด', r7, s => `<span class="mono">${fmt(s.v)} มม.</span>`)}
+          ${row('อ่างเก็บน้ำ ใกล้สุด', dm, d => `<span class="mono">${fmt(d.pct, 0)}%</span>${arrowShort(trendDam(h, d).d, '%')}`)}
+        </dl>
+      </details>
       <div class="muted" style="font-size:11px;margin-top:4px">ระยะทางเป็นเส้นตรง ไม่ได้บอกว่าสถานีอยู่ต้นน้ำหรือท้ายน้ำของจุดนี้</div>
     </div>`;
     $('query').insertAdjacentHTML('beforeend', block);

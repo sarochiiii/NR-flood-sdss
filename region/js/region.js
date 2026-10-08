@@ -233,17 +233,21 @@
       <div class="q-name">ต.${p.name}</div>
       <div class="q-amp">อ.${p.amphoe} · ${fmt(p.area_km2, 1)} ตร.กม. · <span class="mono">${p.tcode}</span></div>
       ${lvl}
-      <dl class="kv">
-        <dt>S (คงที่)</dt><dd>${o.s ? cfg.s_classes[o.s - 1] : '—'}</dd>
+      <dl class="kv kv-main">
         <dt>T (ตอนนี้)</dt><dd>${o.t !== null ? cfg.t_states[o.t] : '—'}</dd>
-        <dt>ลุ่มน้ำ</dt><dd>${p.basin && TR.basins[p.basin] ? TR.basins[p.basin].label : 'นอกลุ่มที่ติดตาม'}</dd>
-        ${p.bldg != null ? `<dt>อาคาร (Open Buildings)</dt><dd class="mono">${Number(p.bldg).toLocaleString('th-TH')} หลัง</dd>` : ''}
         <dt>ฝน 24 ชม. ที่ผ่านมา</dt><dd class="mono">${fmt(o.r && o.r.rain_24h_mm)} มม.</dd>
         <dt>คาดการณ์ 24 ชม.</dt><dd class="mono">${fmt(o.r && o.r.rain_next24h_mm)} มม.</dd>
-        <dt>ฝนสะสม 7 วัน (แบบจำลอง)</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
       </dl>
-      <div class="muted" style="font-size:11.5px;margin-top:6px">ที่มาของ T: ${why || '—'}${TR.verified ? '' : ' · เกณฑ์ยังไม่ยืนยันกับหน่วยงาน'}</div>
-      ${code === cfg.sandbox.tcode ? `<a class="btn" href="${cfg.sandbox.url}">เปิด ${cfg.sandbox.label} →</a>` : ''}`;
+      ${code === cfg.sandbox.tcode ? `<a class="btn" href="${cfg.sandbox.url}">เปิด Dan Ting Sandbox · SDSS บ้านด่านติง →</a>` : ''}
+      <details class="more-d"><summary>ข้อมูลเพิ่มเติมของตำบล</summary>
+        <dl class="kv">
+          <dt>S (คงที่)</dt><dd>${o.s ? cfg.s_classes[o.s - 1] : '—'}</dd>
+          <dt>ลุ่มน้ำ</dt><dd>${p.basin && TR.basins[p.basin] ? TR.basins[p.basin].label : 'นอกลุ่มที่ติดตาม'}</dd>
+          ${p.bldg != null ? `<dt>อาคาร (Open Buildings)</dt><dd class="mono">${Number(p.bldg).toLocaleString('th-TH')} หลัง</dd>` : ''}
+          <dt>ฝนสะสม 7 วัน (แบบจำลอง)</dt><dd class="mono">${fmt(o.r && o.r.rain_7d_mm)} มม.</dd>
+        </dl>
+        <div class="muted" style="font-size:11.5px;margin-top:6px">ที่มาของ T: ${why || '—'}${TR.verified ? '' : ' · เกณฑ์ยังไม่ยืนยันกับหน่วยงาน'}</div>
+      </details>`;
     history.replaceState(null, '', '#t=' + code);
   }
 
