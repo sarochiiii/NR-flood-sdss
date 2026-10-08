@@ -1,6 +1,9 @@
 name: gistda-legend
 # วินิจฉัย legend ภาพน้ำท่วมซ้ำซาก GISTDA: สีพิกเซล tile × FloodGCS × API จุดพิกัด GISTDA — พิมพ์ผลใน log + artifact · ไม่ commit
 on:
+  push:          # รันเมื่อแก้สคริปต์บน branch ทดลอง (workflow_dispatch ใช้ได้เฉพาะเมื่อไฟล์นี้อยู่บน main)
+    branches-ignore: [main]
+    paths: [scripts/region/sample_gistda_legend.py, .github/workflows/gistda-legend.yml]
   workflow_dispatch:
     inputs:
       zoom: { description: 'zoom ของ tile', default: '15' }
@@ -17,8 +20,8 @@ jobs:
       - name: สุ่มสีพิกเซลและเทียบค่า
         env:
           GISTDA_API_KEY: ${{ secrets.GISTDA_API_KEY }}
-          ZOOM: ${{ inputs.zoom }}
-          STEP: ${{ inputs.step }}
+          ZOOM: ${{ inputs.zoom || '15' }}
+          STEP: ${{ inputs.step || '8' }}
           OUT: /tmp/gistda_legend.json
         run: python scripts/region/sample_gistda_legend.py
       - uses: actions/upload-artifact@v4
