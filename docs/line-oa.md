@@ -3,8 +3,11 @@
 ## บัญชีและระบบ (ใช้งานจริง)
 - LINE OA แพ็กเกจ **Free** (300 push/เดือน · ตอบกลับไม่นับ) · Provider `NRRU-IDRM` · Messaging API + webhook ไปยัง Worker
 - Cloudflare Worker **`chanat-line-webhook`** · KV binding `USERS` → namespace `LINE_USERS`
-- โค้ด **v4.10** (`line/kv/worker.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
+- โค้ด **v4.11** (`line/kv/worker.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
 - rich menu 4 ปุ่ม: สถานการณ์น้ำ · แผนที่เสี่ยง · แจ้งเหตุ · **รายงานบ้านด่านติง** (แทน "ติดต่อ อบต." ตั้งแต่ v4.9) · รูป `line/richmenu_kv_2500x1686.png`
+
+## เปลี่ยนใน v4.11
+- รายงาน "สถานการณ์น้ำ" และ "รายงานบ้านด่านติง": ลิงก์แผนที่ (🗺) อยู่ก่อนหมายเหตุ ⚠️ และที่มา
 
 ## เปลี่ยนใน v4.10
 - รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก **API ของ GISTDA ปี 2554–2566** (แทน FloodGCS ที่นับสูงกว่า ~2 ขั้น) · บรรทัดใหม่: เคยท่วม ≥1/≥2/≥3 ครั้ง · ใกล้ลำน้ำ ≤300 ม. และเคยท่วม
