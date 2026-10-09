@@ -3,8 +3,11 @@
 ## บัญชีและระบบ (ใช้งานจริง)
 - LINE OA แพ็กเกจ **Free** (300 push/เดือน · ตอบกลับไม่นับ) · Provider `NRRU-IDRM` · Messaging API + webhook ไปยัง Worker
 - Cloudflare Worker **`chanat-line-webhook`** · KV binding `USERS` → namespace `LINE_USERS`
-- โค้ด **v4.11** (`line/kv/worker.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
+- โค้ด **v4.12** (`line/kv/worker.js`) · Variables: `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` (Secret) · `STATS_KEY` (Secret) · `DAILY_GROUP_PUSH` (Text "on") · Cron `0 0 * * *` (07:00 น.)
 - rich menu 4 ปุ่ม: สถานการณ์น้ำ · แผนที่เสี่ยง · แจ้งเหตุ · **รายงานบ้านด่านติง** (แทน "ติดต่อ อบต." ตั้งแต่ v4.9) · รูป `line/richmenu_kv_2500x1686.png`
+
+## เปลี่ยนใน v4.12
+- **รหัสเชิญกลุ่ม**: Value `{"note":"ADM จันอัด 32 คน","max_uses":32}` → รหัสเดียวใช้ได้ 32 คน (คนเดิมลงทะเบียนซ้ำได้ · ครบแล้วตอบ "ครบจำนวน") · ไม่ใส่ `max_uses` = รหัสรายคนแบบเดิม · ดูผู้ใช้รหัสได้ที่ `used_count` ใน KV
 
 ## เปลี่ยนใน v4.11
 - รายงาน "สถานการณ์น้ำ" และ "รายงานบ้านด่านติง": ลิงก์แผนที่ (🗺) อยู่ก่อนหมายเหตุ ⚠️ และที่มา
@@ -62,7 +65,8 @@
 `user:<id>` {role, adm, invite, consent, last_active} · `session:<id>` (30 นาที) · `report:<id>` (TTL 90 วัน) · `invite:<CODE>` {note, used_by} · `index:adm2` · `group:<gid>` {approved, daily, members, last_push} · `index:adm` (เดิม — ลบได้)
 
 ## สร้างรหัสเชิญ ADM
-Cloudflare → Workers KV → `LINE_USERS` → Add entry · Key `invite:CHANAT-XXXX` · Value `{"note":"ADM จันอัด ชุด 1"}` (**ห้ามใส่ชื่อ/เบอร์**) · 1 รหัสต่อ 1 คน · ส่งทางแชทส่วนตัว ไม่ส่งในกลุ่ม
+**รหัสกลุ่ม (แนะนำเมื่อ ADM หลายคน):** Key `invite:CHANAT-ADM32` · Value `{"note":"ADM จันอัด 32 คน","max_uses":32}` · ส่งรหัสในแชทส่วนตัวหรือกลุ่มปิดของ ADM เท่านั้น · รหัสหลุด → ลบ entry แล้วสร้างรหัสใหม่ (ADM ที่ลงทะเบียนแล้วไม่หลุด)
+**รหัสรายคน:** Cloudflare → Workers KV → `LINE_USERS` → Add entry · Key `invite:CHANAT-XXXX` · Value `{"note":"ADM จันอัด ชุด 1"}` (**ห้ามใส่ชื่อ/เบอร์**) · 1 รหัสต่อ 1 คน · ส่งทางแชทส่วนตัว ไม่ส่งในกลุ่ม
 
 ## โควตาและตัวชี้วัด
 - ตัวชี้วัดข้อเสนอโครงการ: **ผู้ใช้ 100 คน** → เสนอใช้ "ผู้ลงทะเบียนใช้งาน" เป็นหลัก หลักฐาน = ภาพ `/stats` ทุกสิ้นเดือน (ตัดแถบ URL) + Insights ของ OA · ไฟล์ติดตาม `line-oa-stats-tracking.xlsx`
