@@ -1,6 +1,6 @@
 {
  "status": "ok",
- "updated_at": "2026-10-09T17:15:43+00:00",
+ "updated_at": "2026-10-09T18:15:44+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
@@ -13,31 +13,31 @@
    "tcode": "300902",
    "rain_24h_mm": 0.8,
    "rain_7d_mm": 20.6,
-   "rain_next24h_mm": 12.2
+   "rain_next24h_mm": 12.3
   },
   {
    "tcode": "300903",
    "rain_24h_mm": 1.1,
    "rain_7d_mm": 21.5,
-   "rain_next24h_mm": 16.3
+   "rain_next24h_mm": 16.4
   },
   {
    "tcode": "300904",
    "rain_24h_mm": 1.1,
    "rain_7d_mm": 21.5,
-   "rain_next24h_mm": 16.3
+   "rain_next24h_mm": 16.4
   },
   {
    "tcode": "300905",
    "rain_24h_mm": 1.1,
    "rain_7d_mm": 19.9,
-   "rain_next24h_mm": 14.5
+   "rain_next24h_mm": 14.6
   },
   {
    "tcode": "300906",
    "rain_24h_mm": 1.1,
    "rain_7d_mm": 19.9,
-   "rain_next24h_mm": 14.5
+   "rain_next24h_mm": 14.6
   },
   {
    "tcode": "300907",
@@ -73,13 +73,13 @@
    "tcode": "301002",
    "rain_24h_mm": 0.6,
    "rain_7d_mm": 18.8,
-   "rain_next24h_mm": 11.4
+   "rain_next24h_mm": 11.5
   },
   {
    "tcode": "301003",
    "rain_24h_mm": 0.7,
    "rain_7d_mm": 23.5,
-   "rain_next24h_mm": 14.4
+   "rain_next24h_mm": 14.5
   },
   {
    "tcode": "301004",
@@ -91,7 +91,7 @@
    "tcode": "301005",
    "rain_24h_mm": 0.7,
    "rain_7d_mm": 25.6,
-   "rain_next24h_mm": 11.2
+   "rain_next24h_mm": 11.3
   },
   {
    "tcode": "301006",
@@ -121,7 +121,7 @@
    "tcode": "301010",
    "rain_24h_mm": 0.8,
    "rain_7d_mm": 20.6,
-   "rain_next24h_mm": 12.2
+   "rain_next24h_mm": 12.3
   },
   {
    "tcode": "301011",
@@ -133,7 +133,7 @@
    "tcode": "301012",
    "rain_24h_mm": 0.6,
    "rain_7d_mm": 18.8,
-   "rain_next24h_mm": 11.4
+   "rain_next24h_mm": 11.5
   },
   {
    "tcode": "301013",
@@ -151,13 +151,13 @@
    "tcode": "301015",
    "rain_24h_mm": 0.7,
    "rain_7d_mm": 23.5,
-   "rain_next24h_mm": 14.4
+   "rain_next24h_mm": 14.5
   },
   {
    "tcode": "301016",
    "rain_24h_mm": 0.7,
    "rain_7d_mm": 23.5,
-   "rain_next24h_mm": 14.4
+   "rain_next24h_mm": 14.5
   }
  ]
 }
