@@ -45,8 +45,9 @@
       const bt = gf.by_tambon || {}, c = Math.round(bt[TCODE] || 0);
       out.push(`• ต.จันอัด: ${c ? `${c.toLocaleString('th-TH')} ไร่` : 'ไม่พบ'}`);
     } else out.push('• ไม่มีข้อมูล');
+    out.push('', `🗺 แผนที่: ${SITE}`);
     out.push('', `⚠️ ${(cfg.bank || {}).verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.`,
-      'ที่มา: สสน. (ThaiWater) · ECMWF ผ่าน Open-Meteo · กรมชลประทาน · GISTDA', `แผนที่: ${SITE}`);
+      'ที่มา: สสน. (ThaiWater) · ECMWF ผ่าน Open-Meteo · กรมชลประทาน · GISTDA');
     return out.join('\n');
   }
   // <<< situationReport
@@ -87,9 +88,10 @@
     out.push(`• อ่างลำเชียงไกรตอนบน ${up ? n0(up.pct) + '%' : '—'} · ตอนล่าง ${lo ? n0(lo.pct) + '%' : '—'} (ข้อมูลวันที่ ${dd((lo && lo.date) || (up && up.date))})`);
     out.push(`• ฝนข้างหน้า ECMWF: 24 ชม. ${ed.length ? f1(ec.next24_mm) : '—'} มม. · 72 ชม. ${ed.length ? f1(ec.next72_mm) : '—'} มม.`);
     out.push(`• น้ำท่วมตรวจพบ ต.จันอัด (GISTDA 7 วัน): ${gf.status === 'ok' ? (Math.round((gf.by_tambon || {})[TCODE] || 0) ? `${n0((gf.by_tambon || {})[TCODE])} ไร่` : 'ไม่พบ') : 'ไม่มีข้อมูล'}`);
+    out.push('', `🗺 แผนที่ Sandbox: ${SITE}`);
     out.push('', '⚠️ อาคารคือรูปหลังคาจากภาพดาวเทียม ไม่ใช่ครัวเรือน · ตำแหน่งบ้านด่านติงประมาณจากกลุ่มอาคาร ยังไม่ยืนยันกับ อบต. · '
       + `${(cfg.bank || {}).verified ? '' : 'เกณฑ์ตลิ่ง 70/90% ยังไม่ยืนยันกับหน่วยงาน · '}ไม่ใช่ประกาศเตือนภัยทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.`,
-      'ที่มา: Google Open Buildings · OpenStreetMap · GISTDA · สสน. (ThaiWater) · กรมชลประทาน · ECMWF', `แผนที่ Sandbox: ${SITE}`);
+      'ที่มา: Google Open Buildings · OpenStreetMap · GISTDA · สสน. (ThaiWater) · กรมชลประทาน · ECMWF');
     return out.join('\n');
   }
   // <<< sandboxReport
