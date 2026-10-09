@@ -31,3 +31,4 @@
 | 8 ต.ค. | v=42 | tick box บนแผนที่: ย้าย "จุดแจ้งเหตุ" ไปท้ายสุด |
 | 9 ต.ค. | v=43 · LINE v4.9 | /chanat/: tick box ชั้นข้อมูลบนแผนที่ · ปุ่ม "สร้างรายงานบ้านด่านติงสำหรับ LINE" · legend เล็กลงบนมือถือ · รายงาน `sandboxReport` (report.js = worker) · คำสั่ง LINE `รายงานบ้านด่านติง` แทนปุ่ม "ติดต่อ อบต." ใน rich menu (`line/richmenu_kv_2500x1686.png`) · `scripts/region/build_sandbox_summary.py` + workflow `sandbox-summary` → `region/data/sandbox/summary.json` (ตัวเลขตรงกับแผง SDSS ค่าเริ่มต้น: 1,142 / 702 / 431 / 2 / 7) |
 | 8 ต.ค. | chanat | legend ภาพน้ำท่วมซ้ำซาก GISTDA 1–6 ครั้ง (อนุมานจาก API จุดพิกัด GISTDA ตรงกัน 10/10 จุดต่อสี) · workflow วินิจฉัย `gistda-legend` · พบ FloodGCS นับสูงกว่า API GISTDA ~2 ขั้น (รอยืนยัน) |
+| 9 ต.ค. | chanat | เปลี่ยนชื่อหน้าเป็น **Dan Ting Sandbox** · SDSS บ้านด่านติง ต.จันอัด |
