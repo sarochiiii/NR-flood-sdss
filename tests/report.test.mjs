@@ -50,7 +50,7 @@ assert.equal(sent.at(-1).messages[0].text, txt);
 // รายงาน SDSS บ้านด่านติง: ข้อความจากข้อมูลจริง · ข้อมูลว่างไม่ error · คำสั่ง LINE ได้ข้อความเดียวกับเว็บ
 const SB = { ...D, sb: J('data/sandbox/summary.json') };
 const sbt = ctx.window.SDSS_REPORT.sandboxReport(SB);
-for (const k of ['บ้านด่านติง', 'อาคารรอบบ้านด่านติง', 'ท่วมซ้ำ ≥ 3 ครั้ง', 'ทั้ง ต.จันอัด', 'M.188A', 'ลำเชียงไกรตอนบน', 'ECMWF', 'GISTDA 7 วัน', 'ไม่ใช่ครัวเรือน', 'ไม่ใช่ประกาศเตือนภัยทางการ', '/chanat/'])
+for (const k of ['บ้านด่านติง', 'อาคารรอบบ้านด่านติง', 'เคยท่วม ≥ 1 ครั้ง', 'ทั้ง ต.จันอัด', 'M.188A', 'ลำเชียงไกรตอนบน', 'ECMWF', 'GISTDA 7 วัน', 'ไม่ใช่ครัวเรือน', 'ไม่ใช่ประกาศเตือนภัยทางการ', '/chanat/'])
   assert.ok(sbt.includes(k), 'รายงานบ้านด่านติงไม่มี ' + k);
 assert.ok(!/undefined|NaN|null/.test(sbt), 'รายงานบ้านด่านติงมี undefined/NaN/null'); assert.ok(sbt.length < 5000);
 assert.ok(!/undefined|NaN/.test(ctx.window.SDSS_REPORT.sandboxReport({})));

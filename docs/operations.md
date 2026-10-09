@@ -8,7 +8,7 @@
 2. github.com/sarochiiii/NR-flood-sdss → **Add file → Upload files** → ลาก**โฟลเดอร์ระดับบนสุด** (`region`, `scripts`) ไปวาง
    ไฟล์ชื่อซ้ำจะถูกเขียนทับ ไฟล์อื่นไม่ถูกแตะ
 3. **Commit changes** → รอ Actions → `pages-build-deployment` ขึ้น ✓ (1–2 นาที)
-4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=43)
+4. เปิดเว็บ ถ้าเปลี่ยน JS/CSS ต้องเพิ่มเลข `?v=N` ใน `region/index.html` และ `region/lamchiangkrai.html` (ปัจจุบัน v=44)
    มิฉะนั้น browser จะใช้ไฟล์เก่าใน cache (GitHub Pages cache ~10 นาที) — ผู้ใช้กด Ctrl+F5 ได้ชั่วคราว
 
 ข้อห้าม: อย่าลากโฟลเดอร์ `.github` ผ่าน Upload files (อาจไม่ติด) — แก้ workflow ด้วยการเปิดไฟล์แล้วกดดินสอ ✏️
@@ -75,3 +75,14 @@ Settings → Secrets and variables → Actions → New repository secret / ด�
 - ตัวแปร: Settings → Variables and Secrets → Add variable → **ติ๊ก Secret** สำหรับค่าลับ (ไม่ติ๊ก = Text มองเห็นได้) · กล่องเหลือง "Update your Wrangler configuration" ไม่ต้องทำตาม
 - Logs: Observability · ถ้า ADM ไม่ได้รับแจ้ง หา `multicast failed` (429 = โควตาหมด)
 - เปิดให้ OA เข้ากลุ่ม: manager.line.biz (เข้าด้วยบัญชี LINE ที่ดูแล OA หรือบัญชีธุรกิจที่เป็นอีเมล) → ตั้งค่า → ตั้งค่าบัญชี → เข้าร่วมแชทกลุ่ม → ยอมรับคำเชิญ · ผู้เชิญต้องเป็นเพื่อนกับ OA · ควรขออนุญาตสมาชิกกลุ่มก่อน
+
+## ข้อมูลสดทุกชั่วโมง: Worker `gh-cron-dispatch` (ตั้งครั้งเดียว)
+schedule ของ GitHub Actions ไม่ตรงเวลา (5–9 ต.ค. 69: ห่างกันเฉลี่ย 3.9 ชม. นานสุด 8.8 ชม.) → ให้ Cron Trigger ของ Cloudflare สั่งรัน `region-live` ทุกชั่วโมง (schedule เดิมคงไว้เป็นสำรอง)
+1. GitHub → รูปโปรไฟล์ → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
+   - Token name `nr-flood-cron` · Expiration 1 ปี · Repository access: **Only select repositories** → `NR-flood-sdss`
+   - Permissions → Repository permissions → **Actions: Read and write** (อย่างอื่นไม่ต้อง) → Generate → คัดลอก token (ห้ามวางในแชท/ไฟล์)
+2. Cloudflare → Workers & Pages → Create → Worker → ชื่อ `gh-cron-dispatch` → Deploy → Edit code → วางโค้ด `workers/gh-cron-dispatch.js` ทั้งไฟล์ → Deploy
+3. Settings → Variables and Secrets → Add → Type **Secret** · Name `GH_TOKEN` · Value = token ข้อ 1 → Deploy
+4. Settings → Trigger events (Triggers) → Add → **Cron Triggers** → `15 * * * *` → Add
+5. ตรวจ: เปิด URL ของ Worker → `token_set: true` · ชั่วโมงถัดไป GitHub → Actions → region-live มีรอบ event `workflow_dispatch`
+token หมดอายุ → region-live กลับไปพึ่ง schedule ของ GitHub (ไม่พัง แต่ช้าลง) · ต่ออายุแล้วแก้ Secret
