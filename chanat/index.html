@@ -194,6 +194,10 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     onEachFeature: (f, l) => l.bindTooltip(`น้ำท่วมซ้ำซาก ${f.properties.freq} ครั้ง`, { sticky: true }) }) : null;
   // tile GISTDA มีพื้นเทาอ่อนทึบนอกพื้นที่ท่วม → วาดลง canvas แล้วทำพิกเซลเทาอ่อน/ขาวให้โปร่งใส เห็นสีจริงของ GISTDA บนภาพดาวเทียม
   // (Worker ส่ง CORS ให้ sarochiiii.github.io จึงอ่านพิกเซลได้ · ถ้าอ่านไม่ได้ จะแสดงภาพเดิมทั้งแผ่น)
+  // legend ของ tile GISTDA (ไม่มีตารางทางการ) — ยืนยันจากข้อมูลจริง 8 ต.ค. 69 (workflow gistda-legend): สีพิกเซลหลักใน ต.จันอัด
+  // × ค่า total ของ API จุดพิกัด GISTDA flood-recurrence v1.1 (ปี 2011–2023) ตรงกัน 10/10 จุดทุกสี · tile เป็น RGBA alpha ~50% ·
+  // พิกเซลขอบที่สีผสมกันไม่อยู่ในตาราง · ≥ 7 ครั้งยังไม่พบใน ต.จันอัด
+  const GISTDA_LEGEND = [[1, ['#006680']], [2, ['#0B4C6C']], [3, ['#000D62']], [4, ['#564B64']], [5, ['#806904', '#804C17']], [6, ['#582A01']]];
   const isBg = (r, g, b) => r > 200 && g > 200 && b > 200 && Math.max(r, g, b) - Math.min(r, g, b) < 14;
   const GistdaLayer = L.GridLayer.extend({
     createTile(c, done) {
@@ -369,8 +373,10 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     let h = '';
     if (L_.bldg.on && L_.bldg.ok) h += '<b>อาคาร</b>' + Object.values(CLS).map(([c, t]) => row(c, t)).join('');
     if (L_.ff.on && L_.ff.ok) h += L_.ff.mode === 'tile'
-      ? '<b>น้ำท่วมซ้ำซาก</b><div class="muted">ภาพแผนที่จาก GISTDA API (สีตามรูปแบบของ GISTDA · ยังไม่มีตาราง legend)'
-        + (FF ? '<br>การวิเคราะห์อาคารใช้ชั้น FloodGCS (GEE)' : '') + '</div>'
+      ? '<b>น้ำท่วมซ้ำซาก GISTDA (ครั้ง · ปี 2554–2566)</b>'
+        + GISTDA_LEGEND.map(([n, cs]) => `<div class="row">${cs.map(c => `<span class="sw" style="background:${c}"></span>`).join('')}${n}</div>`).join('')
+        + '<div class="muted">สีของ GISTDA แสดงโปร่งแสงบนแผนที่ · ตารางสีอนุมานจาก API จุดพิกัด GISTDA (ไม่ใช่ legend ทางการ)'
+        + (FF ? '<br>การวิเคราะห์อาคารใช้ชั้น FloodGCS (GEE) ซึ่งนับจำนวนครั้งต่างจากภาพนี้' : '') + '</div>'
       : '<b>น้ำท่วมซ้ำซาก (ครั้ง)</b>' + Array.from({ length: maxF }, (_, i) => row(ffCol(i + 1), `${i + 1}${i + 1 === FF_COL.length ? '+' : ''}`)).join('')
         + '<div class="muted">ภาพและการวิเคราะห์จากชั้น FloodGCS (GEE)</div>';
     if (L_.river.on && L_.river.ok) h += row('#1D4ED8', 'แม่น้ำ/ลำน้ำสายหลัก', 'height:4px') + row('#22D3EE', 'คลอง', 'height:3px');
