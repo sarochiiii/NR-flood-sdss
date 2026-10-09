@@ -12,7 +12,7 @@
 |---|---|---|
 | เว็บสาธารณะ | `region/` → https://sarochiiii.github.io/NR-flood-sdss/region/ | push `main` → GitHub Pages |
 | ข้อมูลสด | `scripts/region/*.py` → `region/data/live/` | `.github/workflows/region-live.yml` ทุกชั่วโมง :15 |
-| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.11, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
+| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.12, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
 | Dan Ting Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS · รายงานบ้านด่านติง) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (**API น้ำท่วมซ้ำซาก GISTDA** ปี 2554–2566 · FloodGCS เลิกใช้) → `sandbox-summary` (`data/sandbox/summary.json`) |
 | Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ใช้งาน** https://gistda-tile-proxy.sarochinee-k.workers.dev | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
 | Worker `gh-cron-dispatch` — Cron Cloudflare `15 * * * *` สั่งรัน `region-live` ทุกชั่วโมง (schedule ของ GitHub ไม่ตรงเวลา) | `workers/gh-cron-dispatch.js` (Secret `GH_TOKEN` fine-grained · Actions read/write) | Cloudflare dashboard · ทดสอบ `tests/gh_cron_dispatch.test.mjs` |
@@ -43,7 +43,7 @@ docs/                        คู่มือส่งมอบ
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
 7. เกณฑ์ที่ยังไม่ยืนยันกับชลประทาน/ปภ. ต้องคง `verified: false` และแสดงป้ายบนหน้าเว็บ
-8. LINE: "ติดต่อ อบต."/"ขอความช่วยเหลือ" **ปิดชั่วคราว** (`HELP_ENABLED = false`) · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงเป็นจุดแดงกระพริบบนแผนที่ · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>`) · "รายงานบ้านด่านติง" เฉพาะแชท 1:1 (ปุ่มที่ 4 ของ rich menu) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ผู้รายงาน และปัดตำแหน่ง ~100 ม.
+8. LINE: "ติดต่อ อบต."/"ขอความช่วยเหลือ" **ปิดชั่วคราว** (`HELP_ENABLED = false`) · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงเป็นจุดแดงกระพริบบนแผนที่ · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>` · รายคน หรือรหัสกลุ่ม `max_uses`) · "รายงานบ้านด่านติง" เฉพาะแชท 1:1 (ปุ่มที่ 4 ของ rich menu) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ผู้รายงาน และปัดตำแหน่ง ~100 ม.
 9. โควตา LINE Free 300 push/เดือน (กลุ่มนับตามจำนวนสมาชิก) — ห้ามเพิ่ม push/broadcast โดยไม่คำนวณโควตา · reply ไม่นับโควตา
 
 ## แหล่งข้อมูล (ตรวจแล้ว)

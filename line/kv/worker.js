@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.11 (ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.12 (รหัสเชิญกลุ่ม max_uses · ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -21,8 +21,9 @@
  *   index:adm         รายการ userId ของ ADM (ใช้ส่งแจ้งเตือน)
  *   session:<userId>  ขั้นตอนรายงานที่ค้างอยู่ (หมดอายุเอง 30 นาที)
  *   report:<id>       รายงานเหตุที่ยืนยันแล้ว (หมดอายุเอง 90 วัน)
- *   invite:<CODE>     รหัสเชิญ ADM ใช้ครั้งเดียว — สร้างใน Cloudflare: Workers KV → LINE_USERS → Add entry
- *                     key: invite:CHANAT-7K2Q   value: {"note":"ADM จันอัด ชุด 1"}   (ห้ามใส่ชื่อ/เบอร์โทร)
+ *   invite:<CODE>     รหัสเชิญ ADM — สร้างใน Cloudflare: Workers KV → LINE_USERS → Add entry (ห้ามใส่ชื่อ/เบอร์โทร)
+ *                     รายคน (ใช้ครั้งเดียว): key invite:CHANAT-7K2Q   value {"note":"ADM จันอัด ชุด 1"}
+ *                     รหัสกลุ่ม (v4.12):    key invite:CHANAT-ADM32  value {"note":"ADM จันอัด 32 คน","max_uses":32}
  *   index:adm2        รายชื่อ ADM ที่ยืนยันด้วยรหัสเชิญแล้ว (แทน index:adm เดิมที่ไม่ปลอดภัย)
  *
  * โควตา: ตอบกลับผู้ใช้ใช้ Reply API (ไม่นับโควตา)
@@ -204,11 +205,18 @@ async function handleInvite(ev, env, userId, t) {
   const code = t.trim().toUpperCase().replace(/\s+/g, '');
   const key = `invite:${code}`;
   const inv = code.length >= 6 ? await env.USERS.get(key, 'json') : null;
-  if (!inv || (inv.used_by && inv.used_by !== userId)) {
-    return reply(ev, env, [{ type: 'text', text: 'รหัสเชิญไม่ถูกต้องหรือถูกใช้แล้ว ลองพิมพ์ใหม่ หรือติดต่อทีมวิจัย',
+  // v4.12 รหัสกลุ่ม: value {"note":"…","max_uses":32} = ใช้ได้ไม่เกิน 32 คน (ไม่ใส่ max_uses = 1 คน แบบเดิม)
+  // รายชื่อผู้ใช้รหัสเก็บใน KV เท่านั้น (used_list) · KV ไม่รับประกันการเขียนพร้อมกัน จำนวนจริงอาจเกินเล็กน้อยถ้าลงทะเบียนพร้อมกันวินาทีเดียว
+  const max = inv ? Math.max(1, Math.floor(Number(inv.max_uses) || 1)) : 1;
+  const used = inv ? (Array.isArray(inv.used_list) ? inv.used_list : inv.used_by ? [inv.used_by] : []) : [];
+  if (!inv || (!used.includes(userId) && used.length >= max)) {
+    return reply(ev, env, [{ type: 'text', text: inv && max > 1 ? 'รหัสเชิญนี้มีผู้ลงทะเบียนครบจำนวนแล้ว กรุณาติดต่อทีมวิจัย'
+      : 'รหัสเชิญไม่ถูกต้องหรือถูกใช้แล้ว ลองพิมพ์ใหม่ หรือติดต่อทีมวิจัย',
       quickReply: { items: [qr('ประชาชน', 'ลงทะเบียน ประชาชน'), qr('ยกเลิก')] } }]);
   }
-  await env.USERS.put(key, JSON.stringify({ ...inv, used_by: userId, used_at: nowIso() }));
+  const list = used.includes(userId) ? used : [...used, userId];
+  await env.USERS.put(key, JSON.stringify(max > 1 ? { ...inv, used_list: list, used_count: list.length, used_at: nowIso() }
+    : { ...inv, used_by: userId, used_at: nowIso() }));
   const user = (await getUser(env, userId)) || { joined: nowIso() };
   await putUser(env, userId, { ...user, role: 'adm', adm: true, invite: code, active: true, consent: nowIso() });
   await setAdmIndex(env, userId, true);

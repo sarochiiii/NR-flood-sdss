@@ -31,6 +31,14 @@ assert.match(await U('UA', 'ลงทะเบียน ADM'), /รหัสเ�
 assert.match(await U('UA', 'WRONG1'), /ไม่ถูกต้อง/);
 assert.match(await U('UA', 'chanat-test1'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
 assert.match(await (U('UB', 'ลงทะเบียน ADM'), U('UB', 'CHANAT-TEST1')), /ถูกใช้แล้ว/);
+// v4.12 รหัสกลุ่ม: ใช้ได้ไม่เกิน max_uses คน · คนเดิมลงทะเบียนซ้ำได้ · คนที่ 3 ถูกปฏิเสธ
+store.set('invite:CHANAT-GRP2', JSON.stringify({ note: 'group', max_uses: 2 }));
+await U('UG1', 'ลงทะเบียน ADM'); assert.match(await U('UG1', 'CHANAT-GRP2'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
+await U('UG2', 'ลงทะเบียน ADM'); assert.match(await U('UG2', 'chanat-grp2'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
+await U('UG1', 'ลงทะเบียน ADM'); assert.match(await U('UG1', 'CHANAT-GRP2'), /ลงทะเบียนเป็น ADM เรียบร้อย/);
+await U('UG3', 'ลงทะเบียน ADM'); assert.match(await U('UG3', 'CHANAT-GRP2'), /ครบจำนวน/);
+assert.equal(JSON.parse(store.get('invite:CHANAT-GRP2')).used_count, 2);
+assert.ok(JSON.parse(store.get('user:UG2')).adm && !store.get('user:UG3'));
 assert.match(await U('UC', 'ลงทะเบียน ประชาชน'), /ประชาชน/);
 // v4.6: ติดต่อ อบต./ขอความช่วยเหลือ ปิดชั่วคราว → ตอบเบอร์ฉุกเฉิน ไม่เปิด session
 assert.match(await U('UC', 'ขอความช่วยเหลือ'), /ปิดใช้งานชั่วคราว[\s\S]*1669/);
