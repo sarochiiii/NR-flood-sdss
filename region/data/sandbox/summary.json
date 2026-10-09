@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-09T00:49:31+00:00",
+ "updated_at": "2026-10-09T00:55:45+00:00",
  "tcode": "301010",
  "center": {
   "lat": 15.14223,
@@ -21,7 +21,7 @@
  "inputs": {
   "buildings": "Google Open Buildings V3 (confidence ≥ 0.70)",
   "rivers_updated_at": "2026-10-05T02:02:58+00:00",
-  "floodfreq_updated_at": "2026-10-09T00:48:13+00:00",
+  "floodfreq_updated_at": "2026-10-09T00:55:25+00:00",
   "floodfreq_source": "GISTDA น้ำท่วมซ้ำซาก (API flood-recurrence v1.1 · ปี 2011–2023 · field total)",
   "max_freq": 8
  },
