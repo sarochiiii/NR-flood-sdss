@@ -1,24 +1,24 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-09T16:19:03+00:00",
+ "updated_at": "2026-10-09T17:15:43+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
    "code": "ONE022",
    "name": "คลองสามบาท บ้านกุดพิมาน",
-   "level_m": 202.16,
+   "level_m": 202.15,
    "bank_m": 201.97,
-   "storage_pct": 108.09,
-   "measured_at": "2026-10-09 23:00"
+   "storage_pct": 107.67,
+   "measured_at": "2026-10-10 00:00"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 154.65,
+   "level_m": 154.64,
    "bank_m": 155.3,
-   "storage_pct": 88.6,
-   "measured_at": "2026-10-09 22:00"
+   "storage_pct": 88.42,
+   "measured_at": "2026-10-09 23:00"
   },
   {
    "code": "M.192",
@@ -26,7 +26,7 @@
    "level_m": 203.28,
    "bank_m": 203.9,
    "storage_pct": 84.38,
-   "measured_at": "2026-10-09 22:00"
+   "measured_at": "2026-10-09 23:00"
   },
   {
    "code": "M.195",
@@ -34,15 +34,15 @@
    "level_m": 155.41,
    "bank_m": 158.1,
    "storage_pct": 63.15,
-   "measured_at": "2026-10-09 22:00"
+   "measured_at": "2026-10-09 23:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
-   "level_m": 164.22,
+   "level_m": 164.21,
    "bank_m": 167.83,
-   "storage_pct": 48.06,
-   "measured_at": "2026-10-09 23:00"
+   "storage_pct": 48.04,
+   "measured_at": "2026-10-10 00:00"
   },
   {
    "code": "M.2A",
@@ -50,23 +50,15 @@
    "level_m": 163.1,
    "bank_m": 167.7,
    "storage_pct": 44.24,
-   "measured_at": "2026-10-09 22:00"
+   "measured_at": "2026-10-09 23:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 175.78,
+   "level_m": 175.8,
    "bank_m": 177.6,
-   "storage_pct": 42.04,
-   "measured_at": "2026-10-09 22:00"
-  },
-  {
-   "code": "M.188A",
-   "name": "บ้านบัว",
-   "level_m": 160.37,
-   "bank_m": 162.6,
-   "storage_pct": 40.05,
-   "measured_at": "2026-10-09 22:00"
+   "storage_pct": 42.68,
+   "measured_at": "2026-10-09 23:00"
   },
   {
    "code": "M.191",
@@ -74,7 +66,15 @@
    "level_m": 193.25,
    "bank_m": 195.3,
    "storage_pct": 39.35,
-   "measured_at": "2026-10-09 22:00"
+   "measured_at": "2026-10-09 23:00"
+  },
+  {
+   "code": "M.188A",
+   "name": "บ้านบัว",
+   "level_m": 160.32,
+   "bank_m": 162.6,
+   "storage_pct": 38.71,
+   "measured_at": "2026-10-09 23:00"
   }
  ]
 }
