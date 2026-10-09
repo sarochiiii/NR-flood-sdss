@@ -3,7 +3,7 @@ name: gistda-legend
 on:
   push:          # รันเมื่อแก้สคริปต์บน branch ทดลอง (workflow_dispatch ใช้ได้เฉพาะเมื่อไฟล์นี้อยู่บน main)
     branches-ignore: [main]
-    paths: [scripts/region/sample_gistda_legend.py, .github/workflows/gistda-legend.yml]
+    paths: [scripts/region/sample_gistda_legend.py, scripts/region/probe_gistda_area.py, scripts/region/build_sandbox_floodfreq_gistda.py, .github/workflows/gistda-legend.yml]
   workflow_dispatch:
     inputs:
       zoom: { description: 'zoom ของ tile', default: '15' }
@@ -11,13 +11,29 @@ on:
 jobs:
   sample:
     runs-on: ubuntu-latest
-    permissions: { contents: read }
+    permissions: { contents: write }
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with: { python-version: '3.11' }
-      - run: pip install --quiet pillow
+      - run: pip install --quiet pillow shapely
+      - name: ตรวจโครงสร้าง API น้ำท่วมซ้ำซากแบบพื้นที่ (area)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: python scripts/region/probe_gistda_area.py
+      - name: ทดลองสร้างชั้นน้ำท่วมซ้ำซากจาก API GISTDA แล้ว commit ลง branch ทดลองนี้ (ไม่แตะ main)
+        if: ${{ github.event_name == 'push' && github.ref_name != 'main' }}
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: |
+          python scripts/region/build_sandbox_floodfreq_gistda.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add region/data/sandbox/floodfreq.geojson
+          git diff --staged --quiet && { echo "ไม่มีไฟล์เปลี่ยน"; exit 0; }
+          git commit -q -m "data(sandbox): น้ำท่วมซ้ำซากจาก API GISTDA (ทดลองบน branch)"
+          git push -q origin HEAD:${{ github.ref_name }}
       - name: สุ่มสีพิกเซลและเทียบค่า
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
           GISTDA_API_KEY: ${{ secrets.GISTDA_API_KEY }}
           ZOOM: ${{ inputs.zoom || '15' }}

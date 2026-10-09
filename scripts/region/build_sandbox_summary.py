@@ -3,7 +3,7 @@
 คำนวณวิธีเดียวกับแผง SDSS ใน chanat/index.html ทุกขั้น (ต้องแก้คู่กัน):
   อาคาร Open Buildings (region/data/bldg) · จุดกึ่งกลาง = ค่าเฉลี่ยจุดยอด · ใน ต.จันอัด (NR_admin3 301010) หรือในรัศมี RADIUS_KM จาก DT
   ระยะถึงลำน้ำ = ระยะเส้นตรงแบบ equirectangular (KX, KY เดียวกับเว็บ) ถึงเส้น OSM ประเภท river (สายหลัก) / river+canal
-  น้ำท่วมซ้ำซาก = ค่า freq สูงสุดของ polygon FloodGCS (region/data/sandbox/floodfreq.geojson) ที่ครอบจุดกึ่งกลาง
+  น้ำท่วมซ้ำซาก = ค่า freq สูงสุดของ polygon น้ำท่วมซ้ำซาก GISTDA (region/data/sandbox/floodfreq.geojson · API flood-recurrence ปี 2011–2023) ที่ครอบจุดกึ่งกลาง
 ค่าเริ่มต้นของแผง SDSS: ระยะ ≤ 300 ม. (สายหลัก) · ซ้ำซาก ≥ 1 ครั้ง → นับ both / ff / buf / none เหมือน legend บนเว็บ
 ไม่มีข้อมูลครัวเรือน (อาคารคือรูปหลังคาจากภาพดาวเทียม) · ไม่ใช้เครือข่าย · ไฟล์ input ไม่ครบ → พิมพ์ ::error:: และไม่เขียนทับไฟล์เดิม (exit 0)
 รันโดย workflow sandbox-summary (หลัง sandbox-layers / osm-rivers) หรือรันเองในเครื่อง
@@ -142,9 +142,10 @@ def main():
         for b in rows:
             nr, fl = b["d_river"] <= BUF_DEFAULT, b["freq"] is not None and b["freq"] >= FREQ_DEFAULT
             cls["both" if nr and fl else "ff" if fl else "buf" if nr else "none"] += 1
-        # จำนวนที่ใกล้ลำน้ำ ≤ 300 ม. และท่วมซ้ำ ≥ 3 ครั้ง — ช่วงเชิงพรรณนาสำหรับรายงาน (FloodGCS คลุม ~97% ของตำบล ค่า ≥ 1 จึงแยกแยะไม่ได้) ไม่ใช่เกณฑ์ทางการ
-        near_ff3 = sum(1 for b in rows if b["d_river"] <= BUF_DEFAULT and b["freq"] is not None and b["freq"] >= 3) if FF else None
-        return {"n": n, "near_river": near, "near300_ff3": near_ff3, "ff_ge": {str(k): ffc(k) for k in (1, 3, 5)} if FF else None,
+        # ใกล้ลำน้ำ ≤ 300 ม. และเคยท่วม ≥ 1 / ≥ 3 ครั้ง — ช่วงเชิงพรรณนาสำหรับรายงาน ไม่ใช่เกณฑ์ทางการ
+        near_ff = lambda k: sum(1 for b in rows if b["d_river"] <= BUF_DEFAULT and b["freq"] is not None and b["freq"] >= k) if FF else None
+        return {"n": n, "near_river": near, "near300_ff1": near_ff(1), "near300_ff3": near_ff(3),
+                "ff_ge": {str(k): ffc(k) for k in (1, 2, 3, 5)} if FF else None,
                 "freq_hist": dict(sorted(hist.items(), key=lambda kv: int(kv[0]))) if FF else None, "cls": cls}
 
     out = {

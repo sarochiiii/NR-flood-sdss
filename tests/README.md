@@ -15,3 +15,6 @@
 
 ## Worker gistda-tile-proxy
 `node --no-warnings tests/gistda_tile_proxy.test.mjs` — 200 MISS→HIT (cache) · ส่ง key ใน header ไม่หลุดใน response · SWAP_XY · 204 นอก bbox · 400 zoom นอก 8–17 · 404 path ผิด · 500 not_configured · 405 · upstream error → 502 ไม่ส่งข้อความต่อ
+
+## Worker gh-cron-dispatch
+`node --no-warnings tests/gh_cron_dispatch.test.mjs` — ไม่มี token ไม่เรียก GitHub · cron → POST dispatches ของ region-live บน main · หน้า GET ไม่สั่งรันและไม่แสดง token
