@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-08T22:06:52+00:00",
+ "updated_at": "2026-10-09T00:27:46+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 202.22,
    "bank_m": 201.97,
    "storage_pct": 110.59,
-   "measured_at": "2026-10-09 04:50"
+   "measured_at": "2026-10-09 07:10"
   },
   {
    "code": "M.184",
@@ -18,7 +18,7 @@
    "level_m": 154.68,
    "bank_m": 155.3,
    "storage_pct": 89.12,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "M.192",
@@ -26,7 +26,7 @@
    "level_m": 203.25,
    "bank_m": 203.9,
    "storage_pct": 83.63,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "M.195",
@@ -34,7 +34,7 @@
    "level_m": 155.5,
    "bank_m": 158.1,
    "storage_pct": 64.38,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "M.188A",
@@ -42,15 +42,15 @@
    "level_m": 161.14,
    "bank_m": 162.6,
    "storage_pct": 60.75,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
-   "level_m": 164.28,
+   "level_m": 164.29,
    "bank_m": 167.83,
-   "storage_pct": 49.0,
-   "measured_at": "2026-10-09 04:50"
+   "storage_pct": 49.14,
+   "measured_at": "2026-10-09 07:10"
   },
   {
    "code": "M.191",
@@ -58,7 +58,7 @@
    "level_m": 193.45,
    "bank_m": 195.3,
    "storage_pct": 45.27,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "M.2A",
@@ -66,7 +66,7 @@
    "level_m": 163.15,
    "bank_m": 167.7,
    "storage_pct": 44.85,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   },
   {
    "code": "M.164",
@@ -74,7 +74,7 @@
    "level_m": 175.46,
    "bank_m": 177.6,
    "storage_pct": 31.85,
-   "measured_at": "2026-10-09 04:00"
+   "measured_at": "2026-10-09 06:00"
   }
  ]
 }
