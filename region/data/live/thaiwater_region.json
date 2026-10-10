@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-10-10T17:15:45+00:00",
+"updated_at":"2026-10-10T18:15:50+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -427,7 +427,7 @@
 }
 ],
 "status":{
-"rain":"ok",
-"waterlevel":"ok"
+"rain":"error: 'str' object has no attribute 'get'",
+"waterlevel":"error: 'str' object has no attribute 'get'"
 }
 }

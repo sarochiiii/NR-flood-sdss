@@ -1,6 +1,6 @@
 {
- "status": "ok",
- "message": null,
+ "status": "error",
+ "message": "error: 'str' object has no attribute 'get'",
  "updated_at": "2026-10-10T17:15:45+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
