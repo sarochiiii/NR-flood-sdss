@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-10T16:15:45+00:00",
+ "updated_at": "2026-10-10T17:15:45+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -18,39 +18,39 @@
    "level_m": 203.28,
    "bank_m": 203.9,
    "storage_pct": 84.38,
-   "measured_at": "2026-10-10 22:00"
+   "measured_at": "2026-10-10 23:00"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 154.35,
+   "level_m": 154.34,
    "bank_m": 155.3,
-   "storage_pct": 83.33,
-   "measured_at": "2026-10-10 22:00"
+   "storage_pct": 83.16,
+   "measured_at": "2026-10-10 23:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.38,
+   "level_m": 176.57,
    "bank_m": 177.6,
-   "storage_pct": 61.15,
-   "measured_at": "2026-10-10 22:00"
-  },
-  {
-   "code": "M.195",
-   "name": "บ้านสัมฤทธิ์",
-   "level_m": 155.22,
-   "bank_m": 158.1,
-   "storage_pct": 60.55,
-   "measured_at": "2026-10-10 22:00"
+   "storage_pct": 67.2,
+   "measured_at": "2026-10-10 23:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.08,
+   "level_m": 161.19,
    "bank_m": 162.6,
-   "storage_pct": 59.14,
-   "measured_at": "2026-10-10 22:00"
+   "storage_pct": 62.1,
+   "measured_at": "2026-10-10 23:00"
+  },
+  {
+   "code": "M.195",
+   "name": "บ้านสัมฤทธิ์",
+   "level_m": 155.21,
+   "bank_m": 158.1,
+   "storage_pct": 60.41,
+   "measured_at": "2026-10-10 23:00"
   },
   {
    "code": "MUN002",
@@ -66,15 +66,15 @@
    "level_m": 193.43,
    "bank_m": 195.3,
    "storage_pct": 44.67,
-   "measured_at": "2026-10-10 22:00"
+   "measured_at": "2026-10-10 23:00"
   },
   {
    "code": "M.2A",
    "name": "บ้านด่านกะตา",
-   "level_m": 163.0,
+   "level_m": 162.99,
    "bank_m": 167.7,
-   "storage_pct": 43.03,
-   "measured_at": "2026-10-10 22:00"
+   "storage_pct": 42.91,
+   "measured_at": "2026-10-10 23:00"
   }
  ]
 }
