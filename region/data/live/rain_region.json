@@ -1,67 +1,67 @@
 {
  "status": "ok",
- "updated_at": "2026-10-12T15:15:46+00:00",
+ "updated_at": "2026-10-12T16:15:45+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
    "tcode": "300901",
-   "rain_24h_mm": 0.1,
-   "rain_7d_mm": 22.8,
-   "rain_next24h_mm": 9.0
+   "rain_24h_mm": 0.0,
+   "rain_7d_mm": 22.6,
+   "rain_next24h_mm": 9.1
   },
   {
    "tcode": "300902",
    "rain_24h_mm": 0.1,
-   "rain_7d_mm": 19.6,
+   "rain_7d_mm": 19.5,
    "rain_next24h_mm": 10.3
   },
   {
    "tcode": "300903",
    "rain_24h_mm": 0.0,
-   "rain_7d_mm": 24.6,
-   "rain_next24h_mm": 9.3
+   "rain_7d_mm": 24.5,
+   "rain_next24h_mm": 9.4
   },
   {
    "tcode": "300904",
    "rain_24h_mm": 0.0,
-   "rain_7d_mm": 24.6,
-   "rain_next24h_mm": 9.3
+   "rain_7d_mm": 24.5,
+   "rain_next24h_mm": 9.4
   },
   {
    "tcode": "300905",
    "rain_24h_mm": 0.0,
-   "rain_7d_mm": 26.3,
-   "rain_next24h_mm": 9.0
+   "rain_7d_mm": 26.2,
+   "rain_next24h_mm": 9.1
   },
   {
    "tcode": "300906",
    "rain_24h_mm": 0.0,
-   "rain_7d_mm": 26.3,
-   "rain_next24h_mm": 9.0
+   "rain_7d_mm": 26.2,
+   "rain_next24h_mm": 9.1
   },
   {
    "tcode": "300907",
-   "rain_24h_mm": 0.1,
-   "rain_7d_mm": 22.9,
-   "rain_next24h_mm": 8.3
-  },
-  {
-   "tcode": "300908",
-   "rain_24h_mm": 0.1,
-   "rain_7d_mm": 22.8,
-   "rain_next24h_mm": 9.0
-  },
-  {
-   "tcode": "300909",
-   "rain_24h_mm": 0.1,
-   "rain_7d_mm": 32.2,
+   "rain_24h_mm": 0.0,
+   "rain_7d_mm": 22.7,
    "rain_next24h_mm": 8.4
   },
   {
-   "tcode": "300914",
-   "rain_24h_mm": 0.1,
-   "rain_7d_mm": 29.0,
+   "tcode": "300908",
+   "rain_24h_mm": 0.0,
+   "rain_7d_mm": 22.6,
+   "rain_next24h_mm": 9.1
+  },
+  {
+   "tcode": "300909",
+   "rain_24h_mm": 0.0,
+   "rain_7d_mm": 32.2,
    "rain_next24h_mm": 8.5
+  },
+  {
+   "tcode": "300914",
+   "rain_24h_mm": 0.0,
+   "rain_7d_mm": 28.9,
+   "rain_next24h_mm": 8.6
   },
   {
    "tcode": "301001",
@@ -120,7 +120,7 @@
   {
    "tcode": "301010",
    "rain_24h_mm": 0.1,
-   "rain_7d_mm": 19.6,
+   "rain_7d_mm": 19.5,
    "rain_next24h_mm": 10.3
   },
   {
