@@ -1,6 +1,6 @@
 {
  "status": "ok",
- "updated_at": "2026-10-13T03:15:54+00:00",
+ "updated_at": "2026-10-13T07:15:47+00:00",
  "model": "ecmwf_ifs025",
  "source": "ECMWF IFS ผ่าน Open-Meteo (CC BY 4.0)",
  "point": {
@@ -11,7 +11,7 @@
   "cell_lat": 15.25,
   "cell_lon": 102.25
  },
- "next24_mm": 20.7,
+ "next24_mm": 20.6,
  "next72_mm": 33.0,
  "days": [
   [
