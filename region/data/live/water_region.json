@@ -1,48 +1,48 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-13T18:15:48+00:00",
+ "updated_at": "2026-10-13T19:15:47+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
    "code": "ONE022",
    "name": "คลองสามบาท บ้านกุดพิมาน",
-   "level_m": 201.87,
+   "level_m": 201.88,
    "bank_m": 201.97,
-   "storage_pct": 96.0,
-   "measured_at": "2026-10-14 01:00"
+   "storage_pct": 96.41,
+   "measured_at": "2026-10-14 02:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.98,
+   "level_m": 202.99,
    "bank_m": 203.9,
-   "storage_pct": 76.83,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 77.08,
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 153.96,
+   "level_m": 153.95,
    "bank_m": 155.3,
-   "storage_pct": 76.49,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 76.32,
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.65,
+   "level_m": 161.64,
    "bank_m": 162.6,
-   "storage_pct": 74.46,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 74.19,
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.7,
+   "level_m": 176.72,
    "bank_m": 177.6,
-   "storage_pct": 71.34,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 71.97,
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "M.195",
@@ -50,31 +50,31 @@
    "level_m": 155.04,
    "bank_m": 158.1,
    "storage_pct": 58.08,
-   "measured_at": "2026-10-13 22:00"
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.6,
+   "level_m": 193.56,
    "bank_m": 195.3,
-   "storage_pct": 49.7,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 48.52,
+   "measured_at": "2026-10-14 01:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 163.94,
    "bank_m": 167.83,
-   "storage_pct": 44.14,
-   "measured_at": "2026-10-14 01:00"
+   "storage_pct": 44.08,
+   "measured_at": "2026-10-14 02:00"
   },
   {
    "code": "M.2A",
    "name": "บ้านด่านกะตา",
-   "level_m": 162.84,
+   "level_m": 162.83,
    "bank_m": 167.7,
-   "storage_pct": 41.09,
-   "measured_at": "2026-10-13 22:00"
+   "storage_pct": 40.97,
+   "measured_at": "2026-10-14 01:00"
   }
  ]
 }
