@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-10-14T13:46:08+00:00",
+"updated_at":"2026-10-14T14:15:58+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -326,7 +326,7 @@
 "bank_msl":201.97,
 "storage_pct":96.0,
 "discharge":null,
-"measured_at":"2026-10-14 20:30",
+"measured_at":"2026-10-14 21:00",
 "amphoe":"ด่านขุนทด"
 },
 {
@@ -334,11 +334,11 @@
 "name":"บ้านโนนค่า",
 "lat":14.93225,
 "lon":101.867882,
-"level_msl":203.03,
+"level_msl":203.02,
 "bank_msl":203.9,
-"storage_pct":78.09,
-"discharge":5.54,
-"measured_at":"2026-10-14 19:00",
+"storage_pct":77.83,
+"discharge":5.36,
+"measured_at":"2026-10-14 20:00",
 "amphoe":"สูงเนิน"
 },
 {
@@ -350,7 +350,7 @@
 "bank_msl":155.3,
 "storage_pct":77.19,
 "discharge":51.0,
-"measured_at":"2026-10-14 19:00",
+"measured_at":"2026-10-14 20:00",
 "amphoe":"พิมาย"
 },
 {
@@ -358,11 +358,11 @@
 "name":"ตำบลในเมือง",
 "lat":14.98457,
 "lon":102.092941,
-"level_msl":176.68,
+"level_msl":176.69,
 "bank_msl":177.6,
-"storage_pct":70.7,
-"discharge":3.6,
-"measured_at":"2026-10-14 19:00",
+"storage_pct":71.02,
+"discharge":3.8,
+"measured_at":"2026-10-14 20:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -374,7 +374,7 @@
 "bank_msl":162.6,
 "storage_pct":63.71,
 "discharge":12.52,
-"measured_at":"2026-10-14 19:00",
+"measured_at":"2026-10-14 20:00",
 "amphoe":"โนนสูง"
 },
 {
@@ -382,11 +382,11 @@
 "name":"บ้านสัมฤทธิ์",
 "lat":15.20926,
 "lon":102.392952,
-"level_msl":155.09,
+"level_msl":155.08,
 "bank_msl":158.1,
-"storage_pct":58.77,
-"discharge":49.0,
-"measured_at":"2026-10-14 19:00",
+"storage_pct":58.63,
+"discharge":48.0,
+"measured_at":"2026-10-14 20:00",
 "amphoe":"พิมาย"
 },
 {
@@ -394,11 +394,11 @@
 "name":"บ้านโคกกรวด",
 "lat":14.93281,
 "lon":101.951889,
-"level_msl":193.55,
+"level_msl":193.54,
 "bank_msl":195.3,
-"storage_pct":48.22,
-"discharge":2.5,
-"measured_at":"2026-10-14 19:00",
+"storage_pct":47.93,
+"discharge":2.44,
+"measured_at":"2026-10-14 20:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -408,9 +408,9 @@
 "lon":102.23782,
 "level_msl":163.93,
 "bank_msl":167.83,
-"storage_pct":43.91,
+"storage_pct":43.92,
 "discharge":null,
-"measured_at":"2026-10-14 20:30",
+"measured_at":"2026-10-14 21:00",
 "amphoe":"เฉลิมพระเกียรติ"
 },
 {
@@ -422,7 +422,7 @@
 "bank_msl":167.7,
 "storage_pct":40.85,
 "discharge":10.5,
-"measured_at":"2026-10-14 19:00",
+"measured_at":"2026-10-14 20:00",
 "amphoe":"เฉลิมพระเกียรติ"
 }
 ],
