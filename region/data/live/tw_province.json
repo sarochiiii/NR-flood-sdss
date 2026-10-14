@@ -1,9 +1,9 @@
 {
-"updated_at":"2026-10-14T14:16:05+00:00",
+"updated_at":"2026-10-14T15:16:11+00:00",
 "status":{
-"rain3d":"ok",
-"rain7d":"ok",
-"dams":"ok"
+"rain3d":"error: AttributeError",
+"rain7d":"error: AttributeError",
+"dams":"error: HTTPError"
 },
 "source":"ThaiWater (สสน.) provinces API, province_code=30",
 "rain3d":[
