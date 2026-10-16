@@ -1,5 +1,6 @@
 {
- "status": "ok",
+ "status": "error",
+ "message": "HTTP Error 503: Service Unavailable",
  "updated_at": "2026-10-15T23:15:47+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
