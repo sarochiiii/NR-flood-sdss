@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-16T11:15:30+00:00",
+ "updated_at": "2026-10-16T12:15:30+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.83,
    "bank_m": 201.97,
    "storage_pct": 94.33,
-   "measured_at": "2026-10-16 18:00"
+   "measured_at": "2026-10-16 19:00"
   },
   {
    "code": "M.192",
@@ -18,7 +18,7 @@
    "level_m": 203.03,
    "bank_m": 203.9,
    "storage_pct": 78.09,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "M.184",
@@ -26,7 +26,7 @@
    "level_m": 153.98,
    "bank_m": 155.3,
    "storage_pct": 76.84,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "M.188A",
@@ -34,15 +34,15 @@
    "level_m": 161.59,
    "bank_m": 162.6,
    "storage_pct": 72.85,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.72,
+   "level_m": 176.71,
    "bank_m": 177.6,
-   "storage_pct": 71.97,
-   "measured_at": "2026-10-16 17:00"
+   "storage_pct": 71.66,
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "M.195",
@@ -50,7 +50,7 @@
    "level_m": 155.08,
    "bank_m": 158.1,
    "storage_pct": 58.63,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "M.191",
@@ -58,15 +58,15 @@
    "level_m": 193.57,
    "bank_m": 195.3,
    "storage_pct": 48.82,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 163.89,
    "bank_m": 167.83,
-   "storage_pct": 43.39,
-   "measured_at": "2026-10-16 18:00"
+   "storage_pct": 43.33,
+   "measured_at": "2026-10-16 19:00"
   },
   {
    "code": "M.2A",
@@ -74,7 +74,7 @@
    "level_m": 162.79,
    "bank_m": 167.7,
    "storage_pct": 40.48,
-   "measured_at": "2026-10-16 17:00"
+   "measured_at": "2026-10-16 18:00"
   }
  ]
 }
