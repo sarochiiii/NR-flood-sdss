@@ -1,0 +1,151 @@
+{
+ "type": "FeatureCollection",
+ "updated_at": "2026-10-17T13:51:53+00:00",
+ "source": "Village.shp (EPSG:32647) ได้รับจากโครงการ 17 ต.ค. 2569",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.16687,
+     15.16245
+    ]
+   },
+   "properties": {
+    "code": "430101001",
+    "vill_no": 1,
+    "name": "สำโรง",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.1483,
+     15.1519
+    ]
+   },
+   "properties": {
+    "code": "430101002",
+    "vill_no": 2,
+    "name": "จันอัด",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.17062,
+     15.1536
+    ]
+   },
+   "properties": {
+    "code": "430101003",
+    "vill_no": 3,
+    "name": "เหล่า",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.15956,
+     15.14449
+    ]
+   },
+   "properties": {
+    "code": "430101004",
+    "vill_no": 4,
+    "name": "โค้งกระชาย",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.13639,
+     15.14155
+    ]
+   },
+   "properties": {
+    "code": "430101005",
+    "vill_no": 5,
+    "name": "ด่านติง",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.17403,
+     15.15637
+    ]
+   },
+   "properties": {
+    "code": "430101006",
+    "vill_no": 6,
+    "name": "ดอน",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.16332,
+     15.14947
+    ]
+   },
+   "properties": {
+    "code": "430101007",
+    "vill_no": 7,
+    "name": "ใหม่",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     102.14708,
+     15.14904
+    ]
+   },
+   "properties": {
+    "code": "430101008",
+    "vill_no": 8,
+    "name": "โค้งกระพี้",
+    "tambon": "จันอัด",
+    "amphoe": "โนนสูง",
+    "tcode": "301010"
+   }
+  }
+ ]
+}

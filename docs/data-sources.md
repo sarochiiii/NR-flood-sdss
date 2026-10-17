@@ -94,3 +94,6 @@
 
 ## GISTDA น้ำท่วมซ้ำซาก — API จุดพิกัด (ตรวจแล้ว 8 ต.ค. 69)
 `GET https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/flood-recurrence?lat={lat}&lon={lon}` · header `API-Key` (Secret `GISTDA_API_KEY`) · ตอบ `[{subdistrict_name, district_name, province_name, total, detail:[{year:"2023".."2011", freq}]}]` หรือ `{"result":"not found"}` (ไม่เคยท่วม) · v1.0 ตอบ 404 · ใช้ยืนยัน legend ของ tile `flood-freq/tms`
+
+## ตำแหน่งหมู่บ้าน (นำเข้า 17 ต.ค. 69)
+`Village.shp` (MultiPoint 1 จุด/หมู่บ้าน · EPSG:32647 · UTF-8 · field CODE, VILL_NO, VILL_NAME, TAM_NAME, AMP_NAME) → `scripts/region/import_villages.py` → `region/data/villages.geojson` (WGS84) · ต.จันอัด 8 หมู่: ม.1 สำโรง · ม.2 จันอัด · ม.3 เหล่า · ม.4 โค้งกระชาย · ม.5 ด่านติง · ม.6 ดอน · ม.7 ใหม่ · ม.8 โค้งกระพี้ · ทุกจุดอยู่ใน ต.จันอัด · ม.5 ด่านติงห่างศูนย์กลาง DT ใน /chanat/ (ประมาณจากกลุ่มอาคาร) 310 ม. · ไฟล์ shp ต้นฉบับไม่เก็บใน repo
