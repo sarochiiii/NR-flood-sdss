@@ -298,6 +298,22 @@ document.addEventListener('sdss:ready', async () => {
       }
     },
     {
+      // ตำแหน่งตัวแทนหมู่บ้าน (scripts/region/import_villages.py ← Village.shp) · ชื่อแสดงบนแผนที่ตลอด
+      id: 'villages', icon: 'ti-building', label: 'หมู่บ้าน (ตำแหน่งตัวแทน)', on: true,
+      async build() {
+        const d = await json('data/villages.geojson');
+        const lyr = L.layerGroup(d.features.map(f => { const p = f.properties;
+          return L.marker([f.geometry.coordinates[1], f.geometry.coordinates[0]], {
+            icon: L.divIcon({ className: '', iconSize: [14, 14], iconAnchor: [7, 7],
+              html: '<span class="vil-dot"></span>' }) })
+            .bindTooltip(`ม.${p.vill_no} ${esc(p.name)}`, { permanent: true, direction: 'right', offset: [6, 0], className: 'vlabel' })
+            .bindPopup(`<b>บ้าน${esc(p.name)} หมู่ ${p.vill_no}</b><br>ต.${esc(p.tambon)} อ.${esc(p.amphoe)} · รหัส ${esc(p.code)}
+              <div class="muted" style="font-size:11px">จุดตัวแทนหมู่บ้าน ไม่ใช่ขอบเขตหมู่บ้าน</div>`); }));
+        return { lyr, sub: `${d.features.length} หมู่บ้าน · ${[...new Set(d.features.map(f => 'ต.' + f.properties.tambon))].join(' · ')}`,
+          attr: 'ตำแหน่งหมู่บ้าน: ข้อมูลโครงการ' };
+      }
+    },
+    {
       id: 'reports', icon: 'ti-map-pin-exclamation', label: 'จุดแจ้งเหตุจาก LINE OA', on: true,
       async build() {
         if (!lineReady) return reportsV4();
@@ -569,10 +585,10 @@ document.addEventListener('sdss:ready', async () => {
   }
   // เรียงตามห่วงโซ่การเกิดน้ำท่วม: ฝน → อ่าง/ลำน้ำ → น้ำท่วม → ผลกระทบ → พื้นฐาน
   const GROUPS = [['① ฝน', ['rainsta', 'rainacc', 'radar']], ['② อ่างเก็บน้ำและลำน้ำ', ['dams', 'wlsta', 'structures', 'glofas']],
-    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'rivers', 'water', 'basins']]];
+    ['③ น้ำท่วม', ['gistda', 'reports']], ['④ ผลกระทบ', ['bldg']], ['พื้นฐาน', ['labels', 'villages', 'rivers', 'water', 'basins']]];
   // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
   const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
-    ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['reports', 'จุดแจ้งเหตุ']];
+    ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน'], ['reports', 'จุดแจ้งเหตุ']];
   function renderQuick() {
     const el = $('qlayers'); if (!el) return;
     el.innerHTML = QUICK.filter(([id]) => state[id]).map(([id, lab]) => { const s = state[id];

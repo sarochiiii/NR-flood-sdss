@@ -27,7 +27,7 @@ region/js/report.js          รายงานสถานการณ์สำ
 region/js/layers.js          ชั้นข้อมูลทั้งหมด (GROUPS ตามห่วงโซ่ ①ฝน ②อ่าง/ลำน้ำ ③น้ำท่วม ④ผลกระทบ พื้นฐาน) KPI รายการจับตา ปุ่ม LINE
 region/config.json           เกณฑ์ทั้งหมด (rain, water, bank, t_rules[verified:false], sandbox)
 region/liff/config.js        OA_ID '@142uxpzr' · WEBHOOK (Worker) · LIFF_ID/API (placeholder ระยะสอง)
-region/data/                 tambon/amphoe (NR_admin3) · basins (HydroBASINS) · structures (ปภ./อบต. 64 จุด) · buildings/bldg (Open Buildings) · rid_stations
+region/data/                 tambon/amphoe (NR_admin3) · villages (หมู่บ้าน ต.จันอัด 8 หมู่ ← import_villages.py) · basins (HydroBASINS) · structures (ปภ./อบต. 64 จุด) · buildings/bldg (Open Buildings) · rid_stations
 region/data/live/            เขียนโดย Actions เท่านั้น — ห้ามแก้มือ ห้าม commit การแก้ไฟล์นี้จากเครื่อง
 scripts/region/              fetch_* (ข้อมูลสด) · build_*/import_*/merge_* (สร้างข้อมูลคงที่ครั้งเดียว) · compute_risk.py (T ฝั่ง Python)
 gee/                         สคริปต์ Earth Engine (project ee-sarochineek)
@@ -38,7 +38,7 @@ docs/                        คู่มือส่งมอบ
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
 2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=45**
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=46**
 4. **รายงานมี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` — `situationReport` ("สถานการณ์น้ำ") และ `sandboxReport` ("รายงานบ้านด่านติง") ระหว่าง `// >>> ชื่อฟังก์ชัน` … `// <<<` — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
