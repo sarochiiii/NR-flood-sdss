@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-17T22:15:25+00:00",
+ "updated_at": "2026-10-17T22:22:09+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.81,
    "bank_m": 201.97,
    "storage_pct": 93.49,
-   "measured_at": "2026-10-18 05:00"
+   "measured_at": "2026-10-18 05:10"
   },
   {
    "code": "M.192",
@@ -65,8 +65,8 @@
    "name": "เฉลิมพระเกียรติ",
    "level_m": 164.21,
    "bank_m": 167.83,
-   "storage_pct": 47.99,
-   "measured_at": "2026-10-18 05:00"
+   "storage_pct": 48.01,
+   "measured_at": "2026-10-18 05:10"
   },
   {
    "code": "M.2A",
