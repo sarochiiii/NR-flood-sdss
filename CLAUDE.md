@@ -12,7 +12,7 @@
 |---|---|---|
 | เว็บสาธารณะ | `region/` → https://sarochiiii.github.io/NR-flood-sdss/region/ | push `main` → GitHub Pages |
 | ข้อมูลสด | `scripts/region/*.py` → `region/data/live/` | `.github/workflows/region-live.yml` ทุกชั่วโมง :15 |
-| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.12, KV) | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
+| LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.13, KV) · หน้าติดตามเหตุของ อบต. `region/monitor.html` | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
 | Dan Ting Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS · รายงานบ้านด่านติง) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (**API น้ำท่วมซ้ำซาก GISTDA** ปี 2554–2566 · FloodGCS เลิกใช้) → `sandbox-summary` (`data/sandbox/summary.json`) |
 | Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ใช้งาน** https://gistda-tile-proxy.sarochinee-k.workers.dev | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
 | Worker `gh-cron-dispatch` — Cron Cloudflare `15 * * * *` สั่งรัน `region-live` ทุกชั่วโมง (schedule ของ GitHub ไม่ตรงเวลา) | `workers/gh-cron-dispatch.js` (Secret `GH_TOKEN` fine-grained · Actions read/write) | Cloudflare dashboard · ทดสอบ `tests/gh_cron_dispatch.test.mjs` |
@@ -37,13 +37,13 @@ docs/                        คู่มือส่งมอบ
 
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
-2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=46**
+2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, MONITOR_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=47**
 4. **รายงานมี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` — `situationReport` ("สถานการณ์น้ำ") และ `sandboxReport` ("รายงานบ้านด่านติง") ระหว่าง `// >>> ชื่อฟังก์ชัน` … `// <<<` — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
 7. เกณฑ์ที่ยังไม่ยืนยันกับชลประทาน/ปภ. ต้องคง `verified: false` และแสดงป้ายบนหน้าเว็บ
-8. LINE: "ติดต่อ อบต."/"ขอความช่วยเหลือ" **ปิดชั่วคราว** (`HELP_ENABLED = false`) · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงเป็นจุดแดงกระพริบบนแผนที่ · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>` · รายคน หรือรหัสกลุ่ม `max_uses`) · "รายงานบ้านด่านติง" เฉพาะแชท 1:1 (ปุ่มที่ 4 ของ rich menu) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ผู้รายงาน และปัดตำแหน่ง ~100 ม.
+8. LINE (v4.13 ตามคำแนะนำผู้ทรงคุณวุฒิ): **ทุกคนรายงานเหตุ/ขอความช่วยเหลือได้โดยไม่ต้องลงทะเบียน** (ประกาศการใช้ข้อมูลในขั้นแรก · กด "ยืนยัน" = ยินยอม) · ต้องแชร์ตำแหน่ง · ไม่ส่งถึง ADM · น้ำท่วม/ถนนแสดงเป็นจุดแดง ปัด ~100 ม. · **ขอความช่วยเหลือแสดงตำแหน่งจริงให้ทุกคนเห็น** (จุดม่วง SOS) · `/api/reports` สาธารณะต้องไม่มีข้อความรายละเอียด/ที่อยู่/ผู้รายงาน และไม่แสดงเหตุที่ปิดแล้ว · **อบต. ติดตามเหตุที่ `region/monitor.html`** (Secret `MONITOR_KEY` · เห็นรายละเอียด ไม่เห็น userId · รับทราบ/ปิดเหตุ) · ผู้รายงานพิมพ์ "ปิดเหตุ" ได้ · "ติดต่อ อบต." ตอบเบอร์ฉุกเฉินจนกว่าจะได้เบอร์ที่ยืนยัน (`ABT_PHONE`) · ADM ต้องลงทะเบียนด้วย **รหัสเชิญ** (KV `invite:<CODE>` · รายคน หรือรหัสกลุ่ม `max_uses`) — ใช้เปิดรายงานประจำวันในกลุ่มเท่านั้น · "รายงานบ้านด่านติง" เฉพาะแชท 1:1 (ปุ่มที่ 4 ของ rich menu) · ในกลุ่ม LINE ตอบเฉพาะ 3 คำสั่ง ไม่อ่าน/เก็บข้อความอื่น
 9. โควตา LINE Free 300 push/เดือน (กลุ่มนับตามจำนวนสมาชิก) — ห้ามเพิ่ม push/broadcast โดยไม่คำนวณโควตา · reply ไม่นับโควตา
 
 ## แหล่งข้อมูล (ตรวจแล้ว)
@@ -64,7 +64,7 @@ RainViewer (zoom ≤ 7, past 2 ชม.) · OSM Overpass (ลำน้ำ/แห�
 ## วิธีทำงานกับ repo นี้
 - `git pull` ก่อนเริ่มทุกครั้ง — Actions commit ข้อมูลสดทุกชั่วโมง (`data(region): อัปเดตข้อมูลสด`) · ใช้ `git pull --rebase` ก่อน push
 - commit เฉพาะไฟล์ที่ตั้งใจแก้ อย่า `git add -A` ถ้ามี `region/data/live/` เปลี่ยนในเครื่อง
-- Worker: แก้ `line/kv/worker.js` → deploy ด้วย `npx wrangler deploy` (ต้องมี `wrangler.toml` + login) หรือให้ผู้ใช้วางใน dashboard · bindings: KV `USERS`→`LINE_USERS` · secrets `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN`, `STATS_KEY` · var `DAILY_GROUP_PUSH` · cron `0 0 * * *`
+- Worker: แก้ `line/kv/worker.js` → deploy ด้วย `npx wrangler deploy` (ต้องมี `wrangler.toml` + login) หรือให้ผู้ใช้วางใน dashboard · bindings: KV `USERS`→`LINE_USERS` · secrets `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN`, `STATS_KEY`, `MONITOR_KEY` · var `DAILY_GROUP_PUSH` · cron `0 0 * * *`
 
 ## สถานะและงานถัดไป (ณ 3 ต.ค. 2569) — รายละเอียด `docs/backlog.md`
 - ผู้ใช้ LINE OA: เป้าหมาย 100 คน (ตัวชี้วัดข้อเสนอโครงการ) · ADM ที่มีรหัสเชิญยังน้อย · ติดตามด้วย `/stats?key=…`
