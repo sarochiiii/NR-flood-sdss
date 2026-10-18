@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0A1628">
+<title>ติดตามเหตุ อบต.จันอัด · SDSS-ChanAT</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🆘</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!--
+  หน้าติดตามเหตุสำหรับเจ้าหน้าที่ อบต. (Worker chanat-line-webhook v4.13)
+  เปิดด้วยลิงก์ …/region/monitor.html#k=<MONITOR_KEY> — รหัสอยู่หลัง # จึงไม่ถูกส่งไปกับคำขอหน้าเว็บ · หน้าเก็บรหัสในเครื่องนี้แล้วลบออกจากแถบที่อยู่
+  ข้อมูลจริง (ตำแหน่งจริง รายละเอียด) มาจาก GET /api/monitor ที่ต้องมี header X-Monitor-Key · หน้านี้ไม่มีข้อมูลในตัว เผยแพร่ใน repo ได้
+-->
+<style>
+:root{--navy:#0A1628;--teal:#0E7C7B;--red:#DC2626;--sos:#7E22CE;--orange:#E67E22;--green:#1E8449;--grey:#94A3B8;
+  --border:#E2E8F0;--text:#0F172A;--muted:#64748B;--bg:#F8FAFC;--card:#fff;
+  --font:'IBM Plex Sans Thai',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:14px;display:flex;flex-direction:column}
+.hdr{background:var(--navy);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hdr b{font-size:16px}.hdr small{display:block;opacity:.8;font-size:12px}
+.hdr .r{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:12px}
+.hdr button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:6px;padding:4px 8px;font:inherit;cursor:pointer}
+.disc{background:#FEF3C7;color:#78350F;font-size:12px;padding:6px 16px;border-bottom:1px solid #FDE68A}
+.sum{display:flex;gap:8px;padding:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:#fff}
+.sum div{border:1px solid var(--border);border-radius:8px;padding:6px 10px;min-width:96px}
+.sum b{display:block;font-family:var(--mono);font-size:20px}.sum span{font-size:12px;color:var(--muted)}
+.main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 420px;min-height:0}
+#map{min-height:300px}
+.list{overflow:auto;border-left:1px solid var(--border);padding:10px}
+.tools{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.it{background:var(--card);border:1px solid var(--border);border-left:5px solid var(--red);border-radius:8px;padding:8px 10px;margin-bottom:8px;cursor:pointer}
+.it.help{border-left-color:var(--sos)}.it.road{border-left-color:var(--orange)}.it.closed{opacity:.55;border-left-color:var(--grey)}
+.it.fresh{box-shadow:0 0 0 2px var(--sos)}
+.it h3{margin:0 0 2px;font-size:14.5px}.it .meta{font-size:12px;color:var(--muted)}
+.it .note{margin:6px 0;white-space:pre-wrap;word-break:break-word;background:#F1F5F9;border-radius:6px;padding:6px 8px;font-size:13px}
+.bk{display:inline-block;border-radius:10px;padding:1px 8px;font-size:11.5px;color:#fff;background:var(--red)}
+.bk.ack{background:var(--green)}.bk.closed{background:var(--grey)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.acts a,.acts button{font:inherit;font-size:12.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;text-decoration:none;color:var(--text)}
+.acts .ok{background:var(--green);color:#fff;border-color:var(--green)}.acts .cl{background:#334155;color:#fff;border-color:#334155}
+.login{max-width:420px;margin:40px auto;background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px}
+.login input{width:100%;font:inherit;padding:8px;border:1px solid var(--border);border-radius:6px;margin:8px 0}
+.login button{font:inherit;background:var(--teal);color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+.err{color:#B91C1C;font-size:13px}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+.mk{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.7);color:#fff;font:700 9px/1 sans-serif;width:100%;height:100%}
+.vlabel{background:rgba(255,255,255,.85);border:0;box-shadow:none;font-size:11px;padding:0 4px}
+@media (max-width:860px){.main{grid-template-columns:1fr;grid-template-rows:45vh auto}.list{border-left:0;border-top:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div><b>🆘 ติดตามเหตุ · อบต.จันอัด</b><small>คำขอความช่วยเหลือและจุดแจ้งเหตุจาก LINE OA "จันอัดบ้านฉัน" · สำหรับเจ้าหน้าที่</small></div>
+  <div class="r"><span id="ts">—</span><button type="button" id="reload">โหลดใหม่</button><button type="button" id="logout" hidden>ออก</button></div>
+</header>
+<div class="disc">ระบบของโครงการวิจัย ไม่ใช่ระบบเตือนภัยหรือศูนย์สั่งการทางการ · ข้อมูลมาจากประชาชน ยังไม่ได้ตรวจสอบ · อันตรายต่อชีวิตโทร 1669 / 1784 / 191 ·
+  รายละเอียดในหน้านี้เป็นข้อมูลส่วนบุคคล ห้ามเผยแพร่ต่อหรือแคปหน้าจอส่งกลุ่มสาธารณะ</div>
+
+<section class="login" id="login" hidden>
+  <b>ใส่รหัสติดตามเหตุ</b>
+  <div class="muted" style="font-size:12.5px;margin-top:4px">ได้รับจากทีมวิจัย (หรือเปิดจากลิงก์ที่มีรหัสแนบมา) · รหัสเก็บไว้ในเครื่องนี้เท่านั้น</div>
+  <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="รหัส 24 ตัวอักษรขึ้นไป">
+  <button type="button" id="go">เข้าสู่หน้าติดตาม</button>
+  <div class="err" id="lerr"></div>
+</section>
+
+<section class="sum" id="sum" hidden>
+  <div><b id="n-help">0</b><span>🆘 ขอความช่วยเหลือ (ยังไม่ปิด)</span></div>
+  <div><b id="n-new">0</b><span>ใหม่ · ยังไม่รับทราบ</span></div>
+  <div><b id="n-ack">0</b><span>รับทราบ/กำลังช่วย</span></div>
+  <div><b id="n-closed">0</b><span>ปิดแล้ว (<span id="days">14</span> วัน)</span></div>
+</section>
+<main class="main" id="main" hidden>
+  <div id="map"></div>
+  <div class="list">
+    <div class="tools"><label><input type="checkbox" id="show-closed"> แสดงเหตุที่ปิดแล้ว</label>
+      <span>· โหลดใหม่อัตโนมัติทุก 1 นาที</span></div>
+    <div id="items"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="liff/config.js?v=47"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const API = String((window.LINE_CFG || {}).WEBHOOK || '').replace(/\/$/, '');
+  const HELP = 'ขอความช่วยเหลือ', TCODE = '301010';
+  const ST = { new: 'ใหม่', ack: 'รับทราบ/กำลังช่วย', closed: 'ปิดแล้ว' };
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = { get: () => { try { return localStorage.getItem('chanat_monitor_key') || ''; } catch { return ''; } },
+    set: (v) => { try { v ? localStorage.setItem('chanat_monitor_key', v) : localStorage.removeItem('chanat_monitor_key'); } catch {} } };
+  const ago = (iso) => { const m = (Date.now() - Date.parse(iso)) / 6e4;
+    return m < 60 ? `${Math.max(1, Math.round(m))} นาทีที่แล้ว` : m < 1440 ? `${Math.round(m / 60)} ชม.ที่แล้ว` : `${Math.round(m / 1440)} วันที่แล้ว`; };
+  const when = (iso) => new Date(iso).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short' });
+  const kind = (r) => r.type === HELP ? 'help' : /ถนน/.test(r.type) ? 'road' : 'flood';
+  const color = (r) => r.status === 'closed' ? '#94A3B8' : { help: '#7E22CE', road: '#E67E22', flood: '#DC2626' }[kind(r)];
+
+  // รหัสจากลิงก์ #k=… → เก็บในเครื่อง แล้วลบออกจากแถบที่อยู่ (กันรหัสติดไปกับการแชร์หน้าจอ/ประวัติ)
+  const hk = new URLSearchParams(location.hash.slice(1)).get('k');
+  if (hk) { store.set(hk.trim()); history.replaceState(null, '', location.pathname + location.search); }
+  let KEY = store.get(), data = [], seen = new Set(), first = true, map, layer, timer;
+
+  function showLogin(msg) {
+    $('login').hidden = false; $('sum').hidden = $('main').hidden = $('logout').hidden = true;
+    $('lerr').textContent = msg || ''; clearInterval(timer);
+  }
+  $('go').onclick = () => { KEY = $('key').value.trim(); store.set(KEY); start(); };
+  $('key').onkeydown = (e) => { if (e.key === 'Enter') $('go').onclick(); };
+  $('logout').onclick = () => { store.set(''); KEY = ''; showLogin(); };
+  $('reload').onclick = () => load();
+  $('show-closed').onchange = () => render();
+
+  async function api(path, opt = {}) {
+    const r = await fetch(API + path, { ...opt, cache: 'no-store', headers: { 'X-Monitor-Key': KEY, ...(opt.body ? { 'Content-Type': 'application/json' } : {}) } });
+    if (r.status === 403) throw Object.assign(new Error('รหัสไม่ถูกต้อง'), { auth: true });
+    if (r.status === 503) throw Object.assign(new Error('ยังไม่ได้ตั้ง MONITOR_KEY ใน Worker'), { auth: true });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+
+  function initMap() {
+    if (map) return;
+    map = L.map('map', { zoomControl: true }).setView([15.15, 102.14], 13);
+    const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri World Imagery' });
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
+    sat.addTo(map); L.control.layers({ 'ภาพดาวเทียม': sat, 'แผนที่ถนน (OSM)': osm }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+    fetch('data/tambon.geojson').then((r) => r.json()).then((g) => {
+      const tb = L.geoJSON(g, { filter: (f) => f.properties.tcode === TCODE, style: { color: '#F4D03F', weight: 2, fill: false } }).addTo(map);
+      if (!data.some((r) => r.lat != null)) map.fitBounds(tb.getBounds());
+    }).catch(() => {});
+    fetch('data/villages.geojson').then((r) => r.json()).then((g) => L.geoJSON(g, {
+      pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 3, color: '#fff', weight: 1, fillColor: '#0F172A', fillOpacity: 1 })
+        .bindTooltip(`ม.${f.properties.vill_no} ${esc(f.properties.name)}`, { permanent: true, direction: 'right', className: 'vlabel' }) }).addTo(map)).catch(() => {});
+  }
+
+  async function load() {
+    try {
+      const d = await api('/api/monitor');
+      const fresh = d.items.filter((r) => !seen.has(r.id));
+      data = d.items; $('days').textContent = d.days;
+      $('ts').textContent = 'อัปเดต ' + new Date(d.updated_at).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' });
+      render(first ? new Set() : new Set(fresh.map((r) => r.id)));
+      if (first && data.some((r) => r.lat != null && r.status !== 'closed'))
+        map.fitBounds(L.latLngBounds(data.filter((r) => r.lat != null && r.status !== 'closed').map((r) => [r.lat, r.lon])).pad(0.3), { maxZoom: 16 });
+      data.forEach((r) => seen.add(r.id)); first = false;
+    } catch (e) {
+      if (e.auth) return showLogin(e.message);
+      $('ts').textContent = 'โหลดไม่สำเร็จ ' + new Date().toLocaleTimeString('th-TH');
+    }
+  }
+
+  function render(fresh = new Set()) {
+    const open = data.filter((r) => r.status !== 'closed');
+    const nHelp = open.filter((r) => r.type === HELP).length;
+    $('n-help').textContent = nHelp; $('n-new').textContent = open.filter((r) => r.status === 'new').length;
+    $('n-ack').textContent = open.filter((r) => r.status === 'ack').length; $('n-closed').textContent = data.length - open.length;
+    document.title = (nHelp ? `(${nHelp}) ` : '') + 'ติดตามเหตุ อบต.จันอัด · SDSS-ChanAT';
+    const showClosed = $('show-closed').checked;
+    // เรียง: ขอความช่วยเหลือที่ยังไม่รับทราบก่อน → ยังไม่ปิด → ใหม่ล่าสุด
+    const rank = (r) => (r.status === 'closed' ? 4 : 0) + (r.type === HELP ? 0 : 2) + (r.status === 'new' ? 0 : 1);
+    const rows = data.filter((r) => showClosed || r.status !== 'closed').sort((a, b) => rank(a) - rank(b) || (a.created_at < b.created_at ? 1 : -1));
+    layer.clearLayers();
+    const marks = {};
+    rows.filter((r) => r.lat != null).forEach((r) => {
+      const big = r.type === HELP && r.status !== 'closed', sz = big ? 28 : 18;
+      marks[r.id] = L.marker([r.lat, r.lon], { zIndexOffset: big ? 1000 : 0, icon: L.divIcon({ className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
+        html: `<span class="mk" style="background:${color(r)}">${big ? 'SOS' : ''}</span>` }) })
+        .bindPopup(`<b>${esc(r.type)}</b> · ${esc(r.village)}<br>${esc(when(r.created_at))} (${esc(ago(r.created_at))})<br>สถานะ: ${esc(ST[r.status] || r.status)}`)
+        .addTo(layer);
+    });
+    $('items').innerHTML = rows.length ? rows.map((r) => `
+      <div class="it ${kind(r)}${r.status === 'closed' ? ' closed' : ''}${fresh.has(r.id) ? ' fresh' : ''}" data-id="${esc(r.id)}">
+        <h3>${r.type === HELP ? '🆘 ' : ''}${esc(r.type)} · ${esc(r.village || 'ไม่ระบุหมู่บ้าน')}</h3>
+        <div class="meta"><span class="bk ${esc(r.status)}">${esc(ST[r.status] || r.status)}</span> ${esc(r.id)} · ${esc(when(r.created_at))} · ${esc(ago(r.created_at))}
+          ${r.status === 'closed' ? ` · ปิดโดย${r.closed_by === 'reporter' ? 'ผู้รายงาน' : ' อบต.'}` : ''}${r.by === 'adm' ? ' · รายงานโดย ADM' : ''}</div>
+        ${r.note ? `<div class="note">${esc(r.note)}</div>` : ''}
+        ${r.address ? `<div class="meta">ที่อยู่จาก LINE: ${esc(r.address)}</div>` : ''}
+        <div class="acts">
+          ${r.lat != null ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lon}" target="_blank" rel="noopener">นำทาง</a>` : '<span class="meta">ไม่มีตำแหน่ง</span>'}
+          ${r.status === 'new' ? `<button type="button" class="ok" data-st="ack">รับทราบ</button>` : ''}
+          ${r.status !== 'closed' ? `<button type="button" class="cl" data-st="closed">ปิดเหตุ (ช่วยแล้ว/น้ำลด)</button>` : `<button type="button" data-st="new">เปิดใหม่</button>`}
+        </div>
+      </div>`).join('') : '<div class="empty">ยังไม่มีเหตุในช่วงนี้</div>';
+    $('items').querySelectorAll('.it').forEach((el) => {
+      el.onclick = (e) => {
+        const id = el.dataset.id, st = e.target.dataset && e.target.dataset.st;
+        if (st) { e.stopPropagation(); return setStatus(id, st); }
+        if (e.target.closest('a')) return;
+        const m = marks[id]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 16)); m.openPopup(); }
+      };
+    });
+  }
+
+  async function setStatus(id, st) {
+    if (st === 'closed' && !confirm(`ปิดเหตุ ${id}? จุดจะหายจากแผนที่สาธารณะ`)) return;
+    try { await api('/api/monitor/status', { method: 'POST', body: JSON.stringify({ id, status: st }) }); await load(); }
+    catch (e) { if (e.auth) return showLogin(e.message); alert('บันทึกไม่สำเร็จ: ' + e.message); }
+  }
+
+  function start() {
+    if (!API) return showLogin('ยังไม่ได้ตั้ง WEBHOOK ใน liff/config.js');
+    if (KEY.length < 24) return showLogin(KEY ? 'รหัสสั้นเกินไป' : '');
+    $('login').hidden = true; $('sum').hidden = $('main').hidden = $('logout').hidden = false;
+    initMap(); setTimeout(() => map.invalidateSize(), 50);
+    load(); clearInterval(timer); timer = setInterval(load, 60000);
+  }
+  start();
+})();
+</script>
+</body>
+</html>

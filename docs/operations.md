@@ -74,6 +74,12 @@ Settings → Secrets and variables → Actions → New repository secret / ด�
 - แก้โค้ด: Cloudflare → Workers & Pages → chanat-line-webhook → Edit code → วางทั้งไฟล์ → Deploy (เลข "1" ที่แท็บ = คำเตือนชนิดข้อมูล ไม่ใช่ error)
 - ตัวแปร: Settings → Variables and Secrets → Add variable → **ติ๊ก Secret** สำหรับค่าลับ (ไม่ติ๊ก = Text มองเห็นได้) · กล่องเหลือง "Update your Wrangler configuration" ไม่ต้องทำตาม
 - Logs: Observability · ถ้า ADM ไม่ได้รับแจ้ง หา `multicast failed` (429 = โควตาหมด)
+- **หน้าติดตามเหตุของ อบต. (v4.13 · ตั้งครั้งเดียว):**
+  1. สร้างรหัสสุ่มยาว ≥ 24 ตัวอักษร (ตัวอังกฤษ+ตัวเลข ห้ามมี `,` และห้ามใช้ชื่อ/เบอร์โทร)
+  2. chanat-line-webhook → Settings → Variables and Secrets → Add → Type **Secret** · Name `MONITOR_KEY` · Value = รหัส → Deploy
+  3. ส่งลิงก์ `https://sarochiiii.github.io/NR-flood-sdss/region/monitor.html#k=<รหัส>` ให้เจ้าหน้าที่ อบต. ทางแชทส่วนตัวเท่านั้น (เปิดครั้งแรกแล้วเครื่องจำรหัส ลิงก์ในแถบที่อยู่จะถูกลบรหัสออก)
+  4. หลายหน่วยงาน/เปลี่ยนรหัส: ใส่หลายรหัสคั่นด้วย `,` · รหัสหลุด → แก้ Secret ตัดรหัสนั้นออกแล้ว Deploy (เครื่องที่ใช้รหัสเก่าจะขึ้นหน้าใส่รหัส)
+  - ยังไม่ตั้ง = หน้าติดตามขึ้น "ยังไม่ได้ตั้ง MONITOR_KEY" (แผนที่สาธารณะและ LINE ทำงานปกติ)
 - เปิดให้ OA เข้ากลุ่ม: manager.line.biz (เข้าด้วยบัญชี LINE ที่ดูแล OA หรือบัญชีธุรกิจที่เป็นอีเมล) → ตั้งค่า → ตั้งค่าบัญชี → เข้าร่วมแชทกลุ่ม → ยอมรับคำเชิญ · ผู้เชิญต้องเป็นเพื่อนกับ OA · ควรขออนุญาตสมาชิกกลุ่มก่อน
 
 ## ข้อมูลสดทุกชั่วโมง: Worker `gh-cron-dispatch` (ตั้งครั้งเดียว)

@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.12 (รหัสเชิญกลุ่ม max_uses · ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.13 (ทุกคนรายงานเหตุ/ขอความช่วยเหลือได้ไม่ต้องลงทะเบียน · ขอความช่วยเหลือแสดงตำแหน่งจริงบนแผนที่สาธารณะ · หน้าติดตามของ อบต. /api/monitor (MONITOR_KEY) · ผู้รายงานพิมพ์ "ปิดเหตุ" ได้ · v4.12 รหัสเชิญกลุ่ม max_uses · ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -8,6 +8,8 @@
  *   LINE_CHANNEL_TOKEN   (Secret)
  *   USERS                (KV namespace → LINE_USERS)
  *   STATS_KEY            (Secret · ใหม่ v4.1 · ตั้งเอง ≥ 24 ตัวอักษร) ใช้เปิด /stats ดูสถิติผู้ใช้สำหรับรายงานความก้าวหน้า
+ *   MONITOR_KEY          (Secret · ใหม่ v4.13 · ≥ 24 ตัวอักษร · ใส่หลายรหัสคั่นด้วย , ได้) ใช้เปิดหน้าติดตามเหตุของ อบต.
+ *                        region/monitor.html#k=<รหัส> → GET /api/monitor · POST /api/monitor/status (header X-Monitor-Key)
  *   DAILY_GROUP_PUSH     (Text · ใหม่ v4.2) "on" = ส่งสรุปสถานการณ์น้ำเข้ากลุ่มที่เปิดไว้ทุกเช้า (ต้องตั้ง Cron 0 0 * * * = 07:00 น.)
  *                        ไม่ตั้ง/อื่น ๆ = ไม่ส่งอัตโนมัติ (กลุ่มยังพิมพ์ "สถานการณ์น้ำ" ขอดูเองได้ ไม่เสียโควตา)
  *
@@ -20,7 +22,7 @@
  *   user:<userId>     สถานะผู้ใช้ {role, joined, active}
  *   index:adm         รายการ userId ของ ADM (ใช้ส่งแจ้งเตือน)
  *   session:<userId>  ขั้นตอนรายงานที่ค้างอยู่ (หมดอายุเอง 30 นาที)
- *   report:<id>       รายงานเหตุที่ยืนยันแล้ว (หมดอายุเอง 90 วัน)
+ *   report:<id>       รายงานเหตุที่ยืนยันแล้ว (หมดอายุเอง 90 วัน) · status new → ack (อบต. รับทราบ) → closed (อบต./ผู้รายงานปิด)
  *   invite:<CODE>     รหัสเชิญ ADM — สร้างใน Cloudflare: Workers KV → LINE_USERS → Add entry (ห้ามใส่ชื่อ/เบอร์โทร)
  *                     รายคน (ใช้ครั้งเดียว): key invite:CHANAT-7K2Q   value {"note":"ADM จันอัด ชุด 1"}
  *                     รหัสกลุ่ม (v4.12):    key invite:CHANAT-ADM32  value {"note":"ADM จันอัด 32 คน","max_uses":32}
@@ -34,8 +36,10 @@
 const SITE_URL = 'https://sarochiiii.github.io/NR-flood-sdss/';
 const ABT_PHONE = '';   // เบอร์ อบต.จันอัด ที่ยืนยันแล้ว เช่น '044xxxxxx' (ว่าง = ยังไม่ยืนยัน)
 const VILLAGES = [];    // รายชื่อหมู่บ้านสำหรับปุ่มเลือก ไม่เกิน 12 รายการ (ว่าง = ให้พิมพ์เอง)
-// ปิด "ติดต่อ อบต." และ "ขอความช่วยเหลือ" ไว้ก่อน (ยังไม่เกิดเหตุ · ป้องกันการกดเล่น) — เปิดใหม่ = true
-const HELP_ENABLED = false;
+// v4.13 เปิด "ขอความช่วยเหลือ" ตามคำแนะนำผู้ทรงคุณวุฒิ: ทุกคนส่งได้ ทุกคนเห็นตำแหน่ง ไม่ผ่าน ADM · อบต. ติดตามที่หน้า monitor
+// (false = ปิดทั้ง "ติดต่อ อบต." และ "ขอความช่วยเหลือ" แบบ v4.6–v4.12)
+const HELP_ENABLED = true;
+const HELP = 'ขอความช่วยเหลือ';
 // รายงาน SDSS บ้านด่านติง — ข้อความที่ปุ่มที่ 4 ของ rich menu ส่ง (แทน "ติดต่อ อบต." เดิม) + คำพิมพ์อื่นที่ยอมรับ
 const SANDBOX_CMDS = ['รายงานบ้านด่านติง', 'รายงานด่านติง', 'บ้านด่านติง'];
 // ─────────────────────────────────────────────────────────────────
@@ -44,20 +48,25 @@ const DISCLAIMER =
   'ระบบนี้เป็นเครื่องมือสนับสนุนการตัดสินใจของโครงการวิจัย ' +
   'ไม่ใช่การประกาศเตือนภัยอย่างเป็นทางการ โปรดติดตามประกาศจาก ปภ. และ อบต.';
 const EMERGENCY = 'กรณีฉุกเฉินต่อชีวิต โทร 1669 (การแพทย์ฉุกเฉิน) หรือ 1784 (ปภ.) ทันที';
-const TYPES = ['น้ำท่วมบ้าน', 'ถนนน้ำท่วม/ขาด', ...(HELP_ENABLED ? ['ขอความช่วยเหลือ'] : [])];
+const TYPES = ['น้ำท่วมบ้าน', 'ถนนน้ำท่วม/ขาด', ...(HELP_ENABLED ? [HELP] : [])];
+const HELP_NOTE = 'คำขอนี้ไม่ผ่าน ADM — แสดงบนแผนที่ให้ทุกคนเห็น และเจ้าหน้าที่ อบต. ติดตามจากแผนที่ ระบบนี้ไม่ใช่ศูนย์สั่งการ';
 const HELP_OFF = 'ปิดใช้งานชั่วคราว — ยังไม่เปิดช่องทางติดต่อ อบต./ขอความช่วยเหลือผ่านระบบนี้\n\n' + EMERGENCY;
 const SESSION_TTL = 1800;
 const REPORT_TTL = 90 * 86400;      // เก็บรายงานไว้ 90 วัน แล้ว KV ลบเอง
 const PRIVACY =
   'การใช้ข้อมูล: ระบบเก็บรหัสผู้ใช้ LINE ประเภทผู้ใช้ และรายงานที่ท่านส่ง (ตำแหน่ง/หมู่บ้าน/รายละเอียด) ' +
-  'เพื่อแสดงจุดแจ้งเหตุบนแผนที่ (ปัดตำแหน่ง ~100 ม.) และติดตามสถานการณ์เท่านั้น ไม่เผยแพร่ชื่อผู้รายงานและรายละเอียด รายงานลบอัตโนมัติใน 90 วัน ' +
+  'เพื่อแสดงจุดแจ้งเหตุบนแผนที่สาธารณะ (น้ำท่วม/ถนน ปัดตำแหน่ง ~100 ม. · ขอความช่วยเหลือ แสดงตำแหน่งจริงเพื่อให้ อบต. และเพื่อนบ้านเข้าช่วยได้) ' +
+  'ไม่เผยแพร่ชื่อผู้รายงานและรายละเอียด (รายละเอียดเห็นเฉพาะเจ้าหน้าที่ อบต. ที่ติดตามเหตุ) รายงานลบอัตโนมัติใน 90 วัน ' +
   'พิมพ์ "ลบข้อมูลของฉัน" หรือเลิกติดตามบัญชีเพื่อลบข้อมูลได้ทุกเมื่อ';
+const REPORT_ID = /^R[0-9A-Z]{1,10}$/;
+const MONITOR_DAYS = 14;            // หน้าติดตามของ อบต. แสดงเหตุย้อนหลัง 14 วัน (รวมที่ปิดแล้ว)
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/stats') return stats(env, url);
     if (request.method === 'GET' && url.pathname === '/api/reports') return publicReports(env);
+    if (url.pathname === '/api/monitor' || url.pathname === '/api/monitor/status') return monitor(request, env, url);
     if (request.method !== 'POST') return new Response('OK');
 
     const body = await request.text();
@@ -116,7 +125,7 @@ async function handleEvent(ev, env) {
       s.address = ev.message.address || '';
       s.step = 'note';
       await putSession(env, userId, s);
-      return reply(ev, env, [askNote()]);
+      return reply(ev, env, [askNote(s)]);
     }
     return reply(ev, env, [text('ได้รับตำแหน่งแล้ว หากต้องการรายงานเหตุ กดเมนู "รายงานเหตุ" ก่อน')]);
   }
@@ -133,6 +142,8 @@ async function handleText(ev, env, userId, t) {
     await env.USERS.delete(`session:${userId}`);
     return reply(ev, env, [text('ยกเลิกรายการแล้ว')]);
   }
+
+  if (t === 'ปิดเหตุ' || /^ปิดเหตุ\s+R[0-9A-Z]+$/i.test(t)) return closeByReporter(ev, env, userId, t);
 
   if (t === 'ลงทะเบียน ประชาชน') {
     const user = (await getUser(env, userId)) || { joined: nowIso() };
@@ -173,31 +184,22 @@ async function handleText(ev, env, userId, t) {
       : `อยู่ระหว่างยืนยันเบอร์ติดต่อ อบต.จันอัด\n\n${EMERGENCY}`)]);
   }
 
-  if (t === 'รายงานเหตุ') {
-    const user = await getUser(env, userId);
-    if (!user || !user.role) {
-      return reply(ev, env, [
-        text('กรุณาลงทะเบียนก่อนรายงานเหตุ'),
-        askRole(),
-      ]);
-    }
+  if (t === 'รายงานเหตุ') {                 // v4.13 ไม่ต้องลงทะเบียน — ประกาศการใช้ข้อมูลในขั้นแรก · กด "ยืนยัน" = ยินยอม
     await putSession(env, userId, { step: 'type', started: nowIso() });
     return reply(ev, env, [askType()]);
   }
 
   // ทางลัด "ขอความช่วยเหลือ" (จากปุ่มบนเว็บ) → ข้ามขั้นเลือกประเภท · ถ้ากำลังอยู่ในขั้นตอนอื่น ให้ถือเป็นการตอบขั้นนั้น
   const s = await getSession(env, userId);
-  if (t === 'ขอความช่วยเหลือ' && !s) {
+  if (t === HELP && !s) {
     if (!HELP_ENABLED) return reply(ev, env, [text(HELP_OFF)]);
-    const user = await getUser(env, userId);
-    if (!user || !user.role) return reply(ev, env, [text('กรุณาลงทะเบียนก่อนขอความช่วยเหลือ\nหากมีอันตรายต่อชีวิต โทร 1669 · 1784 · 191 ทันที'), askRole()]);
-    await putSession(env, userId, { step: 'village', type: 'ขอความช่วยเหลือ', started: nowIso() });
-    return reply(ev, env, [text('🆘 ขอความช่วยเหลือ\nหากมีอันตรายต่อชีวิต โทรทันที: 1669 (เจ็บป่วยฉุกเฉิน) · 1784 (ปภ.) · 191\nระบบนี้ส่งเรื่องถึง ADM ไม่ใช่ศูนย์สั่งการ'), askVillage()]);
+    await putSession(env, userId, { step: 'village', type: HELP, started: nowIso() });
+    return reply(ev, env, [text('🆘 ขอความช่วยเหลือ\nหากมีอันตรายต่อชีวิต โทรทันที: 1669 (เจ็บป่วยฉุกเฉิน) · 1784 (ปภ.) · 191\n' + HELP_NOTE + '\n\n' + PRIVACY), askVillage()]);
   }
   if (s && s.step === 'invite') return handleInvite(ev, env, userId, t);
   if (s) return handleReportStep(ev, env, userId, s, t);
 
-  return reply(ev, env, [text('กดปุ่มในเมนูด้านล่าง หรือพิมพ์ "สถานการณ์น้ำ" / "รายงานบ้านด่านติง" / "รายงานเหตุ"')]);
+  return reply(ev, env, [text('กดปุ่มในเมนูด้านล่าง หรือพิมพ์ "สถานการณ์น้ำ" / "รายงานบ้านด่านติง" / "รายงานเหตุ"' + (HELP_ENABLED ? ' / "ขอความช่วยเหลือ"' : '') + ' / "ปิดเหตุ"')]);
 }
 
 // ─── รหัสเชิญ ADM ─────────────────────────────────────────────────
@@ -238,11 +240,11 @@ async function handleReportStep(ev, env, userId, s, t) {
     s.village = t.slice(0, 60);
     s.step = 'location';
     await putSession(env, userId, s);
-    return reply(ev, env, [askLocation()]);
+    return reply(ev, env, [askLocation(false, s)]);
   }
 
   if (s.step === 'location') {                 // ต้องแชร์ตำแหน่งเท่านั้น (ข้อความใดก็ตามจะถามซ้ำ)
-    return reply(ev, env, [askLocation(true)]);
+    return reply(ev, env, [askLocation(true, s)]);
   }
 
   if (s.step === 'note') {
@@ -276,9 +278,56 @@ async function submitReport(ev, env, userId, s) {
   };
   await env.USERS.put(`report:${id}`, JSON.stringify(report), { expirationTtl: REPORT_TTL });
   await env.USERS.delete(`session:${userId}`);
+  // v4.13 ไม่ต้องลงทะเบียนก่อน: กด "ยืนยัน" หลังเห็นประกาศการใช้ข้อมูล = ยินยอม → บันทึกเป็นผู้ใช้ประเภทประชาชน (ถ้ายังไม่มีประเภท)
+  if (!user || !user.role || !user.consent) {
+    await putUser(env, userId, { ...(user || {}), role: (user && user.role) || 'public', adm: !!(user && user.adm),
+      joined: (user && user.joined) || nowIso(), active: true, consent: (user && user.consent) || nowIso() });
+  }
 
-  // v4.6: ไม่ส่งถึง ADM (ไม่ใช้โควตา push) — จุดแจ้งเหตุแสดงบนแผนที่ผ่าน /api/reports (ไอคอนจุดแดงกระพริบ)
-  await reply(ev, env, [text(`รับรายงานแล้ว รหัส ${id}\nจุดแจ้งเหตุจะแสดงบนแผนที่ภายในไม่กี่นาที\n${SITE_URL}region/\n\n${EMERGENCY}`)]);
+  // v4.6: ไม่ส่งถึง ADM (ไม่ใช้โควตา push) — จุดแจ้งเหตุแสดงบนแผนที่ผ่าน /api/reports · อบต. ติดตามที่หน้า monitor (v4.13)
+  const help = s.type === HELP;
+  await reply(ev, env, [text((help
+    ? `รับคำขอความช่วยเหลือแล้ว รหัส ${id}\nตำแหน่งแสดงบนแผนที่ให้ อบต. และเพื่อนบ้านเห็นภายในไม่กี่นาที\n${SITE_URL}region/\n${HELP_NOTE}`
+    : `รับรายงานแล้ว รหัส ${id}\nจุดแจ้งเหตุจะแสดงบนแผนที่ภายในไม่กี่นาที\n${SITE_URL}region/`) +
+    `\nเมื่อ${help ? 'ได้รับความช่วยเหลือแล้ว' : 'น้ำลดแล้ว'} พิมพ์ "ปิดเหตุ" เพื่อเอาจุดออกจากแผนที่\n\n${EMERGENCY}`)]);
+}
+
+// ─── v4.13 ผู้รายงานปิดเหตุของตนเอง ("ปิดเหตุ" → เลือก · "ปิดเหตุ R…" → ปิด) ─────
+async function closeByReporter(ev, env, userId, t) {
+  const m = t.match(/R[0-9A-Z]+$/i);
+  if (m) {
+    const id = m[0].toUpperCase();
+    const r = REPORT_ID.test(id) ? await env.USERS.get(`report:${id}`, 'json') : null;
+    if (!r || r.reporter !== userId) return reply(ev, env, [text(`ไม่พบเหตุรหัส ${id} ที่ท่านรายงาน`)]);
+    if (r.status === 'closed') return reply(ev, env, [text(`เหตุ ${id} ปิดแล้ว`)]);
+    await saveReport(env, { ...r, status: 'closed', status_at: nowIso(), closed_by: 'reporter' });
+    return reply(ev, env, [text(`ปิดเหตุ ${id} (${r.type}) แล้ว — จุดจะหายจากแผนที่ภายในไม่กี่นาที ขอบคุณที่แจ้งครับ`)]);
+  }
+  const mine = (await listReports(env, REPORT_TTL / 86400)).filter((r) => r.reporter === userId && r.status !== 'closed');
+  if (!mine.length) return reply(ev, env, [text('ไม่มีเหตุที่ท่านรายงานและยังเปิดอยู่')]);
+  return reply(ev, env, [{ type: 'text', text: 'เลือกเหตุที่ต้องการปิด (น้ำลดแล้ว/ได้รับความช่วยเหลือแล้ว)\n' +
+      mine.slice(0, 12).map((r) => `${r.id} · ${r.type} · ${r.village}`).join('\n'),
+    quickReply: { items: [...mine.slice(0, 12).map((r) => qr(`${r.id} ${r.type}`, `ปิดเหตุ ${r.id}`)), qr('ยกเลิก')] } }]);
+}
+
+// เขียนรายงานกลับโดยคงวันหมดอายุเดิม (put ใหม่โดยไม่ใส่ expirationTtl = ไม่หมดอายุ)
+async function saveReport(env, r) {
+  const left = Math.floor(REPORT_TTL - (Date.now() - Date.parse(r.created_at)) / 1000);
+  await env.USERS.put(`report:${r.id}`, JSON.stringify(r), { expirationTtl: Math.max(60, left) });
+}
+
+async function listReports(env, days) {
+  const since = new Date(Date.now() - days * 864e5).toISOString(), out = [];
+  let cursor;
+  do {
+    const page = await env.USERS.list({ prefix: 'report:', cursor });
+    for (const k of page.keys) {
+      const r = await env.USERS.get(k.name, 'json');
+      if (r && r.created_at && r.created_at >= since) out.push(r);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 }
 
 // ─── Message builders ────────────────────────────────────────────
@@ -291,7 +340,7 @@ function qr(label, t) {
 function askRole() {
   return {
     type: 'text',
-    text: 'ยินดีต้อนรับสู่ จันอัดบ้านฉัน\nกรุณาเลือกประเภทผู้ใช้ (ADM ต้องมีรหัสเชิญจากทีมวิจัย)\n\n' + PRIVACY,
+    text: 'ยินดีต้อนรับสู่ จันอัดบ้านฉัน\nกรุณาเลือกประเภทผู้ใช้ (ADM ต้องมีรหัสเชิญจากทีมวิจัย)\nรายงานเหตุ/ขอความช่วยเหลือได้ทันทีโดยไม่ต้องลงทะเบียน\n\n' + PRIVACY,
     quickReply: { items: [qr('ADM', 'ลงทะเบียน ADM'), qr('ประชาชน', 'ลงทะเบียน ประชาชน')] },
   };
 }
@@ -299,7 +348,7 @@ function askRole() {
 function askType() {
   return {
     type: 'text',
-    text: 'รายงานเหตุ (1/4)\nเลือกประเภทเหตุการณ์',
+    text: 'รายงานเหตุ (1/4)\nเลือกประเภทเหตุการณ์\n\n' + PRIVACY,
     quickReply: { items: [...TYPES.map((x) => qr(x)), qr('ยกเลิก')] },
   };
 }
@@ -314,11 +363,14 @@ function askVillage() {
   return msg;
 }
 
-function askLocation(again) {
+function askLocation(again, s) {
+  const help = s && s.type === HELP;
   return {
     type: 'text',
     text: (again ? 'ต้องแชร์ตำแหน่งที่เกิดเหตุจึงจะส่งรายงานได้\n' : '') +
-      'รายงานเหตุ (3/4)\nกดปุ่ม "ส่งตำแหน่ง" แล้วเลื่อนหมุดไปที่จุดเกิดเหตุ\nจุดนี้จะแสดงบนแผนที่สาธารณะ (ปัด ~100 ม. ไม่แสดงชื่อและรายละเอียด)',
+      `${help ? 'ขอความช่วยเหลือ' : 'รายงานเหตุ'} (3/4)\nกดปุ่ม "ส่งตำแหน่ง" แล้วเลื่อนหมุดไปที่จุด${help ? 'ที่ต้องการความช่วยเหลือ' : 'เกิดเหตุ'}\n` +
+      (help ? 'จุดนี้จะแสดงบนแผนที่สาธารณะตามตำแหน่งจริง ให้ อบต. และเพื่อนบ้านเห็น (ไม่แสดงชื่อและรายละเอียด)'
+        : 'จุดนี้จะแสดงบนแผนที่สาธารณะ (ปัด ~100 ม. ไม่แสดงชื่อและรายละเอียด)'),
     quickReply: {
       items: [
         { type: 'action', action: { type: 'location', label: 'ส่งตำแหน่ง' } },
@@ -328,10 +380,13 @@ function askLocation(again) {
   };
 }
 
-function askNote() {
+function askNote(s) {
+  const help = s && s.type === HELP;
   return {
     type: 'text',
-    text: 'รายงานเหตุ (4/4)\nพิมพ์รายละเอียดเพิ่มเติม เช่น ระดับน้ำ จำนวนคน ผู้ป่วย/ผู้สูงอายุ หรือกด "ข้าม"',
+    text: help
+      ? 'ขอความช่วยเหลือ (4/4)\nพิมพ์สิ่งที่ต้องการ เช่น จำนวนคน ผู้ป่วย/ผู้สูงอายุ/เด็ก ระดับน้ำ เบอร์ติดต่อกลับ (ถ้าสะดวก) หรือกด "ข้าม"\nรายละเอียดนี้เห็นเฉพาะเจ้าหน้าที่ อบต. ไม่แสดงบนแผนที่สาธารณะ'
+      : 'รายงานเหตุ (4/4)\nพิมพ์รายละเอียดเพิ่มเติม เช่น ระดับน้ำ จำนวนคน ผู้ป่วย/ผู้สูงอายุ หรือกด "ข้าม"\nรายละเอียดนี้เห็นเฉพาะเจ้าหน้าที่ อบต.',
     quickReply: { items: [qr('ข้าม'), qr('ยกเลิก')] },
   };
 }
@@ -344,7 +399,7 @@ function askConfirm(s) {
       `ประเภท: ${s.type}\n` +
       `หมู่บ้าน: ${s.village}\n` +
       `ตำแหน่ง: ${s.lat != null ? 'แชร์แล้ว' : 'ไม่ได้แชร์'}\n` +
-      `รายละเอียด: ${s.note || '-'}`,
+      `รายละเอียด: ${s.note || '-'}\n\nกด "ยืนยัน" = ยินยอมให้ใช้ข้อมูลตามประกาศการใช้ข้อมูลในขั้นแรก`,
     quickReply: { items: [qr('ยืนยัน'), qr('ยกเลิก')] },
   };
 }
@@ -574,7 +629,7 @@ async function stats(env, url) {
     },
     groups: { joined: groups.length, approved: groups.filter(g => g.approved).length, daily_on: groups.filter(g => g.daily).length,
       members_last_push: groups.reduce((a, g) => a + (g.members || 0), 0) },
-    reports: { total_90d: reports.length, by_type: cnt(reports, r => r.type), by_month: cnt(reports, r => (r.created_at || '').slice(0, 7)) },
+    reports: { total_90d: reports.length, by_type: cnt(reports, r => r.type), by_status: cnt(reports, r => r.status || 'new'), by_month: cnt(reports, r => (r.created_at || '').slice(0, 7)) },
     note: 'นับจาก KV ของระบบ (ผู้ที่เลิกติดตามถูกลบแล้ว) · จำนวนเพื่อนทั้งหมดดูที่ LINE OA Manager → Insights'
   };
   return new Response(JSON.stringify(body, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
@@ -652,27 +707,62 @@ async function dailyGroupPush(env) {
 
 // ─── รายงานสำหรับแผนที่เว็บ (สาธารณะ · ไม่มีข้อมูลส่วนบุคคล) ─────────────
 // แสดงเฉพาะ "น้ำท่วมบ้าน" และ "ถนนน้ำท่วม/ขาด" ที่แชร์ตำแหน่ง · ย้อนหลัง 7 วัน
-// ตำแหน่งปัดเป็นทศนิยม 3 ตำแหน่ง (~100 ม.) · ไม่ส่งรายละเอียด/ที่อยู่/ผู้รายงาน
-// "ขอความช่วยเหลือ" ไม่แสดงตำแหน่ง — ส่งเป็นจำนวนรายหมู่บ้านเท่านั้น
+// ไม่ส่งรายละเอียด/ที่อยู่/ผู้รายงาน · เหตุที่ปิดแล้ว (status closed) ไม่แสดง
+// น้ำท่วม/ถนน: ปัดตำแหน่งทศนิยม 3 ตำแหน่ง (~100 ม.)
+// ขอความช่วยเหลือ (v4.13 ตามคำแนะนำผู้ทรงคุณวุฒิ): ตำแหน่งจริง (ทศนิยม 5 ตำแหน่ง ~1 ม.) ให้ทุกคนเห็น · help_by_village = เฉพาะคำขอเก่าที่ไม่มีตำแหน่ง
 const PUBLIC_DAYS = 7;
 async function publicReports(env) {
-  const since = new Date(Date.now() - PUBLIC_DAYS * 864e5).toISOString();
   const items = [], help = {}, noLoc = {};
-  let cursor;
-  do {
-    const page = await env.USERS.list({ prefix: 'report:', cursor });
-    for (const k of page.keys) {
-      const r = await env.USERS.get(k.name, 'json');
-      if (!r || !r.created_at || r.created_at < since) continue;
-      const village = String(r.village || 'ไม่ระบุ').slice(0, 40);
-      if (r.type === 'ขอความช่วยเหลือ') { help[village] = (help[village] || 0) + 1; continue; }
-      if (r.lat == null || r.lon == null) { noLoc[village] = (noLoc[village] || 0) + 1; continue; }
-      items.push({ type: r.type, village, lat: Math.round(r.lat * 1000) / 1000, lon: Math.round(r.lon * 1000) / 1000,
-        created_at: r.created_at, by: r.reporter_role === 'adm' ? 'adm' : 'public', status: r.status || 'new' });
-    }
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
-  items.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  for (const r of await listReports(env, PUBLIC_DAYS)) {
+    if (r.status === 'closed') continue;
+    const village = String(r.village || 'ไม่ระบุ').slice(0, 40), isHelp = r.type === HELP;
+    if (r.lat == null || r.lon == null) { const m = isHelp ? help : noLoc; m[village] = (m[village] || 0) + 1; continue; }
+    const d = isHelp ? 1e5 : 1e3;
+    items.push({ id: r.id, type: r.type, village, lat: Math.round(r.lat * d) / d, lon: Math.round(r.lon * d) / d, precise: isHelp,
+      created_at: r.created_at, by: r.reporter_role === 'adm' ? 'adm' : 'public', status: r.status || 'new' });
+  }
   return new Response(JSON.stringify({ updated_at: nowIso(), days: PUBLIC_DAYS, items, help_by_village: help, no_location_by_village: noLoc }), {
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': 'https://sarochiiii.github.io', 'Cache-Control': 'public, max-age=120' } });
+}
+
+// ─── v4.13 หน้าติดตามเหตุของ อบต. (region/monitor.html) ─────────────────
+// ต้องมี header X-Monitor-Key ตรงกับ Secret MONITOR_KEY (หลายรหัสคั่นด้วย , ได้ · แต่ละรหัส ≥ 24 ตัวอักษร)
+// ส่งตำแหน่งจริงและรายละเอียดให้ อบต. · ไม่ส่งรหัสผู้ใช้ LINE ของผู้รายงาน
+const STATUSES = ['new', 'ack', 'closed'];
+function sameKey(a, b) {
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+async function monitor(request, env, url) {
+  const cors = { 'Access-Control-Allow-Origin': 'https://sarochiiii.github.io', 'Access-Control-Allow-Headers': 'Content-Type, X-Monitor-Key',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Max-Age': '600' };
+  const res = (b, status = 200) => new Response(JSON.stringify(b), { status,
+    headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  const keys = String(env.MONITOR_KEY || '').split(',').map((k) => k.trim()).filter((k) => k.length >= 24);
+  if (!keys.length) return res({ error: 'not_configured' }, 503);
+  const k = (request.headers.get('x-monitor-key') || '').trim();
+  if (!keys.some((x) => sameKey(x, k))) return res({ error: 'forbidden' }, 403);
+
+  if (request.method === 'GET' && url.pathname === '/api/monitor') {
+    const items = (await listReports(env, MONITOR_DAYS)).map((r) => ({ id: r.id, type: r.type, village: r.village || '',
+      lat: r.lat ?? null, lon: r.lon ?? null, address: r.address || '', note: r.note || '', created_at: r.created_at,
+      status: r.status || 'new', status_at: r.status_at || null, closed_by: r.closed_by || null,
+      by: r.reporter_role === 'adm' ? 'adm' : 'public' }));
+    return res({ updated_at: nowIso(), days: MONITOR_DAYS, items });
+  }
+  if (request.method === 'POST' && url.pathname === '/api/monitor/status') {
+    let b;
+    try { b = await request.json(); } catch { return res({ error: 'bad_json' }, 400); }
+    const id = String((b && b.id) || '').toUpperCase(), st = String((b && b.status) || '');
+    if (!REPORT_ID.test(id) || !STATUSES.includes(st)) return res({ error: 'bad_request' }, 400);
+    const r = await env.USERS.get(`report:${id}`, 'json');
+    if (!r) return res({ error: 'not_found' }, 404);
+    const next = { ...r, status: st, status_at: nowIso(), closed_by: st === 'closed' ? 'abt' : null };
+    await saveReport(env, next);
+    return res({ ok: true, id, status: st, status_at: next.status_at });
+  }
+  return res({ error: 'not_found' }, 404);
 }
