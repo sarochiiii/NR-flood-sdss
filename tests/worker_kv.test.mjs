@@ -44,7 +44,11 @@ const loc = (id, lat, lon) => send({ type: 'message', replyToken: 'r', source: {
 // v4.13 รายงานเหตุ: ไม่ต้องลงทะเบียน (ประกาศการใช้ข้อมูลในขั้นแรก) · มีตัวเลือกขอความช่วยเหลือ · ต้องแชร์ตำแหน่ง · ไม่ส่งถึง ADM
 assert.match(await U('UC', 'รายงานเหตุ'), /ประเภทเหตุการณ์[\s\S]*การใช้ข้อมูล/);
 assert.match(JSON.stringify(sent.at(-1).b), /ขอความช่วยเหลือ/);
-await U('UC', 'น้ำท่วมบ้าน'); await U('UC', 'หมู่ 5');
+// v4.14 ปุ่มเลือก ม.1–ม.8 (ยังพิมพ์ชื่อหมู่บ้านอื่นเองได้)
+assert.match(await U('UC', 'น้ำท่วมบ้าน'), /หมู่บ้านใด[\s\S]*พิมพ์ชื่อหมู่บ้านเอง/);
+const qv = sent.at(-1).b.messages.at(-1).quickReply.items.map(i => i.action.text);
+assert.deepEqual([qv.length, qv[0], qv[4], qv[7]], [9, 'ม.1 สำโรง', 'ม.5 ด่านติง', 'ม.8 โค้งกระพี้']);
+await U('UC', 'หมู่ 5');
 assert.match(await U('UC', 'ข้าม'), /ต้องแชร์ตำแหน่ง/);
 await loc('UC', 15.156789, 102.157891);
 await U('UC', 'บ้านเลขที่ทดสอบ');
@@ -54,7 +58,7 @@ assert.equal(sent.slice(nSent).filter(s => s.u.includes('multicast') || s.u.incl
 // ผู้ไม่เคยลงทะเบียนขอความช่วยเหลือได้ทันที (ทางลัด) → ตำแหน่งจริง · กด "ยืนยัน" แล้วถูกบันทึกเป็นประชาชนที่ยินยอม
 assert.equal(store.get('user:UN'), undefined);
 assert.match(await U('UN', 'ขอความช่วยเหลือ'), /ไม่ผ่าน ADM[\s\S]*การใช้ข้อมูล[\s\S]*หมู่บ้านใด/);
-assert.match(await U('UN', 'หมู่ 3 บ้านเหล่า'), /ตำแหน่งจริง/);
+assert.match(await U('UN', 'ม.3 เหล่า'), /ตำแหน่งจริง/);
 await loc('UN', 15.1612345, 102.1498765);
 assert.match(await U('UN', 'ผู้สูงอายุติดเตียง 1 คน'), /ยินยอม/);
 assert.match(await U('UN', 'ยืนยัน'), /รับคำขอความช่วยเหลือแล้ว/);

@@ -13,7 +13,7 @@ from _common import ROOT, now_iso
 
 KEY = os.environ.get("GISTDA_API_KEY", "").strip()
 BASE = "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/flood-recurrence"
-TCODE, DT, RADIUS_KM, STEP = "301010", (102.13359, 15.14223), 1.5, 0.01   # DT เหมือน chanat/index.html
+TCODE, DT, RADIUS_KM, STEP = "301010", (102.13639, 15.14155), 1.5, 0.01   # DT = ม.5 บ้านด่านติง เหมือน chanat/index.html
 OUT = os.environ.get("OUT") or str(ROOT / "data/sandbox/floodfreq.geojson")
 KX, KY = 111320 * math.cos(15.15 * math.pi / 180), 110540
 

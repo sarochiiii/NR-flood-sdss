@@ -33,7 +33,7 @@ def shape(o, d=0):
 def main():
     if not KEY:
         print("::error::ไม่มี GISTDA_API_KEY"); return
-    lat, lon, r = 15.14223, 102.13359, 0.004   # กรอบเล็ก ~900 ม. รอบบ้านด่านติง (DT ใน chanat/index.html)
+    lat, lon, r = 15.14155, 102.13639, 0.004   # กรอบเล็ก ~900 ม. รอบบ้านด่านติง (DT ใน chanat/index.html)
     tests = {
         "polygon เล็ก (geometry)": {"type": "Polygon", "coordinates": [[[lon - r, lat - r], [lon + r, lat - r], [lon + r, lat + r], [lon - r, lat + r], [lon - r, lat - r]]]},
     }

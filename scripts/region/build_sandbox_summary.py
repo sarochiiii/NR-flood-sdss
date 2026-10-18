@@ -12,7 +12,9 @@ import json, math
 from _common import ROOT, now_iso
 
 TCODE = "301010"
-DT = {"lat": 15.14223, "lon": 102.13359, "name": "บ้านด่านติง (ประมาณจากกลุ่มอาคาร)"}   # เหมือน DT ใน chanat/index.html
+# จุดตัวแทน ม.5 บ้านด่านติง (region/data/villages.geojson code 430101005) · เหมือน DT ใน chanat/index.html
+# เดิมถึง 18 ต.ค. 69: 15.14223, 102.13359 (กลุ่มอาคารใกล้ประตูน้ำ · ห่างจุดนี้ ~310 ม.)
+DT = {"lat": 15.14155, "lon": 102.13639, "name": "ม.5 บ้านด่านติง (จุดตัวแทนหมู่บ้าน)"}
 RADIUS_KM = 1.5
 BUF_DEFAULT, FREQ_DEFAULT = 300, 1
 NEAR = (100, 300)              # ระยะที่รายงาน (ม.)
@@ -156,7 +158,7 @@ def main():
                    "max_freq": max((x[0] for x in FF), default=None)},
         "village": summ([b for b in B if b["in_c"]]),
         "tambon": summ([b for b in B if b["in_tb"]]),
-        "note": "อาคาร = รูปหลังคาจากภาพดาวเทียม (Open Buildings) ไม่ใช่ครัวเรือน · ศูนย์กลางบ้านด่านติงประมาณจากกลุ่มอาคาร ยังไม่ยืนยันกับ อบต.",
+        "note": "อาคาร = รูปหลังคาจากภาพดาวเทียม (Open Buildings) ไม่ใช่ครัวเรือน · ศูนย์กลางรัศมี = จุดตัวแทน ม.5 บ้านด่านติง จากข้อมูลหมู่บ้านของโครงการ (ไม่ใช่ขอบเขตหมู่บ้าน)",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
