@@ -102,11 +102,17 @@
     const $ = (id) => document.getElementById(id), btn = $('btn-lrep');
     if (!btn) return;
     const get = (p) => fetch(p, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+    const build = async () => { const [tw, rid, gf, ec, cfg] = await Promise.all(['data/live/thaiwater_region.json', 'data/live/rid_reservoir.json',
+      'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(get));
+      return situationReport({ tw, rid, gf, ec, cfg }); };
+    // พิมพ์แผนที่ + รายงาน 1 หน้า A4 (region/js/print.js · คำสั่งพิมพ์ของเบราว์เซอร์ ไม่มีค่าใช้จ่าย)
+    if ($('btn-print')) $('btn-print').onclick = () => window.SDSS_PRINT && window.SDSS && window.SDSS_PRINT.open({
+      map: window.SDSS.map, title: 'SDSS-ChanAT · รายงานสถานการณ์น้ำ ต.จันอัด',
+      subtitle: 'ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ ตำบลจันอัด อำเภอโนนสูง จังหวัดนครราชสีมา',
+      report: build(), legends: [$('legend'), document.querySelector('.bank-legend')], site: location.origin + location.pathname });
     btn.onclick = async () => {
       btn.disabled = true; btn.textContent = 'กำลังสร้างรายงาน…';
-      const [tw, rid, gf, ec, cfg] = await Promise.all(['data/live/thaiwater_region.json', 'data/live/rid_reservoir.json',
-        'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(get));
-      const txt = situationReport({ tw, rid, gf, ec, cfg });
+      const txt = await build();
       $('lrep-text').textContent = txt;
       $('lrep-share').href = 'https://line.me/R/share?text=' + encodeURIComponent(txt);
       $('lrep').hidden = false;

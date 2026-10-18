@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/region.css?v=48">
+<link rel="stylesheet" href="css/region.css?v=49">
 </head>
 <body>
 <header class="hdr">
@@ -62,6 +62,7 @@
     <div class="muted" id="act-note" style="font-size:12px;margin:-4px 0 8px">ใช้ผ่านแอป LINE · ทุกคนแจ้งได้ ไม่ต้องลงทะเบียน · อันตรายต่อชีวิตโทร 1669 / 1784</div>
     <a class="btn" href="monitor.html" style="margin:0 0 8px;font-size:13px" title="สำหรับเจ้าหน้าที่ อบต. · ต้องใช้รหัสติดตามเหตุจากทีมวิจัย">🛡 หน้าติดตามเหตุ (เจ้าหน้าที่ อบต.)</a>
     <button class="btn" id="btn-lrep" type="button" style="margin-top:0">📋 สร้างรายงานสถานการณ์สำหรับ LINE</button>
+    <button class="btn" id="btn-print" type="button" style="margin-top:6px">🖨 พิมพ์แผนที่ + รายงาน (A4 / PDF)</button>
     <section class="card lrep" id="lrep" hidden>
       <pre id="lrep-text"></pre>
       <div class="lrep-act"><button type="button" id="lrep-copy">คัดลอกข้อความ</button>
@@ -98,9 +99,10 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="liff/config.js?v=48"></script>
-<script src="js/report.js?v=48"></script>
-<script src="js/layers.js?v=48"></script>
-<script src="js/region.js?v=48"></script>
+<script src="liff/config.js?v=49"></script>
+<script src="js/report.js?v=49"></script>
+<script src="js/print.js?v=49"></script>
+<script src="js/layers.js?v=49"></script>
+<script src="js/region.js?v=49"></script>
 </body>
 </html>
