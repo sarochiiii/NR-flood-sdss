@@ -225,3 +225,10 @@ button.btn{background:#fff;font-family:inherit;cursor:pointer}button.btn:disable
 .vil-dot{display:block;width:10px;height:10px;margin:2px;border-radius:50%;background:#F59E0B;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.7)}
 .leaflet-tooltip.vlabel{background:transparent;border:0;box-shadow:none;padding:0 2px;font-size:11.5px;font-weight:600;color:#7C2D12;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}
 .leaflet-tooltip.vlabel::before{display:none}
+/* แถบโลโก้หน่วยงานสนับสนุน (ด้านบนสุด) */
+.funders{display:flex;align-items:center;gap:14px;padding:calc(5px + env(safe-area-inset-top,0px)) 16px 5px;background:#fff;border-bottom:1px solid #E2E8F0;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.funders::-webkit-scrollbar{display:none}
+.funders img{height:34px;width:auto;flex-shrink:0;display:block}
+.funders .fsep{width:1px;height:30px;background:#94A3B8;flex-shrink:0}
+@media (max-width:640px){.funders{gap:10px;padding-left:12px;padding-right:12px}.funders img{height:26px}.funders .fsep{height:22px}}
+@media print{.funders{display:none}}
