@@ -94,6 +94,7 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     <div class="card"><dl class="kv" id="now"><dt class="muted">กำลังโหลด…</dt><dd></dd></dl></div>
 
     <button class="btn" id="btn-sbrep" type="button" style="margin:0 0 8px">📋 สร้างรายงานบ้านด่านติงสำหรับ LINE</button>
+    <button class="btn" id="btn-print" type="button" style="margin:0 0 8px">🖨 พิมพ์แผนที่ + รายงาน (A4 / PDF)</button>
     <div class="card lrep" id="sbrep" hidden>
       <pre id="sbrep-text"></pre>
       <div class="lrep-act"><button type="button" id="sbrep-copy">คัดลอกข้อความ</button>
@@ -133,7 +134,8 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="../region/js/report.js?v=48"></script>
+<script src="../region/js/report.js?v=49"></script>
+<script src="../region/js/print.js?v=49"></script>
 <script>
 (async () => {
   'use strict';
@@ -433,6 +435,12 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
     $('sbrep-share').href = 'https://line.me/R/share?text=' + encodeURIComponent(txt);
     $('sbrep').hidden = false; $('btn-sbrep').disabled = false; $('btn-sbrep').textContent = '📋 สร้างรายงานใหม่';
   };
+  // พิมพ์แผนที่ + รายงานบ้านด่านติง 1 หน้า A4 (region/js/print.js · คำสั่งพิมพ์ของเบราว์เซอร์ ไม่มีค่าใช้จ่าย)
+  $('btn-print').onclick = () => window.SDSS_PRINT && window.SDSS_REPORT && window.SDSS_PRINT.open({
+    map, title: 'Dan Ting Sandbox · รายงาน SDSS บ้านด่านติง ต.จันอัด',
+    subtitle: `อาคารที่สัมผัสภัยรอบ ${DT.name} รัศมี ${RADIUS_KM} กม. · น้ำท่วมซ้ำซาก GISTDA · ลำน้ำ OSM · สถานการณ์น้ำปัจจุบัน`,
+    report: get(D + 'sandbox/summary.json').then(sb => window.SDSS_REPORT.sandboxReport({ sb, tw, rid, gf, ec, cfg })),
+    legends: [$('legend')], site: location.origin + location.pathname });
   $('sbrep-copy').onclick = async () => {
     try { await navigator.clipboard.writeText($('sbrep-text').textContent); }
     catch (e) { const r = document.createRange(); r.selectNodeContents($('sbrep-text')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); }
