@@ -1,80 +1,24 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-19T11:15:25+00:00",
+ "updated_at": "2026-10-19T12:15:24+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
-   "code": "ridhydro_TM.202 (U/S), (D/S)",
-   "name": "Tเขื่อนพิมาย (U/S), (D/S)",
-   "level_m": 152.78,
-   "bank_m": 152.5,
-   "storage_pct": 100.18,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.194 (U/S), (D/S)",
-   "name": "T ขรน.มะเกลือใหม่ (U/S), (D/S)",
-   "level_m": 219.29,
-   "bank_m": 220.13,
-   "storage_pct": 99.62,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.195 (U/S), (D/S)",
-   "name": "T ขรน.กันผม (U/S), (D/S)",
-   "level_m": 166.5,
-   "bank_m": 167.73,
-   "storage_pct": 99.27,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.1A",
-   "name": "TM.1A (วัดใหม่อัมพร)",
-   "level_m": 208.93,
-   "bank_m": 210.52,
-   "storage_pct": 99.24,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.201 (D/S)",
-   "name": "T ปตร.น้ำเค็ม (D/S)",
-   "level_m": 151.32,
-   "bank_m": 153.43,
-   "storage_pct": 98.62,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.200 (U/S), (D/S)",
-   "name": "Tฝายยางบ้านส้ม (U/S), (D/S)",
-   "level_m": 162.45,
-   "bank_m": 164.81,
-   "storage_pct": 98.57,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_TM.197 (D/S)",
-   "name": "T ปตร.ลำสะแทด (D/S)",
-   "level_m": 145.03,
-   "bank_m": 148.59,
-   "storage_pct": 97.6,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
    "code": "ONE022",
    "name": "คลองสามบาท บ้านกุดพิมาน",
-   "level_m": 201.8,
+   "level_m": 201.81,
    "bank_m": 201.97,
-   "storage_pct": 93.08,
-   "measured_at": "2026-10-19 18:00"
+   "storage_pct": 93.49,
+   "measured_at": "2026-10-19 19:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 203.07,
+   "level_m": 203.06,
    "bank_m": 203.9,
-   "storage_pct": 79.09,
-   "measured_at": "2026-10-19 17:00"
+   "storage_pct": 78.84,
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "M.184",
@@ -82,7 +26,7 @@
    "level_m": 154.0,
    "bank_m": 155.3,
    "storage_pct": 77.19,
-   "measured_at": "2026-10-19 17:00"
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "M.164",
@@ -90,55 +34,23 @@
    "level_m": 176.74,
    "bank_m": 177.6,
    "storage_pct": 72.61,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.184",
-   "name": "บ้านซึม",
-   "level_m": 154.0,
-   "bank_m": 155.99,
-   "storage_pct": 68.86,
-   "measured_at": "2026-10-19 17:00"
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.23,
+   "level_m": 161.22,
    "bank_m": 162.6,
-   "storage_pct": 63.17,
-   "measured_at": "2026-10-19 17:00"
+   "storage_pct": 62.9,
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 155.09,
+   "level_m": 155.08,
    "bank_m": 158.1,
-   "storage_pct": 58.77,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.192",
-   "name": "บ้านโนนค่า",
-   "level_m": 203.07,
-   "bank_m": 205.17,
-   "storage_pct": 58.0,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.188A",
-   "name": "บ้านเพิ่ม",
-   "level_m": 161.23,
-   "bank_m": 163.31,
-   "storage_pct": 55.46,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.186",
-   "name": "บ้านโนนคอย",
-   "level_m": 160.9,
-   "bank_m": 163.11,
-   "storage_pct": 55.44,
-   "measured_at": "2026-10-19 17:00"
+   "storage_pct": 58.63,
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "M.191",
@@ -146,23 +58,15 @@
    "level_m": 193.6,
    "bank_m": 195.3,
    "storage_pct": 49.7,
-   "measured_at": "2026-10-19 17:00"
+   "measured_at": "2026-10-19 18:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 164.27,
    "bank_m": 167.83,
-   "storage_pct": 48.84,
-   "measured_at": "2026-10-19 18:00"
-  },
-  {
-   "code": "ridhydro_M.195",
-   "name": "บ้านสำเร็จ",
-   "level_m": 155.09,
-   "bank_m": 159.53,
-   "storage_pct": 45.25,
-   "measured_at": "2026-10-19 17:00"
+   "storage_pct": 48.9,
+   "measured_at": "2026-10-19 19:00"
   },
   {
    "code": "M.2A",
@@ -170,31 +74,7 @@
    "level_m": 163.15,
    "bank_m": 167.7,
    "storage_pct": 44.85,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.164",
-   "name": "ตำบลในเมือง",
-   "level_m": 176.74,
-   "bank_m": 179.61,
-   "storage_pct": 44.38,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.2A",
-   "name": "บ้านด่านตะกา",
-   "level_m": 163.15,
-   "bank_m": 169.02,
-   "storage_pct": 42.56,
-   "measured_at": "2026-10-19 17:00"
-  },
-  {
-   "code": "ridhydro_M.191",
-   "name": "บ้านโคกกรวด",
-   "level_m": 193.6,
-   "bank_m": 195.96,
-   "storage_pct": 42.3,
-   "measured_at": "2026-10-19 17:00"
+   "measured_at": "2026-10-19 18:00"
   }
  ]
 }
