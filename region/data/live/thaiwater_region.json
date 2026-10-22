@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-10-22T22:16:22+00:00",
+"updated_at":"2026-10-22T22:21:51+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -326,7 +326,7 @@
 "bank_msl":201.97,
 "storage_pct":91.83,
 "discharge":null,
-"measured_at":"2026-10-23 05:00",
+"measured_at":"2026-10-23 05:10",
 "amphoe":"ด่านขุนทด"
 },
 {
@@ -396,9 +396,9 @@
 "lon":102.23782,
 "level_msl":164.33,
 "bank_msl":167.83,
-"storage_pct":49.75,
+"storage_pct":49.72,
 "discharge":null,
-"measured_at":"2026-10-23 05:00",
+"measured_at":"2026-10-23 05:10",
 "amphoe":"เฉลิมพระเกียรติ"
 },
 {
