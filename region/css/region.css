@@ -244,3 +244,4 @@ button.btn{background:#fff;font-family:inherit;cursor:pointer}button.btn:disable
 @media print{.modetabs{display:none}}
 .kpi[hidden]{display:none}
 body.mode-drought .bank-legend{display:none}
+.legend-d{left:auto;right:10px;bottom:40px;max-width:240px;max-height:calc(100% - 120px);overflow:auto}.legend-d b{white-space:normal;display:block}.legend-d .row+b{display:block;margin-top:4px}.legend[hidden]{display:none}

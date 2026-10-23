@@ -1,0 +1,41 @@
+name: drought-layers
+# ภัยแล้งซ้ำซาก 26 ตำบล จาก API GISTDA drought-recurrence v1.1 (ปี 2018–2023) → region/data/droughtfreq.geojson
+# กดรันเอง (Actions → drought-layers → Run workflow) · รันเองทุกวันที่ 1 ของเดือน · หรือเมื่อแก้สคริปต์
+# push บน branch อื่นที่ไม่ใช่ main = ทดลองอย่างเดียว (พิมพ์สรุป ไม่ commit)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 3 1 * *'        # วันที่ 1 ของทุกเดือน 10:25 น.
+  push:
+    paths: [scripts/region/build_droughtfreq_gistda.py, .github/workflows/drought-layers.yml]
+concurrency: { group: drought-layers, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - run: pip install --quiet shapely
+      - name: ภัยแล้งซ้ำซาก (API GISTDA drought-recurrence)
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: python scripts/region/build_droughtfreq_gistda.py
+      - name: commit ผลลัพธ์ (เฉพาะ main)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        # เหมือน sandbox-layers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          F=region/data/droughtfreq.geojson
+          [ -f "$F" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
+          cp "$F" /tmp/droughtfreq.geojson
+          for i in 1 2 3 4; do
+            git fetch --quiet origin main && git reset --quiet --hard origin/main
+            cp /tmp/droughtfreq.geojson "$F" && git add "$F"
+            git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+            git commit --quiet -m "data(region): ภัยแล้งซ้ำซาก GISTDA $(date -u '+%Y-%m-%d')"
+            git push --quiet origin HEAD:main && exit 0
+            sleep $((i * 15))
+          done
+          exit 1

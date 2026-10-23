@@ -253,8 +253,54 @@ document.addEventListener('sdss:ready', async () => {
     iconSize: [size, size], iconAnchor: [size / 2, size / 2], html: '<span class="ov-pulse"></span>' }) });
   const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
 
+  /* ---------- ภัยแล้ง (GISTDA): คำอธิบายสัญลักษณ์มุมขวาล่าง แสดงเมื่อเปิดชั้น dri / droughtfreq ---------- */
+  // DRI+ 7 วัน: ช่วงค่าและสีตามคำอธิบายสัญลักษณ์บนแผนที่ภัยแล้งของ GISTDA (ค่า < 50 = ไม่เสี่ยง ไม่แสดง)
+  const DRI_LEGEND = [['#FBE5B6', '50–59', 'ต่ำ'], ['#F7F700', '60–69', 'ปานกลาง'], ['#FFA200', '70–79', 'สูง'], ['#FF1E1E', '≥80', 'สูงมาก']];
+  const DF_COL = ['#FEF3C7', '#FDE68A', '#FBBF24', '#F59E0B', '#D97706', '#92400E'];   // ภัยแล้งซ้ำซาก 1–6 ครั้ง
+  const TILE_WORKER = 'https://gistda-tile-proxy.sarochinee-k.workers.dev';   // เหมือน GISTDA_TILE_WORKER ใน chanat/index.html · key อยู่ใน Secret ของ Worker
+  const LGD = { dri: '', droughtfreq: '' };
+  function legendD() {
+    const el = $('legend-d'); if (!el) return;
+    const h = ['dri', 'droughtfreq'].filter(k => state[k] && state[k].on && LGD[k]).map(k => LGD[k]).join('');
+    el.innerHTML = h; el.hidden = !h;
+  }
+  let dfCache = null;
+  const droughtfreq = () => dfCache || (dfCache = json('data/droughtfreq.geojson').catch(e => { dfCache = null; throw e; }));
+  const thYr = (y) => Number(y) + 543;
+
   /* ---------- นิยามเลเยอร์ ---------- */
   const defs = [
+    {
+      id: 'dri', icon: 'ti-sun-high', label: 'พื้นที่เสี่ยงภัยแล้ง DRI+ 7 วัน (GISTDA)', on: false,
+      async build() {
+        // tile ผ่าน Worker gistda-tile-proxy เส้นทาง /dri/ (แกน y แบบ XYZ · ตรวจ 23 ต.ค. 69) · Worker ตอบ 204 นอกขอบเขต 26 ตำบล
+        const lyr = L.tileLayer(TILE_WORKER + '/dri/{z}/{x}/{y}.png', { minZoom: 6, maxNativeZoom: 15, maxZoom: 19, opacity: 0.8, zIndex: 300 });
+        let bad = 0, ok = 0;   // Worker ตอบ 204 นอกขอบเขต (นับเป็น tileerror) → แจ้งเฉพาะเมื่อไม่มีภาพโหลดสำเร็จเลย
+        lyr.on('tileload', () => ok++);
+        lyr.on('tileerror', () => { if (++bad >= 6 && !ok && state.dri.on && !state.dri.sub.startsWith('โหลด')) { state.dri.sub = 'โหลดภาพไม่สำเร็จ — ตรวจ Worker gistda-tile-proxy (v1.3 /dri/)'; render(); } });
+        LGD.dri = `<b>พื้นที่เสี่ยงภัยแล้ง DRI+ (GISTDA · 7 วันล่าสุด)</b>` + DRI_LEGEND.map(([c, v, t]) =>
+          `<div class="row"><span class="sw" style="background:${c}"></span>${v} ${t}</div>`).join('') + '<div class="muted">ค่า &lt; 50 ไม่เสี่ยง (ไม่แสดง)</div>';
+        lyr.on('add remove', () => setTimeout(legendD));
+        return { lyr, sub: 'ดัชนีความเสี่ยงภัยแล้ง ปรับรายสัปดาห์ · สีตามคำอธิบายของ GISTDA', attr: 'ดัชนีภัยแล้ง DRI+ © GISTDA' };
+      }
+    },
+    {
+      id: 'droughtfreq', icon: 'ti-repeat', label: 'ภัยแล้งซ้ำซาก (GISTDA)', on: false,
+      async build() {
+        // สร้างโดย .github/workflows/drought-layers.yml (scripts/region/build_droughtfreq_gistda.py) · ตัดตามขอบเขต 26 ตำบล
+        const d = await droughtfreq().catch(() => { throw new Error('รอ workflow drought-layers สร้างข้อมูล'); });
+        const ys = d.years || [], n = ys.length, yr = n ? `${thYr(ys[0])}–${thYr(ys[n - 1])}` : '';
+        const lyr = L.geoJSON(d, { style: f => ({ stroke: false, fillColor: DF_COL[Math.min(f.properties.freq, 6) - 1] || DF_COL[5], fillOpacity: 0.5 }),
+          onEachFeature: (f, l) => l.bindTooltip(`ภัยแล้งซ้ำซาก ${f.properties.freq} ครั้ง ใน ${n} ปี (${yr}) · GISTDA`, { sticky: true }) });
+        const fq = Object.keys(d.count_by_freq || {}).map(Number).sort((a, b) => a - b);
+        LGD.droughtfreq = `<b>ภัยแล้งซ้ำซาก (ครั้ง ใน ${n} ปี ${yr})</b>` + fq.map(k =>
+          `<div class="row"><span class="sw" style="background:${DF_COL[Math.min(k, 6) - 1]}"></span>${k} ครั้ง</div>`).join('');
+        lyr.on('add remove', () => setTimeout(legendD));
+        const ca = (d.by_tambon || {})['301010'];
+        return { lyr, sub: `GISTDA ปี ${yr}${ca ? ` · ต.จันอัด ส่วนใหญ่ ${ca.mode} ครั้ง (${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่)` : ''} · ดึงเมื่อ ${hhmm(d.updated_at)}`,
+          attr: 'ภัยแล้งซ้ำซาก © GISTDA' };
+      }
+    },
     {
       id: 'gistda', icon: 'ti-satellite', label: 'น้ำท่วมตรวจพบ (ดาวเทียม)', on: true,
       async build() {
@@ -595,14 +641,14 @@ document.addEventListener('sdss:ready', async () => {
   // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
   const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
     ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน'], ['reports', 'จุดแจ้งเหตุ']];
-  // แท็บภัยแล้ง: น้ำต้นทุน (อ่าง) → ฝน/พยากรณ์ → พื้นฐาน · ใช้ชั้นข้อมูลเดิมทั้งหมด (DRI ของ GISTDA เพิ่มเมื่อยืนยัน API แล้ว)
+  // แท็บภัยแล้ง: น้ำต้นทุน (อ่าง) → ฝน/พยากรณ์ → ความเสี่ยงภัยแล้ง (GISTDA) → พื้นฐาน · ชั้น dri/droughtfreq ไม่อยู่ในแท็บน้ำท่วม
   const GROUPS_D = [['① น้ำต้นทุน', ['dams', 'water', 'wlsta', 'glofas']], ['② ฝนและพยากรณ์', ['rainacc', 'rainsta', 'radar']],
-    ['พื้นฐาน', ['labels', 'villages', 'rivers', 'basins', 'structures']]];
-  const QUICK_D = [['dams', 'อ่างเก็บน้ำ'], ['rainacc', 'ฝนสะสม 7 วัน'], ['water', 'แหล่งน้ำ'], ['wlsta', 'ระดับน้ำ'],
+    ['③ ความเสี่ยงภัยแล้ง (GISTDA)', ['dri', 'droughtfreq']], ['พื้นฐาน', ['labels', 'villages', 'rivers', 'basins', 'structures']]];
+  const QUICK_D = [['dams', 'อ่างเก็บน้ำ'], ['rainacc', 'ฝนสะสม 7 วัน'], ['dri', 'DRI+'], ['droughtfreq', 'แล้งซ้ำซาก'], ['water', 'แหล่งน้ำ'], ['wlsta', 'ระดับน้ำ'],
     ['rivers', 'ลำน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน']];
   const MODES = {
     flood: { groups: GROUPS, quick: QUICK, on: defs.filter(d => d.on).map(d => d.id) },
-    drought: { groups: GROUPS_D, quick: QUICK_D, on: ['dams', 'rainacc', 'water', 'labels', 'villages'] },
+    drought: { groups: GROUPS_D, quick: QUICK_D, on: ['dams', 'rainacc', 'water', 'labels', 'villages', 'dri'] },
   };
   let mode = location.hash === '#drought' ? 'drought' : 'flood';
   const isDefault = (id) => MODES[mode].on.includes(id);
@@ -759,6 +805,13 @@ document.addEventListener('sdss:ready', async () => {
       const br = await json('data/live/basin_rain.json'), b = br && br.status === 'ok' && br.basins && br.basins.LCK;
       setK('k-d-r7', b ? fmt(b.past7d) + ' มม.' : '—', b ? `3 วัน ${fmt(b.past72)} มม. · แบบจำลองถ่วงพื้นที่ลุ่ม · ${hhmm(br.updated_at)}` : 'ไม่มีข้อมูล');
     } catch (e) { setK('k-d-r7', '—', 'ไม่มีข้อมูล'); }
+    try {   // ภัยแล้งซ้ำซาก ต.จันอัด: จำนวนครั้งที่ครอบคลุมพื้นที่ตำบลมากที่สุด (สัดส่วนพื้นที่จากขอบเขตตำบลของโครงการ)
+      const d = await droughtfreq(), ca = (d.by_tambon || {})['301010'], ys = d.years || [];
+      if (!ca || !ca.mode) throw new Error('no');
+      const oth = Object.entries(ca.share).filter(([k]) => +k !== ca.mode).sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `${k} ครั้ง ${fmt(v * 100, 0)}%`).join(' · ');
+      setK('k-d-dri', `${ca.mode} ครั้ง/${ys.length} ปี`, `${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่ตำบล${oth ? ' · ' + oth : ''} · ปี ${thYr(ys[0])}–${thYr(ys[ys.length - 1])} · GISTDA`);
+    } catch (e) { setK('k-d-dri', '—', 'รอ workflow drought-layers สร้างข้อมูล'); }
     try {
       const ec = await json('data/live/ecmwf.json');
       setK('k-d-fc', ec && ec.status === 'ok' ? fmt(ec.next72_mm) + ' มม.' : '—', ec && ec.status === 'ok' ? `24 ชม. ${fmt(ec.next24_mm)} มม. · ECMWF · ดึงเมื่อ ${hhmm(ec.updated_at)}` : 'ไม่มีข้อมูล');
@@ -773,6 +826,7 @@ document.addEventListener('sdss:ready', async () => {
     $('kpi-flood').hidden = m !== 'flood'; $('kpi-drought').hidden = m !== 'drought';
     document.body.classList.toggle('mode-drought', m === 'drought');
     if (m !== 'flood' && $('bank-alert')) $('bank-alert').hidden = true;
+    setTimeout(legendD);
     $('now-title').textContent = 'สถานีที่ควรจับตา';
     defs.forEach(d => { const want = isDefault(d.id);
       if (first ? want : state[d.id].on !== want) setOn(d.id, want); });

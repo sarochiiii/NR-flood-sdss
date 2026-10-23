@@ -91,9 +91,137 @@ def main():
             print(f"\n[ERR] {red(url)[:200]} · {red(e)[:200]}")
 
 
+BBOX = (101.71793, 14.8793, 102.5855, 15.53446)      # 26 ตำบล + buffer (เดียวกับ thaiwater_region.json)
+WMS = "https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/wms"
+TMS = "https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/tms"
+OUT = os.environ.get("OUT_DIR", "probe_out")
+
+
+def wms_probe():
+    """③ ชั้น DRI+: ชื่อชั้น/SRS/เวลา จาก GetCapabilities · legend · ภาพทดลองของพื้นที่ศึกษา (บันทึกเป็น artifact ไม่ commit)"""
+    import xml.etree.ElementTree as ET
+    os.makedirs(OUT, exist_ok=True)
+    print("\n=== ③ DRI+ 7 วัน (WMS) ===")
+    try:
+        st, ct, body = get(WMS + "?service=WMS&request=GetCapabilities&version=1.1.1&api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
+        print("  capabilities (ตัดตอน):", red(body.decode("utf-8", "replace"))[:1500].replace("\n", " "))
+        root = ET.fromstring(body)
+        layers = []
+        for ly in root.iter("Layer"):
+            name = ly.findtext("Name")
+            if not name:
+                continue
+            layers.append(name)
+            print(f"  ชั้น: {name} · {ly.findtext('Title')}")
+            print("     SRS:", [e.text for e in ly.findall("SRS")][:6])
+            for d in list(ly.findall("Dimension")) + list(ly.findall("Extent")):
+                print("     มิติ:", d.attrib, (d.text or "")[:200])
+            for st_ in ly.findall("Style"):
+                lu = st_.find("LegendURL/OnlineResource")
+                print("     style:", st_.findtext("Name"), "· legend:", red(lu.attrib.get("{http://www.w3.org/1999/xlink}href", lu.attrib.get("href", "")) if lu is not None else "-")[:200])
+            for bb in ly.findall("LatLonBoundingBox"):
+                print("     bbox:", bb.attrib)
+        fmts = [e.text for e in root.iter("Format")]
+        print("  รูปแบบที่รองรับ:", sorted({f for f in fmts if f})[:12])
+    except Exception as e:
+        print("  [ERR] GetCapabilities", red(e)[:200]); return
+    if not layers:
+        return
+    lyr = next((n for n in layers if "Root" not in n), layers[0])
+    print("  ใช้ชั้น:", lyr)
+    w, h = 1024, int(1024 * (BBOX[3] - BBOX[1]) / (BBOX[2] - BBOX[0]))
+    qs = {"service": "WMS", "request": "GetMap", "version": "1.1.1", "layers": lyr, "styles": "", "srs": "EPSG:4326",
+          "bbox": ",".join(map(str, BBOX)), "width": w, "height": h, "format": "image/png", "transparent": "true"}
+    qs["api_key"] = KEY
+    try:
+        st, ct, body = get(WMS + "?" + urllib.parse.urlencode(qs), {"API-Key": KEY}, timeout=90)
+        print(f"  GetMap [{st}] {ct} · {len(body)} bytes")
+        if "image" in ct:
+            open(os.path.join(OUT, "dri_studyarea.png"), "wb").write(body)
+            try:
+                from PIL import Image
+                im = Image.open(os.path.join(OUT, "dri_studyarea.png")).convert("RGBA")
+                cols = im.getcolors(1 << 20) or []
+                cols = sorted(cols, reverse=True)[:12]
+                print("  สีที่พบมากสุด (จำนวนพิกเซล, RGBA):", cols)
+                # ต.จันอัด (ecmwf.json) → พิกเซล
+                px = int((LON - BBOX[0]) / (BBOX[2] - BBOX[0]) * w); py = int((BBOX[3] - LAT) / (BBOX[3] - BBOX[1]) * h)
+                print(f"  สีที่ ต.จันอัด ({px},{py}):", im.getpixel((px, py)))
+            except Exception as e:
+                print("  (อ่านภาพไม่ได้)", red(e)[:120])
+        else:
+            print("  ข้อความ:", red(body.decode("utf-8", "replace"))[:400])
+    except urllib.error.HTTPError as e:
+        print(f"  GetMap [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:300])
+    except Exception as e:
+        print("  [ERR] GetMap", red(e)[:200])
+    for leg in [WMS + "?" + urllib.parse.urlencode({"service": "WMS", "request": "GetLegendGraphic", "version": "1.1.1", "layer": lyr, "format": "image/png", "api_key": KEY})]:
+        try:
+            st, ct, body = get(leg, {"API-Key": KEY})
+            print(f"  GetLegendGraphic [{st}] {ct} · {len(body)} bytes")
+            if "image" in ct:
+                open(os.path.join(OUT, "dri_legend.png"), "wb").write(body)
+            else:
+                print("   ", red(body.decode("utf-8", "replace"))[:300])
+        except urllib.error.HTTPError as e:
+            print(f"  GetLegendGraphic [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:200])
+        except Exception as e:
+            print("  [ERR] legend", red(e)[:150])
+    # TMS: ลองรูปแบบ path ทีละแบบ ที่ z=11 ครอบ ต.จันอัด (xyz และ tms y)
+    import math
+    z = 11; x = int((LON + 180) / 360 * 2 ** z); r = math.radians(LAT)
+    y = int((1 - math.log(math.tan(r) + 1 / math.cos(r)) / math.pi) / 2 * 2 ** z); yt = 2 ** z - 1 - y
+    for suf in [f"/{z}/{x}/{y}", f"/{z}/{x}/{y}.png", f"/{z}/{x}/{yt}", f"/{z}/{x}/{yt}.png"]:
+        try:
+            st, ct, body = get(TMS + suf + "?api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
+            print(f"  TMS {suf} [{st}] {ct} · {len(body)} bytes")
+            if "image" in ct and suf == f"/{z}/{x}/{y}":
+                try:
+                    import io
+                    from PIL import Image
+                    im = Image.open(io.BytesIO(body)); print("   โหมดภาพ:", im.mode, im.size)
+                    print("   สี (จำนวน, RGBA):", sorted(im.convert("RGBA").getcolors(1 << 20) or [], reverse=True)[:15])
+                except Exception as e:
+                    print("   (อ่านภาพไม่ได้)", red(e)[:100])
+        except urllib.error.HTTPError as e:
+            print(f"  TMS {suf} [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:120])
+        except Exception as e:
+            print(f"  TMS {suf} [ERR]", red(e)[:120])
+    # ภัยแล้งซ้ำซากแบบพื้นที่ (รอบแรกได้ 503) — ห่อ Feature เหมือน flood-recurrence
+    cell = [[102.10, 15.10], [102.18, 15.10], [102.18, 15.18], [102.10, 15.18], [102.10, 15.10]]   # ครอบ ต.จันอัด
+    feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [cell]}}
+    url = "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/drought-recurrence?area=" + urllib.parse.quote(json.dumps(feat, separators=(",", ":")))
+    try:
+        st, ct, body = get(url, {"API-Key": KEY}, timeout=90)
+        j = json.loads(body.decode("utf-8", "replace"))
+        print(f"  drought-recurrence area [{st}] · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:800])
+        for r in (j if isinstance(j, list) else []):   # แต่ละแถว: ตำบล/total/area และกรอบของ geom (ขอบเขตตำบล หรือ patch?)
+            cs = []
+            def walk(c):
+                if c and isinstance(c[0], (int, float)): cs.append(c)
+                else: [walk(x) for x in c]
+            walk((r.get("geom") or {}).get("coordinates") or [])
+            xs, ys = [c[0] for c in cs], [c[1] for c in cs]
+            print(f"   · {r.get('subdistrict_name')} {r.get('district_name')} total={r.get('total')} area={r.get('area')} "
+                  f"geom={(r.get('geom') or {}).get('type')} จุด={len(cs)} กรอบ={[round(min(xs),4), round(min(ys),4), round(max(xs),4), round(max(ys),4)] if cs else None} "
+                  f"detail={r.get('detail')}")
+    except urllib.error.HTTPError as e:
+        print(f"  drought-recurrence area [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:200])
+    except Exception as e:
+        print("  drought-recurrence area [ERR]", red(e)[:200])
+    try:   # รายปีของจุด ต.จันอัด (รอบแรกเห็นแค่โครงสร้าง)
+        st, ct, body = get(f"https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/drought-recurrence?lat={LAT}&lon={LON}", {"API-Key": KEY})
+        print("  drought-recurrence จุด ต.จันอัด:", red(body.decode("utf-8", "replace"))[:400])
+    except Exception as e:
+        print("  [ERR] point", red(e)[:150])
+
+
 if __name__ == "__main__":
     try:
-        main()
+        if os.environ.get("SKIP_SEARCH") != "1":
+            main()
+        if KEY:
+            wms_probe()
     except Exception as e:
         print(f"::error::{red(e)[:300]}")
     sys.exit(0)

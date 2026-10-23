@@ -34,4 +34,16 @@ assert.equal((await go('/floodfreq/14/12840/7494.png', env, 'OPTIONS')).status, 
 // upstream ไม่ใช่ภาพ → 502 ไม่ส่งข้อความต่อ
 globalThis.fetch = async () => new Response('{"error":"bad key k-test"}', { status: 401, headers: { 'Content-Type': 'application/json' } });
 r = await go('/floodfreq/14/12839/7494.png'); assert.equal(r.status, 502); assert.ok(!(await r.text()).includes('k-test'));
+// /dri/: upstream ค่าเริ่มต้นของ GISTDA · ไม่แปลง TMS_Y/SWAP_XY · ไม่มี .png ท้าย · cache 6 ชม. แยกจาก floodfreq · zoom 6–15
+globalThis.fetch = async (u, o) => { seen.push({ u: String(u), key: o.headers['API-Key'] });
+  return new Response(new Uint8Array([137, 80, 78, 71]), { status: 200, headers: { 'Content-Type': 'image/png' } }); };
+r = await go('/dri/11/1605/936.png', { ...env, TMS_Y: 'true', SWAP_XY: 'true', UPSTREAM: undefined });
+assert.equal(r.status, 200); assert.equal(r.headers.get('X-Cache'), 'MISS');
+assert.equal(seen.at(-1).u, 'https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/tms/11/1605/936'); assert.equal(seen.at(-1).key, 'k-test');
+assert.match(r.headers.get('Cache-Control'), /max-age=21600/);
+r = await go('/dri/11/1606/936.png', { ...env, DRI_UPSTREAM: 'https://up.example/dri/{z}/{x}/{y}' }); assert.equal(seen.at(-1).u, 'https://up.example/dri/11/1606/936');
+assert.equal((await go('/dri/5/25/14.png')).status, 400);
+assert.equal((await go('/dri/16/51360/29976.png')).status, 400);
+assert.equal((await go('/dri/11/0/0.png')).status, 204);
+r = await go('/dri/11/1604/936.png', { ALLOWED_ORIGIN: env.ALLOWED_ORIGIN }); assert.equal(r.status, 500);
 console.log('gistda_tile_proxy: ผ่านทุกกรณี');
