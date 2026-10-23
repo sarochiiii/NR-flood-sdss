@@ -103,7 +103,8 @@ def wms_probe():
     os.makedirs(OUT, exist_ok=True)
     print("\n=== ③ DRI+ 7 วัน (WMS) ===")
     try:
-        st, ct, body = get(WMS + "?service=WMS&request=GetCapabilities&version=1.1.1", {"API-Key": KEY})
+        st, ct, body = get(WMS + "?service=WMS&request=GetCapabilities&version=1.1.1&api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
+        print("  capabilities (ตัดตอน):", red(body.decode("utf-8", "replace"))[:1500].replace("\n", " "))
         root = ET.fromstring(body)
         layers = []
         for ly in root.iter("Layer"):
@@ -121,15 +122,17 @@ def wms_probe():
             for bb in ly.findall("LatLonBoundingBox"):
                 print("     bbox:", bb.attrib)
         fmts = [e.text for e in root.iter("Format")]
-        print("  รูปแบบที่รองรับ:", sorted(set(fmts))[:12])
+        print("  รูปแบบที่รองรับ:", sorted({f for f in fmts if f})[:12])
     except Exception as e:
         print("  [ERR] GetCapabilities", red(e)[:200]); return
     if not layers:
         return
-    lyr = layers[0]
+    lyr = next((n for n in layers if "Root" not in n), layers[0])
+    print("  ใช้ชั้น:", lyr)
     w, h = 1024, int(1024 * (BBOX[3] - BBOX[1]) / (BBOX[2] - BBOX[0]))
     qs = {"service": "WMS", "request": "GetMap", "version": "1.1.1", "layers": lyr, "styles": "", "srs": "EPSG:4326",
           "bbox": ",".join(map(str, BBOX)), "width": w, "height": h, "format": "image/png", "transparent": "true"}
+    qs["api_key"] = KEY
     try:
         st, ct, body = get(WMS + "?" + urllib.parse.urlencode(qs), {"API-Key": KEY}, timeout=90)
         print(f"  GetMap [{st}] {ct} · {len(body)} bytes")
@@ -152,7 +155,7 @@ def wms_probe():
         print(f"  GetMap [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:300])
     except Exception as e:
         print("  [ERR] GetMap", red(e)[:200])
-    for leg in [WMS + "?" + urllib.parse.urlencode({"service": "WMS", "request": "GetLegendGraphic", "version": "1.1.1", "layer": lyr, "format": "image/png"})]:
+    for leg in [WMS + "?" + urllib.parse.urlencode({"service": "WMS", "request": "GetLegendGraphic", "version": "1.1.1", "layer": lyr, "format": "image/png", "api_key": KEY})]:
         try:
             st, ct, body = get(leg, {"API-Key": KEY})
             print(f"  GetLegendGraphic [{st}] {ct} · {len(body)} bytes")
@@ -170,7 +173,7 @@ def wms_probe():
     y = int((1 - math.log(math.tan(r) + 1 / math.cos(r)) / math.pi) / 2 * 2 ** z); yt = 2 ** z - 1 - y
     for suf in [f"/{z}/{x}/{y}", f"/{z}/{x}/{y}.png", f"/{z}/{x}/{yt}", f"/{z}/{x}/{yt}.png"]:
         try:
-            st, ct, body = get(TMS + suf, {"API-Key": KEY})
+            st, ct, body = get(TMS + suf + "?api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
             print(f"  TMS {suf} [{st}] {ct} · {len(body)} bytes")
         except urllib.error.HTTPError as e:
             print(f"  TMS {suf} [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:120])
