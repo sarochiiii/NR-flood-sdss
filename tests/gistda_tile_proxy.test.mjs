@@ -46,4 +46,8 @@ assert.equal((await go('/dri/5/25/14.png')).status, 400);
 assert.equal((await go('/dri/16/51360/29976.png')).status, 400);
 assert.equal((await go('/dri/11/0/0.png')).status, 204);
 r = await go('/dri/11/1604/936.png', { ALLOWED_ORIGIN: env.ALLOWED_ORIGIN }); assert.equal(r.status, 500);
+// /smap/ /ndwi/: path GISTDA ตามชื่อดัชนี
+r = await go('/smap/11/1605/936.png'); assert.equal(r.status, 200); assert.equal(seen.at(-1).u, 'https://api-gateway.gistda.or.th/api/2.0/resources/maps/smap/7days/tms/11/1605/936');
+r = await go('/ndwi/11/1605/936.png'); assert.equal(r.status, 200); assert.equal(seen.at(-1).u, 'https://api-gateway.gistda.or.th/api/2.0/resources/maps/ndwi/7days/tms/11/1605/936');
+assert.equal((await go('/lst/11/1605/936.png')).status, 404);
 console.log('gistda_tile_proxy: ผ่านทุกกรณี');

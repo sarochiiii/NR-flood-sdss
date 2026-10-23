@@ -100,8 +100,8 @@
 
 ## GISTDA ภัยแล้ง — ตรวจแล้ว 23 ต.ค. 69 (workflow `gistda-drought-probe`)
 - **DRI+ 7 วัน (tile)**: `GET https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/tms/{z}/{x}/{y}` · key ใน header `API-Key` หรือ `?api_key=` · แกน y แบบ **XYZ** · **ห้ามมี `.png` ท้าย** (ได้ 400 Unsupported format) · ภาพ PNG 512 px RGBA · มีชุดเดียวกันสำหรับ NDWI (`maps/ndwi/7days/…`) และ SMAP (`maps/smap/7days/…`) และแบบ WMS/WMTS
-- คำอธิบายสี DRI+ (จากแผนที่ภัยแล้งของ GISTDA · `GetLegendGraphic` ไม่คืนภาพ): 50–59 ต่ำ · 60–69 ปานกลาง · 70–79 สูง · ≥80 สูงมาก · < 50 ไม่เสี่ยง (ไม่แสดง/ไม่นำมาคำนวณ) — NDWI/SMAP ยังไม่มีคำอธิบายสี จึงยังไม่แสดง
-- เว็บเรียกผ่าน Worker `gistda-tile-proxy` v1.3 `/dri/{z}/{x}/{y}.png` (z 6–15 · cache 6 ชม. · key อยู่ใน Secret)
+- คำอธิบายสี DRI+ (จากแผนที่ภัยแล้งของ GISTDA · `GetLegendGraphic` ไม่คืนภาพ): 50–59 ต่ำ · 60–69 ปานกลาง · 70–79 สูง · ≥80 สูงมาก · < 50 ไม่เสี่ยง (ไม่แสดง/ไม่นำมาคำนวณ) · SMAP (%): 0–8 ชื้นน้อยที่สุด · 9–22 ชื้นน้อย · 23–37 ชื้นปานกลาง · 38–51 ชื้นมาก · 52–100 ชื้นมากที่สุด · NDWI: −1 ถึง −0.14 ความชื้นต่ำมีผลต่อพืชมาก · −0.13 ถึง −0.08 ปานกลาง · −0.07 ถึง 0.02 น้อย · 0.03 ถึง 1 ชื้นมากที่สุด (ภาพคำอธิบายจากผู้ใช้ 24 ต.ค. 69)
+- เว็บเรียกผ่าน Worker `gistda-tile-proxy` v1.4 `/dri/` `/smap/` `/ndwi/{z}/{x}/{y}.png` (z 6–15 · cache 6 ชม. · key อยู่ใน Secret)
 - **ภัยแล้งซ้ำซาก**: `GET …/gi-service/v1.1/disasters/drought-recurrence?lat=&lon=` หรือ `?area={GeoJSON Feature}` · header `API-Key` · ตอบ `[{subdistrict_name, district_name, province_name, total, detail:[{year:"2023".."2018", freq}], area, geom}]` · แบบ area: `geom` = patch ที่ถูกตัดตามกรอบที่ส่ง (โครงสร้างเดียวกับ flood-recurrence) · ต.จันอัด (จุดตัวแทน) total = 5 (ไม่เกิดปี 2022)
 - `scripts/region/build_droughtfreq_gistda.py` (workflow `drought-layers`): ตาราง 0.05° ครอบ 26 ตำบล → dissolve ตาม total → ตัดตามขอบเขตตำบล → `region/data/droughtfreq.geojson` + `by_tambon` (สัดส่วนพื้นที่ตำบลตามจำนวนครั้ง ใช้ขอบเขตตำบลของโครงการ ไม่ใช้ชื่อตำบลที่ GISTDA ติดมากับ patch)
 - อื่น ๆ ที่พบ (ยังไม่ใช้): STAC `…/stac/drought/catalogs/{dri_plus,lst,ndwi,smap}` · `cropsdrought.gistda.or.th/api/rest/zonal/{province,irrigation,mainbasin}`

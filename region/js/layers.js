@@ -254,8 +254,16 @@ document.addEventListener('sdss:ready', async () => {
   const wlColor = v => v === null || v === undefined ? '#94A3B8' : WL_BR.find(([b]) => v >= b)[1];
 
   /* ---------- ภัยแล้ง (GISTDA): คำอธิบายสัญลักษณ์มุมขวาล่าง แสดงเมื่อเปิดชั้น dri / droughtfreq ---------- */
-  // DRI+ 7 วัน: ช่วงค่าและสีตามคำอธิบายสัญลักษณ์บนแผนที่ภัยแล้งของ GISTDA (ค่า < 50 = ไม่เสี่ยง ไม่แสดง)
-  const DRI_LEGEND = [['#FBE5B6', '50–59', 'ต่ำ'], ['#F7F700', '60–69', 'ปานกลาง'], ['#FFA200', '70–79', 'สูง'], ['#FF1E1E', '≥80', 'สูงมาก']];
+  // ดัชนีภัยแล้ง 7 วัน: ช่วงค่าและสีตามคำอธิบายสัญลักษณ์บนแผนที่ภัยแล้งของ GISTDA (ภาพจากผู้ใช้ 23 ต.ค. 69)
+  const IDX = {
+    dri: { name: 'พื้นที่เสี่ยงภัยแล้ง DRI+', unit: '', note: 'ค่า &lt; 50 ไม่เสี่ยง (ไม่แสดง)',
+      lg: [['#FBE5B6', '50–59', 'ต่ำ'], ['#F7F700', '60–69', 'ปานกลาง'], ['#FFA200', '70–79', 'สูง'], ['#FF1E1E', '≥80', 'สูงมาก']] },
+    smap: { name: 'ความชื้นในดิน SMAP', unit: ' (%)', note: '',
+      lg: [['#FF1010', '0–8', 'ชื้นน้อยที่สุด'], ['#F5B800', '9–22', 'ชื้นน้อย'], ['#FFFFA6', '23–37', 'ชื้นปานกลาง'], ['#8CCF9A', '38–51', 'ชื้นมาก'], ['#0C2C72', '52–100', 'ชื้นมากที่สุด']] },
+    ndwi: { name: 'ความชื้นพืชพรรณ NDWI', unit: '', note: '',
+      lg: [['#FF1010', '−1 ถึง −0.14', 'ความชื้นต่ำ มีผลต่อพืชมาก'], ['#FFA500', '−0.13 ถึง −0.08', 'ความชื้นต่ำ มีผลต่อพืชปานกลาง'],
+        ['#D4F56A', '−0.07 ถึง 0.02', 'ความชื้นต่ำ มีผลต่อพืชน้อย'], ['#2E7D0F', '0.03 ถึง 1', 'ชื้นมากที่สุด']] },
+  };
   const DF_COL = ['#FEF3C7', '#FDE68A', '#FBBF24', '#F59E0B', '#D97706', '#92400E'];   // ภัยแล้งซ้ำซาก 1–6 ครั้ง
   const TILE_WORKER = 'https://gistda-tile-proxy.sarochinee-k.workers.dev';   // เหมือน GISTDA_TILE_WORKER ใน chanat/index.html · key อยู่ใน Secret ของ Worker
   const LGD = { dri: '', droughtfreq: '' };
@@ -271,17 +279,19 @@ document.addEventListener('sdss:ready', async () => {
   /* ---------- นิยามเลเยอร์ ---------- */
   const defs = [
     {
-      id: 'dri', icon: 'ti-sun-high', label: 'พื้นที่เสี่ยงภัยแล้ง DRI+ 7 วัน (GISTDA)', on: false,
-      async build() {
-        // tile ผ่าน Worker gistda-tile-proxy เส้นทาง /dri/ (แกน y แบบ XYZ · ตรวจ 23 ต.ค. 69) · Worker ตอบ 204 นอกขอบเขต 26 ตำบล
-        const lyr = L.tileLayer(TILE_WORKER + '/dri/{z}/{x}/{y}.png', { minZoom: 6, maxNativeZoom: 15, maxZoom: 19, opacity: 0.8, zIndex: 300 });
+      id: 'dri', icon: 'ti-sun-high', label: 'ดัชนีภัยแล้ง 7 วัน (GISTDA)', on: false,
+      sw: ['dri', 'smap', 'ndwi'], swLabels: ['DRI', 'SMAP', 'NDWI'],
+      async build(s) {
+        // tile ผ่าน Worker gistda-tile-proxy เส้นทาง /dri/ /smap/ /ndwi/ (แกน y แบบ XYZ · ตรวจ 23 ต.ค. 69) · Worker ตอบ 204 นอกขอบเขต 26 ตำบล
+        const k = s.sw || 'dri', ix = IDX[k];
+        const lyr = L.tileLayer(`${TILE_WORKER}/${k}/{z}/{x}/{y}.png`, { minZoom: 6, maxNativeZoom: 15, maxZoom: 19, opacity: 0.8, zIndex: 300 });
         let bad = 0, ok = 0;   // Worker ตอบ 204 นอกขอบเขต (นับเป็น tileerror) → แจ้งเฉพาะเมื่อไม่มีภาพโหลดสำเร็จเลย
         lyr.on('tileload', () => ok++);
-        lyr.on('tileerror', () => { if (++bad >= 6 && !ok && state.dri.on && !state.dri.sub.startsWith('โหลด')) { state.dri.sub = 'โหลดภาพไม่สำเร็จ — ตรวจ Worker gistda-tile-proxy (v1.3 /dri/)'; render(); } });
-        LGD.dri = `<b>พื้นที่เสี่ยงภัยแล้ง DRI+ (GISTDA · 7 วันล่าสุด)</b>` + DRI_LEGEND.map(([c, v, t]) =>
-          `<div class="row"><span class="sw" style="background:${c}"></span>${v} ${t}</div>`).join('') + '<div class="muted">ค่า &lt; 50 ไม่เสี่ยง (ไม่แสดง)</div>';
+        lyr.on('tileerror', () => { if (++bad >= 6 && !ok && state.dri.on && !state.dri.sub.startsWith('โหลด')) { state.dri.sub = `โหลดภาพไม่สำเร็จ — ตรวจ Worker gistda-tile-proxy (v1.4 /${k}/)`; render(); } });
+        LGD.dri = `<b>${ix.name}${ix.unit} · GISTDA 7 วันล่าสุด</b>` + ix.lg.map(([c, v, t]) =>
+          `<div class="row"><span class="sw" style="background:${c}"></span>${v} ${t}</div>`).join('') + (ix.note ? `<div class="muted">${ix.note}</div>` : '');
         lyr.on('add remove', () => setTimeout(legendD));
-        return { lyr, sub: 'ดัชนีความเสี่ยงภัยแล้ง ปรับรายสัปดาห์ · สีตามคำอธิบายของ GISTDA', attr: 'ดัชนีภัยแล้ง DRI+ © GISTDA' };
+        return { lyr, sub: `${ix.name} · ปรับรายสัปดาห์ · สีตามคำอธิบายของ GISTDA`, attr: `${ix.name.split(' ').pop()} © GISTDA` };
       }
     },
     {
@@ -641,14 +651,15 @@ document.addEventListener('sdss:ready', async () => {
   // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
   const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
     ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน'], ['reports', 'จุดแจ้งเหตุ']];
-  // แท็บภัยแล้ง: น้ำต้นทุน (อ่าง) → ฝน/พยากรณ์ → ความเสี่ยงภัยแล้ง (GISTDA) → พื้นฐาน · ชั้น dri/droughtfreq ไม่อยู่ในแท็บน้ำท่วม
-  const GROUPS_D = [['① น้ำต้นทุน', ['dams', 'water', 'wlsta', 'glofas']], ['② ฝนและพยากรณ์', ['rainacc', 'rainsta', 'radar']],
-    ['③ ความเสี่ยงภัยแล้ง (GISTDA)', ['dri', 'droughtfreq']], ['พื้นฐาน', ['labels', 'villages', 'rivers', 'basins', 'structures']]];
-  const QUICK_D = [['dams', 'อ่างเก็บน้ำ'], ['rainacc', 'ฝนสะสม 7 วัน'], ['dri', 'DRI+'], ['droughtfreq', 'แล้งซ้ำซาก'], ['water', 'แหล่งน้ำ'], ['wlsta', 'ระดับน้ำ'],
-    ['rivers', 'ลำน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน']];
+  // แท็บภัยแล้ง: เฉพาะชั้นที่ใช้วิเคราะห์ภัยแล้ง (ผู้ใช้กำหนด 24 ต.ค. 69) — ดัชนี GISTDA → น้ำต้นทุน → พื้นฐาน
+  // ฝน เรดาร์ ระดับน้ำ GloFAS ลำน้ำ ลุ่มน้ำ อาคารชลศาสตร์ อยู่เฉพาะแท็บน้ำท่วม · ชั้น dri/droughtfreq ไม่อยู่ในแท็บน้ำท่วม
+  const GROUPS_D = [['① ดัชนีภัยแล้ง (GISTDA)', ['dri', 'droughtfreq']], ['② น้ำต้นทุน', ['dams', 'water']],
+    ['พื้นฐาน', ['labels', 'villages']]];
+  const QUICK_D = [['dri', 'ดัชนีภัยแล้ง'], ['droughtfreq', 'แล้งซ้ำซาก'], ['dams', 'อ่างเก็บน้ำ'], ['water', 'แหล่งน้ำ'],
+    ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน']];
   const MODES = {
     flood: { groups: GROUPS, quick: QUICK, on: defs.filter(d => d.on).map(d => d.id) },
-    drought: { groups: GROUPS_D, quick: QUICK_D, on: ['dams', 'rainacc', 'water', 'labels', 'villages', 'dri'] },
+    drought: { groups: GROUPS_D, quick: QUICK_D, on: ['dri', 'dams', 'water', 'labels', 'villages'] },
   };
   let mode = location.hash === '#drought' ? 'drought' : 'flood';
   const isDefault = (id) => MODES[mode].on.includes(id);
@@ -675,6 +686,7 @@ document.addEventListener('sdss:ready', async () => {
   async function rebuild(id) {
     const s = state[id];
     if (s.lyr) { map.removeLayer(s.lyr); s.lyr = null; }
+    if (s.attr) map.attributionControl.removeAttribution(s.attr);   // ชื่อแหล่งข้อมูลเปลี่ยนตามตัวเลือก (เช่น DRI → SMAP)
     await setOn(id, true);
   }
   async function setOn(id, on) {
@@ -801,21 +813,13 @@ document.addEventListener('sdss:ready', async () => {
         const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 11)); m.openPopup(); }
       });
     } catch (e) { setK('k-d-low', '—', e.message); }
-    try {
-      const br = await json('data/live/basin_rain.json'), b = br && br.status === 'ok' && br.basins && br.basins.LCK;
-      setK('k-d-r7', b ? fmt(b.past7d) + ' มม.' : '—', b ? `3 วัน ${fmt(b.past72)} มม. · แบบจำลองถ่วงพื้นที่ลุ่ม · ${hhmm(br.updated_at)}` : 'ไม่มีข้อมูล');
-    } catch (e) { setK('k-d-r7', '—', 'ไม่มีข้อมูล'); }
     try {   // ภัยแล้งซ้ำซาก ต.จันอัด: จำนวนครั้งที่ครอบคลุมพื้นที่ตำบลมากที่สุด (สัดส่วนพื้นที่จากขอบเขตตำบลของโครงการ)
       const d = await droughtfreq(), ca = (d.by_tambon || {})['301010'], ys = d.years || [];
       if (!ca || !ca.mode) throw new Error('no');
-      const oth = Object.entries(ca.share).filter(([k]) => +k !== ca.mode).sort((a, b) => b[1] - a[1])
+      const oth = Object.entries(ca.share).filter(([k, v]) => +k !== ca.mode && v >= 0.01).sort((a, b) => b[1] - a[1])
         .map(([k, v]) => `${k} ครั้ง ${fmt(v * 100, 0)}%`).join(' · ');
       setK('k-d-dri', `${ca.mode} ครั้ง/${ys.length} ปี`, `${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่ตำบล${oth ? ' · ' + oth : ''} · ปี ${thYr(ys[0])}–${thYr(ys[ys.length - 1])} · GISTDA`);
     } catch (e) { setK('k-d-dri', '—', 'รอ workflow drought-layers สร้างข้อมูล'); }
-    try {
-      const ec = await json('data/live/ecmwf.json');
-      setK('k-d-fc', ec && ec.status === 'ok' ? fmt(ec.next72_mm) + ' มม.' : '—', ec && ec.status === 'ok' ? `24 ชม. ${fmt(ec.next24_mm)} มม. · ECMWF · ดึงเมื่อ ${hhmm(ec.updated_at)}` : 'ไม่มีข้อมูล');
-    } catch (e) { setK('k-d-fc', '—', 'ไม่มีข้อมูล'); }
   }
 
   // สลับแท็บ: เปิด/ปิดชั้นข้อมูลตามค่าเริ่มต้นของแท็บ · สลับแถว KPI · รายการจับตา · แถบเตือนตลิ่ง (เฉพาะน้ำท่วม)
