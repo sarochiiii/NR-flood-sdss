@@ -595,16 +595,27 @@ document.addEventListener('sdss:ready', async () => {
   // แถบ tick box ชั้นข้อมูลสำคัญบนแผนที่ (มือถือ: แผงชั้นข้อมูลอยู่ใต้แผนที่ ต้องเลื่อนลงไปไกล) · สถานะตรงกับแผงซ้ายเสมอ
   const QUICK = [['wlsta', 'ระดับน้ำ'], ['dams', 'อ่างเก็บน้ำ'], ['rainsta', 'ฝน'], ['gistda', 'น้ำท่วม'],
     ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน'], ['reports', 'จุดแจ้งเหตุ']];
+  // แท็บภัยแล้ง: น้ำต้นทุน (อ่าง) → ฝน/พยากรณ์ → พื้นฐาน · ใช้ชั้นข้อมูลเดิมทั้งหมด (DRI ของ GISTDA เพิ่มเมื่อยืนยัน API แล้ว)
+  const GROUPS_D = [['① น้ำต้นทุน', ['dams', 'water', 'wlsta', 'glofas']], ['② ฝนและพยากรณ์', ['rainacc', 'rainsta', 'radar']],
+    ['พื้นฐาน', ['labels', 'villages', 'rivers', 'basins', 'structures']]];
+  const QUICK_D = [['dams', 'อ่างเก็บน้ำ'], ['rainacc', 'ฝนสะสม 7 วัน'], ['water', 'แหล่งน้ำ'], ['wlsta', 'ระดับน้ำ'],
+    ['rivers', 'ลำน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน']];
+  const MODES = {
+    flood: { groups: GROUPS, quick: QUICK, on: defs.filter(d => d.on).map(d => d.id) },
+    drought: { groups: GROUPS_D, quick: QUICK_D, on: ['dams', 'rainacc', 'water', 'labels', 'villages'] },
+  };
+  let mode = location.hash === '#drought' ? 'drought' : 'flood';
+  const isDefault = (id) => MODES[mode].on.includes(id);
   function renderQuick() {
     const el = $('qlayers'); if (!el) return;
-    el.innerHTML = QUICK.filter(([id]) => state[id]).map(([id, lab]) => { const s = state[id];
+    el.innerHTML = MODES[mode].quick.filter(([id]) => state[id]).map(([id, lab]) => { const s = state[id];
       return `<label class="qchip${s.on ? ' on' : ''}${s.loading ? ' busy' : ''}${s.err ? ' err' : ''}" title="${esc(s.err || lab)}">
         <input type="checkbox" data-id="${id}" ${s.on ? 'checked' : ''}> ${lab}</label>`; }).join('');
     el.querySelectorAll('input').forEach(cb => cb.onchange = () => setOn(cb.dataset.id, cb.checked));
   }
   function render() {
     renderQuick();
-    $('layers').innerHTML = GROUPS.map(([g, ids]) => {
+    $('layers').innerHTML = MODES[mode].groups.map(([g, ids]) => {
       const rows = ids.map(id => defs.find(d => d.id === id)).filter(Boolean);
       return rows.length ? `<div class="lgrp">${g}</div>` + rows.map(row).join('') : '';
     }).join('');
@@ -714,11 +725,66 @@ document.addEventListener('sdss:ready', async () => {
     } catch (e) { setK('k-flood', '—', 'ไม่มีข้อมูล'); }
   }
 
+  /* ---------- แท็บภัยแล้ง: KPI + อ่างที่ควรจับตา (แสดงค่าจริง ไม่จัดระดับแล้ง/ไม่แล้ง) ---------- */
+  // อ่างลำเชียงไกร: ค่าล่าสุดระหว่าง items กับ hist (กติกาเดียวกับรายงานสถานการณ์ใน report.js)
+  const lckPct = (rid, code) => { const items = rid && rid.status === 'ok' ? (rid.items || []) : [];
+    const hh = ((rid && rid.hist) || {})[code] || [], h2 = hh.filter(r => r[2] != null), i = items.find(x => x.code === code);
+    if (i && i.pct != null && (!h2.length || i.date >= h2[h2.length - 1][0])) return { pct: i.pct, date: i.date, prev: h2.length ? h2[h2.length - 1][2] : null };
+    return h2.length ? { pct: h2[h2.length - 1][2], date: h2[h2.length - 1][0], prev: h2.length > 1 ? h2[h2.length - 2][2] : null } : null; };
+  const dDate = (s) => s ? new Date(s + 'T00:00:00+07:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '—';
+  async function refreshDrought() {
+    try {
+      const rid = await json('data/live/rid_reservoir.json');
+      [['k-d-up', 'rsv300'], ['k-d-lo', 'rsv292']].forEach(([k, code]) => { const r = lckPct(rid, code);
+        setK(k, r ? fmt(r.pct, 0) + '%' : '—', r ? `ข้อมูลวันที่ ${dDate(r.date)}${r.prev != null && r.pct !== r.prev ? ` · ${r.pct > r.prev ? '▲' : '▼'} ${fmt(Math.abs(r.pct - r.prev), 1)}% จากวันก่อน` : ''} · กรมชลประทาน` : 'ไม่มีข้อมูล'); });
+    } catch (e) { setK('k-d-up', '—', 'ไม่มีข้อมูล'); setK('k-d-lo', '—', 'ไม่มีข้อมูล'); }
+    try {
+      const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null && rel(d));
+      const crit = dams.filter(d => d.pct < 30), low = dams.filter(d => d.pct >= 30 && d.pct < 50);   // ช่วงสีเดิมของชั้นอ่าง (DAM_BR)
+      setK('k-d-low', `${crit.length}`, `30–50% อีก ${low.length} อ่าง · จาก ${dams.length} อ่าง · ${hhmm(p.updated_at)}`);
+      const h = await history();
+      const rows = dams.slice().sort((a, b) => a.pct - b.pct).slice(0, 8);
+      $('now-title').textContent = 'อ่างเก็บน้ำที่ควรจับตา (น้ำน้อยก่อน)';
+      $('now').innerHTML = rows.length ? rows.map(d => `<div class="wrow" data-k="d:${esc(d.name)}" data-l="dams">
+          <span><span class="dot" style="background:${damColor(d)}"></span>${esc(d.name)} ${tag(d)}<span class="muted" style="display:block;font-size:11.5px;margin-left:15px">อ่างเก็บน้ำ · อ.${esc(d.amphoe || '—')}</span></span>
+          <span class="mono">${fmt(d.pct, 0)}%${arrowShort(trendDam(h, d).d, '%')}</span></div>`).join('')
+        : '<div class="muted" style="font-size:13px">ไม่มีข้อมูลอ่างเก็บน้ำ</div>';
+      $('now-ts').textContent = '· ' + hhmm(p.updated_at);
+      $('now').querySelectorAll('.wrow').forEach(el => el.onclick = async () => {
+        if (!state.dams.on) await setOn('dams', true);
+        const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 11)); m.openPopup(); }
+      });
+    } catch (e) { setK('k-d-low', '—', e.message); }
+    try {
+      const br = await json('data/live/basin_rain.json'), b = br && br.status === 'ok' && br.basins && br.basins.LCK;
+      setK('k-d-r7', b ? fmt(b.past7d) + ' มม.' : '—', b ? `3 วัน ${fmt(b.past72)} มม. · แบบจำลองถ่วงพื้นที่ลุ่ม · ${hhmm(br.updated_at)}` : 'ไม่มีข้อมูล');
+    } catch (e) { setK('k-d-r7', '—', 'ไม่มีข้อมูล'); }
+    try {
+      const ec = await json('data/live/ecmwf.json');
+      setK('k-d-fc', ec && ec.status === 'ok' ? fmt(ec.next72_mm) + ' มม.' : '—', ec && ec.status === 'ok' ? `24 ชม. ${fmt(ec.next24_mm)} มม. · ECMWF · ดึงเมื่อ ${hhmm(ec.updated_at)}` : 'ไม่มีข้อมูล');
+    } catch (e) { setK('k-d-fc', '—', 'ไม่มีข้อมูล'); }
+  }
+
+  // สลับแท็บ: เปิด/ปิดชั้นข้อมูลตามค่าเริ่มต้นของแท็บ · สลับแถว KPI · รายการจับตา · แถบเตือนตลิ่ง (เฉพาะน้ำท่วม)
+  function applyMode(m, first) {
+    mode = m;
+    document.querySelectorAll('#modetabs .mtab[data-mode]').forEach(a => { const on = a.dataset.mode === m;
+      a.classList.toggle('on', on); a.setAttribute('aria-current', on ? 'page' : 'false'); });
+    $('kpi-flood').hidden = m !== 'flood'; $('kpi-drought').hidden = m !== 'drought';
+    document.body.classList.toggle('mode-drought', m === 'drought');
+    if (m !== 'flood' && $('bank-alert')) $('bank-alert').hidden = true;
+    $('now-title').textContent = 'สถานีที่ควรจับตา';
+    defs.forEach(d => { const want = isDefault(d.id);
+      if (first ? want : state[d.id].on !== want) setOn(d.id, want); });
+    render();
+    if (m === 'drought') refreshDrought(); else refreshNow();
+  }
+
   /* ---------- แถบแจ้งเตือนระดับน้ำเทียบตลิ่ง ---------- */
   function renderAlert(alarm) {
     const el = $('bank-alert');
     if (!el) return;
-    if (!alarm.length) { el.hidden = true; return; }
+    if (!alarm.length || mode !== 'flood') { el.hidden = true; return; }
     const top = alarm[0].b;
     el.hidden = false;
     el.style.background = top.color;
@@ -786,9 +852,9 @@ document.addEventListener('sdss:ready', async () => {
     for (const d of defs) {
       const st = state[d.id];
       // เลเยอร์ที่เปิดอยู่ → โหลดใหม่ · เลเยอร์ที่ตั้งให้เปิดแต่โหลดไม่สำเร็จตอนแรก → ลองใหม่
-      if (d.id !== 'labels' && (st.on || (d.on && st.err))) await rebuild(d.id);
+      if (d.id !== 'labels' && (st.on || (isDefault(d.id) && st.err))) await rebuild(d.id);
     }
-    await refreshNow();
+    await (mode === 'drought' ? refreshDrought() : refreshNow());
   }
   setInterval(refreshAll, 10 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastRun > 10 * 60 * 1000) refreshAll(); });
@@ -817,6 +883,9 @@ document.addEventListener('sdss:ready', async () => {
 
   defs.forEach(d => state[d.id] = { on: false });
   render();
-  defs.filter(d => d.on).forEach(d => setOn(d.id, true));
-  refreshNow();
+  applyMode(mode, true);
+  window.addEventListener('hashchange', () => {
+    const m = location.hash === '#drought' ? 'drought' : location.hash === '#flood' || !location.hash ? 'flood' : null;
+    if (m && m !== mode) applyMode(m);
+  });
 });

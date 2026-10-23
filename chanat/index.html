@@ -80,7 +80,16 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
 .funders .fsep{width:1px;height:30px;background:#94A3B8;flex-shrink:0}
 @media (max-width:640px){.funders{gap:10px;padding-left:12px;padding-right:12px}.funders img{height:26px}.funders .fsep{height:22px}}
 @media print{.funders{display:none}}
+/* แท็บหัวข้อ (เหมือน region/css/region.css) */
+.modetabs{display:flex;gap:4px;margin:8px 16px 8px;padding:4px;background:#EEF2F7;border-radius:12px;max-width:420px;flex-shrink:0}
+.mtab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;border-radius:9px;font-size:14px;font-weight:600;color:#334155;text-decoration:none;white-space:nowrap}
+.mtab:hover{background:#fff}
+.mtab .ti{font-size:17px}
+.mtab.on{background:#0F766E;color:#fff;box-shadow:0 1px 3px rgba(15,118,110,.35)}
+@media (max-width:860px){.modetabs{margin:8px 12px;max-width:none}.mtab{font-size:13.5px;padding:8px 6px}}
+@media print{.modetabs{display:none}}
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
 </head>
 <body>
 <!-- แถบโลโก้หน่วยงานสนับสนุน (ลำดับตามที่โครงการกำหนด) · ไฟล์ region/img/logos/ -->
@@ -100,6 +109,12 @@ body{font-family:var(--font);color:var(--text);background:#fff;font-size:14px;di
   </div>
   <a href="../region/">← SDSS-ChanAT ภาพรวม</a>
 </header>
+<!-- แท็บหัวข้อ (เหมือน region/index.html) · หน้านี้ = Sandbox -->
+<nav class="modetabs" aria-label="หัวข้อ">
+  <a class="mtab" href="../region/#flood"><i class="ti ti-ripple" aria-hidden="true"></i> น้ำท่วม</a>
+  <a class="mtab" href="../region/#drought"><i class="ti ti-sun" aria-hidden="true"></i> ภัยแล้ง</a>
+  <a class="mtab on" href="./" aria-current="page"><i class="ti ti-building" aria-hidden="true"></i> Sandbox</a>
+</nav>
 
 <main class="body">
   <div class="mapwrap"><div id="map"></div>

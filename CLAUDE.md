@@ -21,7 +21,7 @@
 
 ## โครงสร้างสำคัญ
 ```
-region/index.html            หน้าหลัก (หัว SDSS-ChanAT) · lamchiangkrai.html หน้าลำเชียงไกร
+region/index.html            หน้าหลัก (หัว SDSS-ChanAT) · แท็บ น้ำท่วม `#flood` / ภัยแล้ง `#drought` / Sandbox (→ /chanat/) · lamchiangkrai.html หน้าลำเชียงไกร
 region/js/region.js          แผนที่ ขอบเขตตำบล โหมดสี การ์ดตำบล T (basinT)
 region/js/report.js          รายงานสถานการณ์สำหรับ LINE (situationReport) — **ต้องเหมือนใน line/kv/worker.js**
 region/js/print.js           ปุ่ม 🖨 พิมพ์แผนที่ + รายงาน 1 หน้า A4 (window.print · บันทึก PDF ได้ · ใช้ทั้ง region และ chanat)
@@ -39,7 +39,7 @@ docs/                        คู่มือส่งมอบ
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
 2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, MONITOR_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=50**
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=51**
 4. **รายงานมี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` — `situationReport` ("สถานการณ์น้ำ") และ `sandboxReport` ("รายงานบ้านด่านติง") ระหว่าง `// >>> ชื่อฟังก์ชัน` … `// <<<` — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)

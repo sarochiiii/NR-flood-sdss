@@ -1,0 +1,18 @@
+name: gistda-drought-probe
+# วินิจฉัย: หา API พื้นที่เสี่ยงภัยแล้ง (DRI) ของ GISTDA สำหรับแท็บ "ภัยแล้ง" — พิมพ์ผลใน log เท่านั้น · ไม่ commit · ปิดบัง key
+on:
+  push:          # รันเมื่อแก้สคริปต์บน branch ทดลอง (workflow_dispatch ใช้ได้เฉพาะเมื่อไฟล์นี้อยู่บน main)
+    branches-ignore: [main]
+    paths: [scripts/region/probe_gistda_drought.py, .github/workflows/gistda-drought-probe.yml]
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - name: ค้นชุดข้อมูลและเรียก API ภัยแล้งของ GISTDA
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: python scripts/region/probe_gistda_drought.py
