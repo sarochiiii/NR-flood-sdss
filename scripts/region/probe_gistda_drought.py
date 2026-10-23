@@ -175,18 +175,36 @@ def wms_probe():
         try:
             st, ct, body = get(TMS + suf + "?api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
             print(f"  TMS {suf} [{st}] {ct} · {len(body)} bytes")
+            if "image" in ct and suf == f"/{z}/{x}/{y}":
+                try:
+                    import io
+                    from PIL import Image
+                    im = Image.open(io.BytesIO(body)); print("   โหมดภาพ:", im.mode, im.size)
+                    print("   สี (จำนวน, RGBA):", sorted(im.convert("RGBA").getcolors(1 << 20) or [], reverse=True)[:15])
+                except Exception as e:
+                    print("   (อ่านภาพไม่ได้)", red(e)[:100])
         except urllib.error.HTTPError as e:
             print(f"  TMS {suf} [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:120])
         except Exception as e:
             print(f"  TMS {suf} [ERR]", red(e)[:120])
     # ภัยแล้งซ้ำซากแบบพื้นที่ (รอบแรกได้ 503) — ห่อ Feature เหมือน flood-recurrence
-    cell = [[102.13, 15.13], [102.15, 15.13], [102.15, 15.15], [102.13, 15.15], [102.13, 15.13]]
+    cell = [[102.10, 15.10], [102.18, 15.10], [102.18, 15.18], [102.10, 15.18], [102.10, 15.10]]   # ครอบ ต.จันอัด
     feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [cell]}}
     url = "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.1/disasters/drought-recurrence?area=" + urllib.parse.quote(json.dumps(feat, separators=(",", ":")))
     try:
         st, ct, body = get(url, {"API-Key": KEY}, timeout=90)
         j = json.loads(body.decode("utf-8", "replace"))
         print(f"  drought-recurrence area [{st}] · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:800])
+        for r in (j if isinstance(j, list) else []):   # แต่ละแถว: ตำบล/total/area และกรอบของ geom (ขอบเขตตำบล หรือ patch?)
+            cs = []
+            def walk(c):
+                if c and isinstance(c[0], (int, float)): cs.append(c)
+                else: [walk(x) for x in c]
+            walk((r.get("geom") or {}).get("coordinates") or [])
+            xs, ys = [c[0] for c in cs], [c[1] for c in cs]
+            print(f"   · {r.get('subdistrict_name')} {r.get('district_name')} total={r.get('total')} area={r.get('area')} "
+                  f"geom={(r.get('geom') or {}).get('type')} จุด={len(cs)} กรอบ={[round(min(xs),4), round(min(ys),4), round(max(xs),4), round(max(ys),4)] if cs else None} "
+                  f"detail={r.get('detail')}")
     except urllib.error.HTTPError as e:
         print(f"  drought-recurrence area [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:200])
     except Exception as e:
