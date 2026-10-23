@@ -187,6 +187,26 @@ def wms_probe():
             print(f"  TMS {suf} [HTTP {e.code}]", red(e.read().decode("utf-8", "replace"))[:120])
         except Exception as e:
             print(f"  TMS {suf} [ERR]", red(e)[:120])
+    for idx in ("smap", "ndwi"):   # แกน y ของดัชนีอื่น: XYZ (y) ควรได้ภาพที่มีข้อมูลไทย · TMS (yt) ตกทะเลจีนใต้/ว่าง
+        base = TMS.replace("/dri/", f"/{idx}/")
+        for suf in (f"/{z}/{x}/{y}", f"/{z}/{x}/{yt}"):
+            try:
+                st, ct, body = get(base + suf + "?api_key=" + urllib.parse.quote(KEY), {"API-Key": KEY})
+                info = ""
+                if "image" in ct:
+                    try:
+                        import io
+                        from PIL import Image
+                        im = Image.open(io.BytesIO(body)).convert("RGBA")
+                        nz = sum(n for n, c in (im.getcolors(1 << 20) or []) if c[3] > 0)
+                        info = f" · พิกเซลมีสี {nz}/{im.size[0] * im.size[1]} · สีเด่น {sorted(im.getcolors(1 << 20) or [], reverse=True)[:4]}"
+                    except Exception as e:
+                        info = " (อ่านภาพไม่ได้)"
+                print(f"  {idx} {suf} [{st}] {ct} · {len(body)} bytes{info}")
+            except urllib.error.HTTPError as e:
+                print(f"  {idx} {suf} [HTTP {e.code}]")
+            except Exception as e:
+                print(f"  {idx} {suf} [ERR]", red(e)[:100])
     # ภัยแล้งซ้ำซากแบบพื้นที่ (รอบแรกได้ 503) — ห่อ Feature เหมือน flood-recurrence
     cell = [[102.10, 15.10], [102.18, 15.10], [102.18, 15.18], [102.10, 15.18], [102.10, 15.10]]   # ครอบ ต.จันอัด
     feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [cell]}}
