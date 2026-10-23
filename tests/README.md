@@ -3,6 +3,9 @@
 ## Worker LINE (KV)
 `node --no-warnings tests/worker_kv.test.mjs` — ลงทะเบียน ADM ด้วยรหัสเชิญ · ขอความช่วยเหลือแจ้ง ADM · กลุ่ม LINE · /api/reports ไม่มีข้อมูลส่วนบุคคล · /stats ต้องใช้ key
 
+## Message Gateway (LINE v4.15)
+`node --no-warnings tests/gateway.test.mjs` — P1 ส่งแม้โควตาหมด (Free ถูกปฏิเสธ → inbox) · P2 เข้า inbox เมื่อต่ำกว่าสำรอง · รวม ≤ 5 object ต่อคำขอ · งบรายวัน · P3 → inbox · piggyback แนบ reply ≤ 5 แล้วลบ · escalation ตามเวลาและไม่เกินโควตา · สรุป 07:00 นับตามสมาชิกกลุ่ม ไม่ส่งเมื่อสถานะไม่เปลี่ยน/โควตาไม่พอ/ตรวจโควตาไม่ได้/room · /stats ไม่มี userId/groupId
+
 ## หน้าเว็บ (smoke test ด้วย jsdom)
 ติดตั้ง: `npm i -D jsdom leaflet`
 แนวทาง: โหลด `region/index.html` ตัด `<script src>` ออก → `window.eval` leaflet → `window.eval` `region/liff/config.js`, `js/layers.js`, `js/region.js`
