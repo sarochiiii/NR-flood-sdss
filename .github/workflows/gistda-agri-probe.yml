@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: '3.11' }
       - name: ค้นชุดข้อมูลและเรียก API พื้นที่การเกษตรของ GISTDA
-        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}', OUT_DIR: probe_out }
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}', OUT_DIR: probe_out, ONLY_CROPS: '1' }
         run: python scripts/region/probe_gistda_agri.py
       - name: เก็บภาพทดลอง (artifact 3 วัน · ไม่ commit)
         uses: actions/upload-artifact@v4

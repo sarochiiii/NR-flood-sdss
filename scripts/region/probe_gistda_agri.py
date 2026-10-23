@@ -166,7 +166,65 @@ def call(cand):
             print(f"\n[ERR] {red(url)[:200]} · {red(e)[:160]}")
 
 
+AG = "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v2.2/agriculture/"
+CROPS = ["sugarcane-weekly-40m", "cassava-weekly-40m", "maize-weekly-40m", "rice-weekly-40m", "check-crop"]
+
+
+def crops():
+    """⑤ พืชเศรษฐกิจ v2.2 (พบใน CKAN รอบแรก): จุด ต.จันอัด และแบบพื้นที่ (กรอบ ~2×2 กม. กลาง ต.จันอัด) → โครงสร้าง แถวตัวอย่าง กรอบ geom"""
+    print("\n=== ⑤ พืชเศรษฐกิจ v2.2 (ต.จันอัด) ===")
+    if not KEY:
+        print("(ข้าม — ไม่มี GISTDA_API_KEY)"); return
+    a, b, d = 102.14, 15.145, 0.02
+    feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[[a, b], [a + d, b], [a + d, b + d], [a, b + d], [a, b]]]}}
+    for c in CROPS:
+        for q in (f"lat={LAT}&lon={LON}", "area=" + urllib.parse.quote(json.dumps(feat, separators=(",", ":")))):
+            url = AG + c + "?" + q
+            tag = "จุด" if q.startswith("lat") else "พื้นที่"
+            try:
+                st, ct, body = get(url, {"API-Key": KEY}, timeout=120)
+                j = json.loads(body.decode("utf-8", "replace"))
+                print(f"\n[{st}] {c} · {tag} · {len(body)} bytes · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:900])
+                rows = j if isinstance(j, list) else (j.get("features") or j.get("data") or []) if isinstance(j, dict) else []
+                for r in rows[:6] if isinstance(rows, list) else []:
+                    if not isinstance(r, dict):
+                        continue
+                    g = r.get("geom") or r.get("geometry")
+                    cs = []
+                    def walk(x):
+                        if x and isinstance(x[0], (int, float)): cs.append(x)
+                        elif isinstance(x, list): [walk(y) for y in x]
+                    walk((g or {}).get("coordinates") or [])
+                    props = {k: v for k, v in r.items() if k not in ("geom", "geometry")}
+                    bb = [round(min(x[0] for x in cs), 4), round(min(x[1] for x in cs), 4), round(max(x[0] for x in cs), 4), round(max(x[1] for x in cs), 4)] if cs else None
+                    print(f"   · {red(json.dumps(props, ensure_ascii=False))[:400]} · geom={(g or {}).get('type')} จุด={len(cs)} กรอบ={bb}")
+                if isinstance(rows, list) and len(rows) > 6:
+                    print(f"   … อีก {len(rows) - 6} แถว")
+            except urllib.error.HTTPError as e:
+                print(f"\n[HTTP {e.code}] {c} · {tag} · {red(e.read().decode('utf-8', 'replace'))[:200]}")
+            except Exception as e:
+                print(f"\n[ERR] {c} · {tag} · {red(e)[:160]}")
+    for u in ZONAL + ["https://cropsdrought.gistda.or.th/api/statwater/et/province", "https://cropsdrought.gistda.or.th/api-docs"]:
+        try:
+            st, ct, body = get(u, timeout=60)
+            txt = body.decode("utf-8", "replace")
+            try:
+                j = json.loads(txt)
+                print(f"\n[{st}] {u} · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:700])
+                nr = [r for r in (j if isinstance(j, list) else j.get("data", []) if isinstance(j, dict) else []) if "นครราชสีมา" in json.dumps(r, ensure_ascii=False)][:1]
+                for r in nr:
+                    print("   แถวนครราชสีมา:", red(json.dumps(r, ensure_ascii=False))[:500])
+            except Exception:
+                print(f"\n[{st}] {u} · {ct} · {len(body)} bytes · ข้อความ:", red(txt)[:300].replace("\n", " "))
+        except urllib.error.HTTPError as e:
+            print(f"\n[HTTP {e.code}] {u}")
+        except Exception as e:
+            print(f"\n[ERR] {u} · {red(e)[:120]}")
+
+
 def main():
+    if os.environ.get("ONLY_CROPS") == "1":
+        return crops()
     found, paths = set(), set()
     ckan(found)
     portals(found, paths)
