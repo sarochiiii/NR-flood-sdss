@@ -97,3 +97,11 @@
 
 ## ตำแหน่งหมู่บ้าน (นำเข้า 17 ต.ค. 69)
 `Village.shp` (MultiPoint 1 จุด/หมู่บ้าน · EPSG:32647 · UTF-8 · field CODE, VILL_NO, VILL_NAME, TAM_NAME, AMP_NAME) → `scripts/region/import_villages.py` → `region/data/villages.geojson` (WGS84) · ต.จันอัด 8 หมู่: ม.1 สำโรง · ม.2 จันอัด · ม.3 เหล่า · ม.4 โค้งกระชาย · ม.5 ด่านติง · ม.6 ดอน · ม.7 ใหม่ · ม.8 โค้งกระพี้ · ทุกจุดอยู่ใน ต.จันอัด · ม.5 ด่านติงห่างศูนย์กลาง DT ใน /chanat/ (ประมาณจากกลุ่มอาคาร) 310 ม. · ไฟล์ shp ต้นฉบับไม่เก็บใน repo
+
+## GISTDA ภัยแล้ง — ตรวจแล้ว 23 ต.ค. 69 (workflow `gistda-drought-probe`)
+- **DRI+ 7 วัน (tile)**: `GET https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/tms/{z}/{x}/{y}` · key ใน header `API-Key` หรือ `?api_key=` · แกน y แบบ **XYZ** · **ห้ามมี `.png` ท้าย** (ได้ 400 Unsupported format) · ภาพ PNG 512 px RGBA · มีชุดเดียวกันสำหรับ NDWI (`maps/ndwi/7days/…`) และ SMAP (`maps/smap/7days/…`) และแบบ WMS/WMTS
+- คำอธิบายสี DRI+ (จากแผนที่ภัยแล้งของ GISTDA · `GetLegendGraphic` ไม่คืนภาพ): 50–59 ต่ำ · 60–69 ปานกลาง · 70–79 สูง · ≥80 สูงมาก · < 50 ไม่เสี่ยง (ไม่แสดง/ไม่นำมาคำนวณ) — NDWI/SMAP ยังไม่มีคำอธิบายสี จึงยังไม่แสดง
+- เว็บเรียกผ่าน Worker `gistda-tile-proxy` v1.3 `/dri/{z}/{x}/{y}.png` (z 6–15 · cache 6 ชม. · key อยู่ใน Secret)
+- **ภัยแล้งซ้ำซาก**: `GET …/gi-service/v1.1/disasters/drought-recurrence?lat=&lon=` หรือ `?area={GeoJSON Feature}` · header `API-Key` · ตอบ `[{subdistrict_name, district_name, province_name, total, detail:[{year:"2023".."2018", freq}], area, geom}]` · แบบ area: `geom` = patch ที่ถูกตัดตามกรอบที่ส่ง (โครงสร้างเดียวกับ flood-recurrence) · ต.จันอัด (จุดตัวแทน) total = 5 (ไม่เกิดปี 2022)
+- `scripts/region/build_droughtfreq_gistda.py` (workflow `drought-layers`): ตาราง 0.05° ครอบ 26 ตำบล → dissolve ตาม total → ตัดตามขอบเขตตำบล → `region/data/droughtfreq.geojson` + `by_tambon` (สัดส่วนพื้นที่ตำบลตามจำนวนครั้ง ใช้ขอบเขตตำบลของโครงการ ไม่ใช้ชื่อตำบลที่ GISTDA ติดมากับ patch)
+- อื่น ๆ ที่พบ (ยังไม่ใช้): STAC `…/stac/drought/catalogs/{dri_plus,lst,ndwi,smap}` · `cropsdrought.gistda.or.th/api/rest/zonal/{province,irrigation,mainbasin}`

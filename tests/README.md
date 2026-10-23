@@ -17,7 +17,7 @@
 `node --no-warnings tests/report.test.mjs` — `situationReport` ใน `region/js/report.js` ต้องตรงกับ `line/kv/worker.js` ทุกตัวอักษร · สร้างข้อความจาก `region/data/live` ได้ ไม่มี undefined/NaN · คำสั่ง "สถานการณ์น้ำ" ใน worker ได้ข้อความเดียวกับเว็บ
 
 ## Worker gistda-tile-proxy
-`node --no-warnings tests/gistda_tile_proxy.test.mjs` — 200 MISS→HIT (cache) · ส่ง key ใน header ไม่หลุดใน response · SWAP_XY · 204 นอก bbox · 400 zoom นอก 8–17 · 404 path ผิด · 500 not_configured · 405 · upstream error → 502 ไม่ส่งข้อความต่อ
+`node --no-warnings tests/gistda_tile_proxy.test.mjs` — 200 MISS→HIT (cache) · ส่ง key ใน header ไม่หลุดใน response · SWAP_XY · 204 นอก bbox · 400 zoom นอก 8–17 (floodfreq) / 6–15 (dri) · `/dri/` ใช้ upstream ค่าเริ่มต้น ไม่แปลง TMS_Y/SWAP_XY · 404 path ผิด · 500 not_configured · 405 · upstream error → 502 ไม่ส่งข้อความต่อ
 
 ## Worker gh-cron-dispatch
 `node --no-warnings tests/gh_cron_dispatch.test.mjs` — ไม่มี token ไม่เรียก GitHub · cron → POST dispatches ของ region-live บน main · หน้า GET ไม่สั่งรันและไม่แสดง token

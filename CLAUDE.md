@@ -14,7 +14,7 @@
 | ข้อมูลสด | `scripts/region/*.py` → `region/data/live/` | `.github/workflows/region-live.yml` ทุกชั่วโมง :15 |
 | LINE OA "จันอัดบ้านฉัน" (@142uxpzr) — **ใช้งานจริง** | `line/kv/worker.js` (v4.15, KV · Message Gateway) · หน้าติดตามเหตุของ อบต. `region/monitor.html` | Cloudflare Worker `chanat-line-webhook` (วางผ่าน dashboard หรือ wrangler) |
 | Dan Ting Sandbox สาธารณะ (ไม่มีข้อมูลครัวเรือน) | `chanat/index.html` → …/chanat/ (ศูนย์กลาง = จุด ม.5 บ้านด่านติง · หมู่บ้าน · อาคาร · ลำน้ำ · แหล่งน้ำ · น้ำท่วมซ้ำซาก · แผง SDSS · รายงานบ้านด่านติง) | push `main` · ชั้นน้ำท่วมซ้ำซาก: workflow `sandbox-layers` (**API น้ำท่วมซ้ำซาก GISTDA** ปี 2554–2566 · FloodGCS เลิกใช้) → `sandbox-summary` (`data/sandbox/summary.json`) |
-| Worker `gistda-tile-proxy` (ภาพน้ำท่วมซ้ำซาก GISTDA) — **ใช้งาน** https://gistda-tile-proxy.sarochinee-k.workers.dev | `workers/gistda-tile-proxy.js` (`/floodfreq/{z}/{x}/{y}.png` · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
+| Worker `gistda-tile-proxy` (ภาพ GISTDA: น้ำท่วมซ้ำซาก + DRI+ ภัยแล้ง) — **ใช้งาน** https://gistda-tile-proxy.sarochinee-k.workers.dev | `workers/gistda-tile-proxy.js` v1.3 (`/floodfreq/{z}/{x}/{y}.png` · `/dri/{z}/{x}/{y}.png` แท็บภัยแล้ง · Secret `GISTDA_API_KEY` · var `UPSTREAM`, `ALLOWED_ORIGIN`, `TMS_Y`, `SWAP_XY`) | Cloudflare dashboard · ใส่ URL ที่ `GISTDA_TILE_WORKER` ใน `chanat/index.html` |
 | Worker `gh-cron-dispatch` — Cron Cloudflare `15 * * * *` สั่งรัน `region-live` ทุกชั่วโมง (schedule ของ GitHub ไม่ตรงเวลา) | `workers/gh-cron-dispatch.js` (Secret `GH_TOKEN` fine-grained · Actions read/write) | Cloudflare dashboard · ทดสอบ `tests/gh_cron_dispatch.test.mjs` |
 | LINE ระยะสอง (D1 + LIFF) — **ยังไม่ใช้** | `line/worker.js`, `line/schema.sql`, `region/liff/*` | — |
 | Sandbox บ้านด่านติง (ข้อมูลครัวเรือน) | **ไม่อยู่ใน repo** — โฟลเดอร์ `sandbox-private` แยก | Cloudflare Pages + Access |
@@ -39,7 +39,7 @@ docs/                        คู่มือส่งมอบ
 ## กฎที่ห้ามละเมิด
 1. **ห้ามมีข้อมูลรายบุคคล/รายครัวเรือนใน repo** (PPPConnext, พิกัดบ้าน Sandbox, รหัสประจำบ้าน, เบอร์โทร, LINE userId) — repo สาธารณะ
 2. **ห้าม commit secret** — LINE secret/token, STATS_KEY, MONITOR_KEY, GISTDA key, EE service account อยู่ใน GitHub Secrets / Cloudflare Secrets เท่านั้น · ห้ามพิมพ์ค่าเหล่านี้ใน log/คำตอบ
-3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=51**
+3. **แก้ JS/CSS ต้องเพิ่ม `?v=N`** ใน `region/index.html` และ `region/lamchiangkrai.html` (ทุก `<script src>`/`<link>` รวม `liff/config.js`) — ปัจจุบัน **v=52**
 4. **รายงานมี 2 ที่** `region/js/report.js` และ `line/kv/worker.js` — `situationReport` ("สถานการณ์น้ำ") และ `sandboxReport` ("รายงานบ้านด่านติง") ระหว่าง `// >>> ชื่อฟังก์ชัน` … `// <<<` — แก้ที่เว็บแล้วคัดลอกทั้งฟังก์ชัน · `tests/report.test.mjs` ตรวจว่าตรงกัน
 5. **ตรรกะ T มี 2 ที่** `region/js/region.js` (basinT) และ `scripts/region/compute_risk.py` (basin_t) — แก้คู่กันเสมอ
 6. **อย่าเดา** field ของ API ภายนอก ลำดับสถานี หรือความสัมพันธ์ต้นน้ำ–ท้ายน้ำ — ตรวจกับข้อมูลจริง (บทเรียน: ลำเชียงไกรบรรจบมูลระหว่าง **M.194–M.195** ไม่ใช่ M.2A–M.194 เพราะลำตะคองบรรจบก่อน M.194)
@@ -50,7 +50,7 @@ docs/                        คู่มือส่งมอบ
 ## แหล่งข้อมูล (ตรวจแล้ว)
 ThaiWater public (`rain_24h`, `waterlevel_load` CORS เปิด) · ThaiWater provinces (`rain3d/7d`, `dam` — CORS ปิด ใช้ใน Actions) ·
 กรมชลประทาน `POST app.rid.go.th/reservoir/api/rsvmiddles` (form date/region=ne/status=1, ตัวเลขมีจุลภาค, CORS *) ·
-GISTDA flood 7days (header API-Key, H3 res9, `links[]` มี key — ห้ามเก็บ) · GloFAS ผ่าน `flood-api.open-meteo.com` · Open-Meteo forecast · ECMWF IFS 0.25° (`models=ecmwf_ifs025` → `live/ecmwf.json` ต.จันอัด ทุก 3 ชม.) ·
+GISTDA flood 7days (header API-Key, H3 res9, `links[]` มี key — ห้ามเก็บ) · GISTDA DRI+ 7 วัน tile + ภัยแล้งซ้ำซาก `drought-recurrence` v1.1 (workflow `drought-layers` → `data/droughtfreq.geojson`) · GloFAS ผ่าน `flood-api.open-meteo.com` · Open-Meteo forecast · ECMWF IFS 0.25° (`models=ecmwf_ifs025` → `live/ecmwf.json` ต.จันอัด ทุก 3 ชม.) ·
 RainViewer (zoom ≤ 7, past 2 ชม.) · OSM Overpass (ลำน้ำ/แหล่งน้ำ — เข้าได้จาก Actions เท่านั้น workflow `osm-rivers`) · Earth Engine S1 (service account) · Open Buildings V3 · HydroBASINS L12
 รหัสสำคัญ: ต.จันอัด `301010` · อ่างลำเชียงไกรตอนบน `rsv300` / ตอนล่าง `rsv292` · สถานี M.188A (ท้ายจันอัด), M.206, M.2A, M.164, M.194, M.195
 

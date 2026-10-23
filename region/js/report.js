@@ -109,7 +109,7 @@
     if ($('btn-print')) $('btn-print').onclick = () => window.SDSS_PRINT && window.SDSS && window.SDSS_PRINT.open({
       map: window.SDSS.map, title: 'SDSS-ChanAT · รายงานสถานการณ์น้ำ ต.จันอัด',
       subtitle: 'ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ ตำบลจันอัด อำเภอโนนสูง จังหวัดนครราชสีมา',
-      report: build(), legends: [$('legend'), document.querySelector('.bank-legend')], site: location.origin + location.pathname });
+      report: build(), legends: [$('legend'), $('legend-d'), document.querySelector('.bank-legend')], site: location.origin + location.pathname });
     btn.onclick = async () => {
       btn.disabled = true; btn.textContent = 'กำลังสร้างรายงาน…';
       const txt = await build();
