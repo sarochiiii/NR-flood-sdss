@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/region.css?v=50">
+<link rel="stylesheet" href="css/region.css?v=51">
 </head>
 <body>
 <!-- แถบโลโก้หน่วยงานสนับสนุน (ลำดับตามที่โครงการกำหนด) · ไฟล์ region/img/logos/ -->
@@ -36,13 +36,28 @@
 </header>
 
 <div id="bank-alert" class="bank-alert" role="status" aria-live="polite" hidden></div>
-<section class="kpi">
+<!-- แท็บหัวข้อ: น้ำท่วม / ภัยแล้ง (หน้าเดียวกัน · #flood #drought) / Sandbox (ไปหน้า /chanat/) — เหมือนแถบใน chanat/index.html -->
+<nav class="modetabs" id="modetabs" aria-label="หัวข้อ">
+  <a class="mtab" data-mode="flood" href="#flood"><i class="ti ti-ripple" aria-hidden="true"></i> น้ำท่วม</a>
+  <a class="mtab" data-mode="drought" href="#drought"><i class="ti ti-sun" aria-hidden="true"></i> ภัยแล้ง</a>
+  <a class="mtab" href="../chanat/"><i class="ti ti-building" aria-hidden="true"></i> Sandbox</a>
+</nav>
+<section class="kpi" id="kpi-flood">
   <div class="kpi-card"><div class="kpi-lab">ฝนสถานีสูงสุด 24 ชม.</div><div class="kpi-val mono" id="k-rmax">—</div><div class="kpi-sub" id="k-rmax-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">สถานีฝนหนัก ≥ 35.1 มม.</div><div class="kpi-val mono" id="k-heavy">—</div><div class="kpi-sub" id="k-heavy-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">สถานีน้ำ ใกล้/ล้นตลิ่ง</div><div class="kpi-val mono" id="k-wl">—</div><div class="kpi-sub" id="k-wl-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">อ่างเก็บน้ำ ≥ 80% ความจุ</div><div class="kpi-val mono" id="k-dam">—</div><div class="kpi-sub" id="k-dam-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">น้ำท่วมตรวจพบ 7 วัน</div><div class="kpi-val mono" id="k-flood">—</div><div class="kpi-sub" id="k-flood-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">คาดการณ์ฝน 24 ชม. สูงสุด</div><div class="kpi-val mono" id="k-fcst">—</div><div class="kpi-sub">Open-Meteo รายตำบล</div></div>
+</section>
+<!-- แท็บภัยแล้ง: แสดงค่าจริง ไม่จัดระดับแล้ง/ไม่แล้ง (ยังไม่มีเกณฑ์ที่ยืนยันกับหน่วยงาน) · สีอ่างใช้ช่วงเดิมของชั้นอ่างเก็บน้ำ -->
+<section class="kpi" id="kpi-drought" hidden>
+  <div class="kpi-card"><div class="kpi-lab">อ่างลำเชียงไกรตอนบน</div><div class="kpi-val mono" id="k-d-up">—</div><div class="kpi-sub" id="k-d-up-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">อ่างลำเชียงไกรตอนล่าง</div><div class="kpi-val mono" id="k-d-lo">—</div><div class="kpi-sub" id="k-d-lo-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">อ่างในจังหวัด &lt; 30% ความจุ</div><div class="kpi-val mono" id="k-d-low">—</div><div class="kpi-sub" id="k-d-low-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">ฝนสะสม 7 วัน ลุ่มลำเชียงไกร</div><div class="kpi-val mono" id="k-d-r7">—</div><div class="kpi-sub" id="k-d-r7-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">คาดการณ์ฝน 72 ชม. ต.จันอัด</div><div class="kpi-val mono" id="k-d-fc">—</div><div class="kpi-sub" id="k-d-fc-s"></div></div>
+  <div class="kpi-card"><div class="kpi-lab">พื้นที่เสี่ยงภัยแล้ง (DRI · GISTDA)</div><div class="kpi-val mono" id="k-d-dri">—</div><div class="kpi-sub" id="k-d-dri-s">รอตรวจสอบ API ของ GISTDA</div></div>
 </section>
 
 <main class="body" id="body">
@@ -81,7 +96,7 @@
     </section>
     <a class="btn" href="lamchiangkrai.html" style="margin-top:8px">เฝ้าระวังลำเชียงไกร · ต้นน้ำ → แม่น้ำมูล →</a>
     <section>
-      <h2 class="rail-h">สถานีที่ควรจับตา <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
+      <h2 class="rail-h"><span id="now-title">สถานีที่ควรจับตา</span> <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
       <div id="now" class="collapsed"></div>
       <button class="more" id="now-more" type="button">ดูทั้งหมด ▾</button>
     </section>
@@ -109,10 +124,10 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="liff/config.js?v=50"></script>
-<script src="js/report.js?v=50"></script>
-<script src="js/print.js?v=50"></script>
-<script src="js/layers.js?v=50"></script>
-<script src="js/region.js?v=50"></script>
+<script src="liff/config.js?v=51"></script>
+<script src="js/report.js?v=51"></script>
+<script src="js/print.js?v=51"></script>
+<script src="js/layers.js?v=51"></script>
+<script src="js/region.js?v=51"></script>
 </body>
 </html>
