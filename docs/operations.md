@@ -74,6 +74,7 @@ Settings → Secrets and variables → Actions → New repository secret / ด�
 - แก้โค้ด: Cloudflare → Workers & Pages → chanat-line-webhook → Edit code → วางทั้งไฟล์ → Deploy (เลข "1" ที่แท็บ = คำเตือนชนิดข้อมูล ไม่ใช่ error)
 - ตัวแปร: Settings → Variables and Secrets → Add variable → **ติ๊ก Secret** สำหรับค่าลับ (ไม่ติ๊ก = Text มองเห็นได้) · กล่องเหลือง "Update your Wrangler configuration" ไม่ต้องทำตาม
 - Logs: Observability · ถ้า ADM ไม่ได้รับแจ้ง หา `multicast failed` (429 = โควตาหมด)
+- **Message Gateway (v4.15):** ตัวแปร Text `LINE_PLAN` (free/basic) · `P1_RESERVE` · `OVERAGE_CAP_THB` · `OVERAGE_RATE_THB` · `ESCALATE_AFTER_H` (ไม่ตั้ง = ค่าเริ่มต้น ดู `docs/line-oa.md`) · เปลี่ยนแผนเป็น Basic ช่วงฤดูแล้ง → ตั้ง `LINE_PLAN=basic` และ `OVERAGE_CAP_THB` · กลับเป็น Free → ตั้ง `LINE_PLAN=free` · Cron เพิ่ม `5 * * * *` (ไม่บังคับ): Settings → Triggers → Cron Triggers → Add · ดูการใช้โควตาที่ `/stats?key=…` ส่วน `gateway`
 - **หน้าติดตามเหตุของ อบต. (v4.13 · ตั้งครั้งเดียว):**
   1. สร้างรหัสสุ่มยาว ≥ 24 ตัวอักษร (ตัวอังกฤษ+ตัวเลข ห้ามมี `,` และห้ามใช้ชื่อ/เบอร์โทร)
   2. chanat-line-webhook → Settings → Variables and Secrets → Add → Type **Secret** · Name `MONITOR_KEY` · Value = รหัส → Deploy

@@ -1,6 +1,6 @@
 /**
  * LINE OA Webhook — จันอัดบ้านฉัน (Provider: NRRU-IDRM)
- * Cloudflare Worker · v4.14 (ปุ่มเลือก ม.1–ม.8 ตอนรายงานเหตุ · รายงานบ้านด่านติงใช้ ม.5 เป็นศูนย์กลางรัศมี · v4.13 ทุกคนรายงานเหตุ/ขอความช่วยเหลือได้ไม่ต้องลงทะเบียน · ขอความช่วยเหลือแสดงตำแหน่งจริงบนแผนที่สาธารณะ · หน้าติดตามของ อบต. /api/monitor (MONITOR_KEY) · ผู้รายงานพิมพ์ "ปิดเหตุ" ได้ · v4.12 รหัสเชิญกลุ่ม max_uses · ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
+ * Cloudflare Worker · v4.15 (Message Gateway ประหยัดโควตา: ทุก push ผ่าน send() · P1/P2/P3 · inbox + piggyback · escalation · สรุป 07:00 ส่งเฉพาะวันที่สถานะเปลี่ยน · v4.14 ปุ่มเลือก ม.1–ม.8 ตอนรายงานเหตุ · รายงานบ้านด่านติงใช้ ม.5 เป็นศูนย์กลางรัศมี · v4.13 ทุกคนรายงานเหตุ/ขอความช่วยเหลือได้ไม่ต้องลงทะเบียน · ขอความช่วยเหลือแสดงตำแหน่งจริงบนแผนที่สาธารณะ · หน้าติดตามของ อบต. /api/monitor (MONITOR_KEY) · ผู้รายงานพิมพ์ "ปิดเหตุ" ได้ · v4.12 รหัสเชิญกลุ่ม max_uses · ลิงก์แผนที่อยู่ก่อนหมายเหตุ/ที่มาในรายงาน · รายงานบ้านด่านติง: น้ำท่วมซ้ำซากจาก API GISTDA ปี 2554–2566 แทน FloodGCS · รายงาน SDSS บ้านด่านติง "รายงานบ้านด่านติง" แทนปุ่มติดต่อ อบต. ใน rich menu · รายงาน: ตัดฝนสถานี 24 ชม. · รายงาน: พยากรณ์ ECMWF · อ่าง/GISTDA เฉพาะลำเชียงไกร/จันอัด · ปิดติดต่อ อบต./ขอความช่วยเหลือชั่วคราว · รายงานเหตุต้องแชร์ตำแหน่ง ไม่ส่งถึง ADM แสดงบนแผนที่ · รายงานสถานการณ์น้ำครบ 4 ชั้นข้อมูล รูปแบบเดียวกับเว็บ · รายงานบนแผนที่เว็บ /api/reports · ปุ่มบนเว็บเปิดแชทพร้อมคำสั่ง · ทางลัดขอความช่วยเหลือ · ADM ต้องใช้รหัสเชิญ · ขอความยินยอม · ลบข้อมูลตามกำหนด · สถานการณ์น้ำจริง · สถิติผู้ใช้ · รายงานเข้ากลุ่ม LINE ของ ADM)
  * แก้จาก v3: เดิมใครก็พิมพ์ "ลงทะเบียน ADM" แล้วได้รับทุกรายงาน (รวมคำขอความช่วยเหลือ) → ปิดช่องโหว่นี้
  *
  * Bindings
@@ -10,6 +10,12 @@
  *   STATS_KEY            (Secret · ใหม่ v4.1 · ตั้งเอง ≥ 24 ตัวอักษร) ใช้เปิด /stats ดูสถิติผู้ใช้สำหรับรายงานความก้าวหน้า
  *   MONITOR_KEY          (Secret · ใหม่ v4.13 · ≥ 24 ตัวอักษร · ใส่หลายรหัสคั่นด้วย , ได้) ใช้เปิดหน้าติดตามเหตุของ อบต.
  *                        region/monitor.html#k=<รหัส> → GET /api/monitor · POST /api/monitor/status (header X-Monitor-Key)
+ *   Message Gateway (v4.15 · Text · ไม่ตั้ง = ค่าเริ่มต้นในวงเล็บ)
+ *   LINE_PLAN            free | basic (free) — basic = ยอมให้ส่วนเกินโควตาได้ไม่เกิน OVERAGE_CAP_THB
+ *   P1_RESERVE           สัดส่วนโควตาที่กันไว้ให้ P1 ความปลอดภัย (0.2)
+ *   OVERAGE_CAP_THB      เพดานค่าส่วนเกินต่อเดือน บาท (0) · OVERAGE_RATE_THB บาท/ข้อความ (0.10)
+ *   ESCALATE_AFTER_H     ชั่วโมงที่รายการ P2 ค้างใน inbox ก่อน escalate (6)
+ *   Cron: 0 0 * * * = สรุป 07:00 + escalate · เพิ่ม 5 * * * * (ไม่บังคับ) = ตรวจ escalate ทุกชั่วโมง
  *   DAILY_GROUP_PUSH     (Text · ใหม่ v4.2) "on" = ส่งสรุปสถานการณ์น้ำเข้ากลุ่มที่เปิดไว้ทุกเช้า (ต้องตั้ง Cron 0 0 * * * = 07:00 น.)
  *                        ไม่ตั้ง/อื่น ๆ = ไม่ส่งอัตโนมัติ (กลุ่มยังพิมพ์ "สถานการณ์น้ำ" ขอดูเองได้ ไม่เสียโควตา)
  *
@@ -27,9 +33,14 @@
  *                     รายคน (ใช้ครั้งเดียว): key invite:CHANAT-7K2Q   value {"note":"ADM จันอัด ชุด 1"}
  *                     รหัสกลุ่ม (v4.12):    key invite:CHANAT-ADM32  value {"note":"ADM จันอัด 32 คน","max_uses":32}
  *   index:adm2        รายชื่อ ADM ที่ยืนยันด้วยรหัสเชิญแล้ว (แทน index:adm เดิมที่ไม่ปลอดภัย)
+ *   inbox:<userId|groupId>  ข้อความที่ยังไม่ push รอแนบไปกับ reply ครั้งถัดไป (TTL 7 วัน · v4.15)
+ *   gw:pending        ดัชนีรายการ P2 รอ escalate {t, id, created} (TTL 7 วัน)
+ *   gw:spent:<YYYY-MM-DD>   จำนวนข้อความ P2/P3 ที่ส่งวันนั้น (งบรายวัน · TTL 3 วัน)
+ *   gw:stat:<YYYY-MM> ตัวนับรวมรายเดือน (ไม่มีข้อมูลรายบุคคล · แสดงใน /stats)
+ *   digest:last:<groupId>   สถานะล่าสุดที่ส่งสรุป 07:00 เข้ากลุ่มนั้นแล้ว
  *
- * โควตา: ตอบกลับผู้ใช้ใช้ Reply API (ไม่นับโควตา)
- *        แจ้ง ADM ใช้ Multicast = นับ 1 ข้อความต่อ ADM 1 คน
+ * โควตา: ตอบกลับผู้ใช้ใช้ Reply API (ไม่นับโควตา) · push/multicast ทุกจุดต้องผ่าน send() ของ Message Gateway
+ *        (นับ 1 ข้อความต่อผู้รับ 1 คน · เข้ากลุ่ม = จำนวนสมาชิก · ข้อความ ≤ 5 object ในคำขอเดียว = 1 ข้อความ)
  */
 
 // ─── ค่าที่ต้องยืนยันก่อนใช้งานจริง ───────────────────────────────
@@ -89,7 +100,11 @@ export default {
     return new Response('OK');
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dailyGroupPush(env));
+    // 0 0 * * * (07:00 น.) = สรุปประจำวันเข้ากลุ่ม + escalate · cron อื่น (เช่น 5 * * * *) = escalate อย่างเดียว
+    ctx.waitUntil((async () => {
+      if (event.cron === DIGEST_CRON) await dailyDigest(env).catch((e) => console.error('digest', e && e.message));
+      await escalate(env).catch((e) => console.error('escalate', e && e.message));
+    })());
   },
 };
 
@@ -112,6 +127,7 @@ async function handleEvent(ev, env) {
   if (ev.type === 'unfollow') {
     await env.USERS.delete(`user:${userId}`);
     await env.USERS.delete(`session:${userId}`);
+    await env.USERS.delete(`inbox:${userId}`);
     await setAdmIndex(env, userId, false);
     return;
   }
@@ -163,6 +179,7 @@ async function handleText(ev, env, userId, t) {
   if (t === 'ลบข้อมูลของฉัน') {
     await env.USERS.delete(`user:${userId}`);
     await env.USERS.delete(`session:${userId}`);
+    await env.USERS.delete(`inbox:${userId}`);
     await setAdmIndex(env, userId, false);
     return reply(ev, env, [text('ลบข้อมูลการลงทะเบียนของท่านแล้ว (รายงานที่ส่งไปแล้วจะหมดอายุเองภายใน 90 วัน)')]);
   }
@@ -440,16 +457,23 @@ async function setAdmIndex(env, id, isAdm) {
 }
 
 // ─── LINE API ────────────────────────────────────────────────────
+// reply ไม่นับโควตา · v4.15 แนบข้อความที่ค้างใน inbox ของผู้รับ (piggyback) ได้รวมไม่เกิน 5 object แล้วลบออกเมื่อส่งสำเร็จ
 async function reply(ev, env, messages) {
-  return callLine(env, 'https://api.line.me/v2/bot/message/reply',
-    { replyToken: ev.replyToken, messages }, 'reply');
-}
-
-async function multicast(env, to, messages) {
-  for (let i = 0; i < to.length; i += 500) {
-    await callLine(env, 'https://api.line.me/v2/bot/message/multicast',
-      { to: to.slice(i, i + 500), messages }, 'multicast');
+  const target = inboxTarget(ev);
+  const box = target && messages.length < MAX_OBJECTS ? await getInbox(env, target) : [];
+  const take = [], extra = [];
+  for (const it of box) {
+    if (messages.length + extra.length + it.messages.length > MAX_OBJECTS) break;
+    take.push(it); extra.push(...it.messages);
   }
+  const ok = await callLine(env, 'https://api.line.me/v2/bot/message/reply',
+    { replyToken: ev.replyToken, messages: messages.concat(extra) }, 'reply');
+  if (ok && take.length) {
+    await putInbox(env, target, box.slice(take.length));
+    await dropPending(env, target, take.map((x) => x.id));
+    await bumpStat(env, { piggybacked: take.length });
+  }
+  return ok;
 }
 
 async function callLine(env, url, payload, label) {
@@ -461,7 +485,8 @@ async function callLine(env, url, payload, label) {
     },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) console.error(`${label} failed`, res.status, await res.text());
+  if (!res.ok) console.error(`${label} failed`, res.status, await res.text());   // ไม่ log ผู้รับ
+  return !!res.ok;
 }
 
 // ─── Utils ───────────────────────────────────────────────────────
@@ -494,12 +519,13 @@ async function getJson(p) {
   const r = await fetch(DATA + p);
   return r.ok ? r.json() : null;
 }
-async function waterStatus() {
+async function waterData() {
   const [tw, rid, gf, ec, cfg] = await Promise.all(['data/live/thaiwater_region.json', 'data/live/rid_reservoir.json',
     'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(p => getJson(p).catch(() => null)));
   if (!tw && !rid && !gf) throw new Error('no data');
-  return situationReport({ tw, rid, gf, ec, cfg });
+  return { tw, rid, gf, ec, cfg };
 }
+async function waterStatus() { return situationReport(await waterData()); }
 // รูปแบบรายงานเดียวกับปุ่ม "สร้างรายงานสถานการณ์สำหรับ LINE" บนเว็บ — แก้ที่ region/js/report.js แล้วคัดลอกมาทั้งฟังก์ชัน
 // >>> situationReport
 function situationReport(D) {
@@ -633,11 +659,27 @@ async function stats(env, url) {
     groups: { joined: groups.length, approved: groups.filter(g => g.approved).length, daily_on: groups.filter(g => g.daily).length,
       members_last_push: groups.reduce((a, g) => a + (g.members || 0), 0) },
     reports: { total_90d: reports.length, by_type: cnt(reports, r => r.type), by_status: cnt(reports, r => r.status || 'new'), by_month: cnt(reports, r => (r.created_at || '').slice(0, 7)) },
+    gateway: await gatewayStats(env),
     note: 'นับจาก KV ของระบบ (ผู้ที่เลิกติดตามถูกลบแล้ว) · จำนวนเพื่อนทั้งหมดดูที่ LINE OA Manager → Insights'
   };
   return new Response(JSON.stringify(body, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
 }
 
+
+// Message Gateway: ตัวนับรวมรายเดือน + โควตาปัจจุบัน (ไม่มี userId/groupId)
+async function gatewayStats(env) {
+  const cfg = gwConfig(env), month = bkk().slice(0, 7), prev = new Date(Date.parse(month + '-01T00:00:00Z') - 864e5).toISOString().slice(0, 7);
+  const cur = (await env.USERS.get(`gw:stat:${month}`, 'json')) || {};
+  const pend = (await env.USERS.get('gw:pending', 'json')) || [];
+  const q = await quotaState(env, {});
+  const split = (o) => { const by_category = {}, rest = {};
+    for (const [k, v] of Object.entries(o)) (k.startsWith('cat:') ? (by_category[k.slice(4)] = v) : (rest[k] = v));
+    return { ...rest, by_category }; };
+  return { plan: cfg.plan, p1_reserve: cfg.reserve, overage_cap_thb: cfg.capThb, escalate_after_h: cfg.escalateH,
+    quota: q.ok ? { limit: q.limit === Infinity ? 'unlimited' : q.limit, used: q.used, days_left: daysLeftInMonth() } : 'unavailable',
+    pending_p2: pend.length, month, this_month: split(cur),
+    last_month: split((await env.USERS.get(`gw:stat:${prev}`, 'json')) || {}) };
+}
 
 // ─── กลุ่ม LINE ของ ADM ─────────────────────────────────────────
 const GROUP_CMDS = ['สถานการณ์น้ำ', 'เปิดรายงานประจำวัน', 'ปิดรายงานประจำวัน'];
@@ -646,13 +688,13 @@ async function handleGroup(ev, env) {
   if (!gid) return;
   const key = `group:${gid}`;
   if (ev.type === 'join') {
-    await env.USERS.put(key, JSON.stringify({ approved: false, daily: false, joined: nowIso() }));
+    await env.USERS.put(key, JSON.stringify({ approved: false, daily: false, joined: nowIso(), kind: ev.source.type }));
     return reply(ev, env, [text('สวัสดีครับ บัญชี "จันอัดบ้านฉัน" เข้ากลุ่มแล้ว\n\n' +
       'พิมพ์ "สถานการณ์น้ำ" เพื่อดูสรุปสถานการณ์ได้ทุกเมื่อ\n' +
       'ให้ ADM ที่ลงทะเบียนด้วยรหัสเชิญแล้ว พิมพ์ "เปิดรายงานประจำวัน" เพื่อรับสรุปทุกเช้า 07:00 น.\n\n' +
       'ระบบตอบเฉพาะคำสั่งข้างต้น และไม่เก็บข้อความอื่นในกลุ่ม\n\n' + DISCLAIMER)]);
   }
-  if (ev.type === 'leave') { await env.USERS.delete(key); return; }
+  if (ev.type === 'leave') { await env.USERS.delete(key); await env.USERS.delete(`inbox:${gid}`); await env.USERS.delete(`digest:last:${gid}`); return; }
   if (ev.type !== 'message' || ev.message.type !== 'text') return;
   const t = ev.message.text.trim();
   if (!GROUP_CMDS.includes(t)) return;                      // ไม่อ่าน/ไม่เก็บข้อความอื่นในกลุ่ม
@@ -682,8 +724,8 @@ async function lineGet(env, url) {
   return r.ok ? r.json() : null;
 }
 
-// ส่งสรุปเข้ากลุ่มทุกเช้า — ตรวจโควตาก่อนส่ง (ข้อความเข้ากลุ่มนับตามจำนวนสมาชิกในกลุ่ม)
-async function dailyGroupPush(env) {
+// สรุปประจำวันเข้ากลุ่ม (P3 digest) — v4.15 ส่งเฉพาะวันที่สถานะเปลี่ยนจากครั้งก่อนที่ส่งเข้ากลุ่มนั้น · ผ่าน send() (ตรวจโควตา/งบรายวัน)
+async function dailyDigest(env) {
   if (env.DAILY_GROUP_PUSH !== 'on') return;
   const groups = [];
   let cursor;
@@ -691,21 +733,216 @@ async function dailyGroupPush(env) {
     for (const k of page.keys) { const g = await env.USERS.get(k.name, 'json'); if (g && g.approved && g.daily) groups.push({ id: k.name.slice(6), g }); }
     cursor = page.list_complete ? undefined : page.cursor; } while (cursor);
   if (!groups.length) return;
-  const quota = await lineGet(env, 'https://api.line.me/v2/bot/message/quota');
-  const used = await lineGet(env, 'https://api.line.me/v2/bot/message/quota/consumption');
-  let left = quota && quota.type === 'limited' ? quota.value - ((used && used.totalUsage) || 0) : Infinity;
-  let msg;
-  try { msg = await waterStatus(); } catch (e) { console.error('daily water', e && e.message); return; }
+  let D, msg;
+  try { D = await waterData(); msg = situationReport(D); } catch (e) { console.error('daily water', e && e.message); return; }
+  const sig = digestSignature(D);
+  const q = {};                                             // cache โควตาในรอบนี้
   for (const { id, g } of groups) {
-    const mc = await lineGet(env, `https://api.line.me/v2/bot/group/${id}/members/count`);
-    const n = (mc && mc.count) || 0;
-    if (n > left) { console.warn('daily push skipped: quota', { left, n }); continue; }
-    await callLine(env, 'https://api.line.me/v2/bot/message/push',
-      { to: id, messages: [text(`☀️ รายงานประจำวัน\n${msg}`)] }, 'push-group');
-    left -= n;
-    await env.USERS.put(`group:${id}`, JSON.stringify({ ...g, last_push: nowIso(), members: n }));
+    const last = await env.USERS.get(`digest:last:${id}`);
+    if (last === sig) { await bumpStat(env, { digest_skipped_nochange: 1 }); continue; }
+    const to = g.kind === 'room' ? { room: id } : { group: id };
+    const r = await send(env, to, [text(`☀️ รายงานประจำวัน\n${msg}`)], { priority: 3, category: 'daily_digest', digest: true, _q: q });
+    if (r.status !== 'sent') continue;
+    await env.USERS.put(`digest:last:${id}`, sig, { expirationTtl: 30 * 86400 });
+    await env.USERS.put(`group:${id}`, JSON.stringify({ ...g, last_push: nowIso(), members: r.cost }));
   }
 }
+
+// สถานะสำหรับเทียบ "เปลี่ยนจากครั้งก่อน" — ใช้การจัดระดับที่มีอยู่แล้วเท่านั้น (ไม่มีเกณฑ์ใหม่):
+// ระดับ M.188A ตามขั้น bank.levels ใน config.json (เดียวกับรายงาน) · สถานีที่ ≥ 90% (รายการ "ใกล้/ล้นตลิ่ง" ในรายงาน)
+// อ่างลำเชียงไกรตอนบน/ตอนล่าง "เกินความจุ" (> 100%) · ต.จันอัด พบน้ำท่วม GISTDA (> 0 ไร่)
+function digestSignature(D) {
+  const tw = D.tw || {}, rid = D.rid || {}, gf = D.gf || {}, cfg = D.cfg || {};
+  const levels = ((cfg.bank || {}).levels || []).slice().sort((a, b) => b.min - a.min);
+  const lvl = (p) => p == null ? 'nodata' : ((levels.find((l) => p >= l.min) || {}).key || 'nodata');
+  const wl = tw.waterlevel || [], m = wl.find((x) => x.code === 'M.188A');
+  const hi = wl.filter((x) => x.storage_pct != null && x.storage_pct >= 90).map((x) => x.code).sort();
+  const items = rid.status === 'ok' ? (rid.items || []) : [];
+  const lck = (code) => { const h = ((rid.hist || {})[code] || []).filter((r) => r[2] != null), it = items.find((x) => x.code === code);
+    const pct = it && it.pct != null && (!h.length || it.date >= h[h.length - 1][0]) ? it.pct : h.length ? h[h.length - 1][2] : null;
+    return pct == null ? 'nodata' : pct > 100 ? 'over' : 'ok'; };
+  const flood = gf.status === 'ok' ? (Math.round((gf.by_tambon || {})['301010'] || 0) > 0 ? 'yes' : 'no') : 'nodata';
+  return JSON.stringify({ m188a: lvl(m ? m.storage_pct : null), near: hi, rsv300: lck('rsv300'), rsv292: lck('rsv292'), flood });
+}
+
+
+// ─── Message Gateway (v4.15) ──────────────────────────────────────
+// ทุก push/multicast ต้องเรียก send(env, to, messages, {priority, category}) เท่านั้น — ห้ามเรียก /push หรือ /multicast ตรง
+//   to: 'U…' userId · ['U…', …] หลายคน (multicast) · {group: id} · {room: id} (room ยังไม่รองรับการนับสมาชิก → ไม่ส่ง)
+//   P1 ความปลอดภัย (เตือนภัยระดับสูง/อพยพ): ส่งเสมอแม้โควตาไม่พอ (แผน Free API จะปฏิเสธเอง → log + เก็บ inbox)
+//   P2 ต้องลงมือทำ: ส่งเมื่อคงเหลือหลังส่ง ≥ สำรอง P1 และไม่เกินงบรายวัน ไม่เช่นนั้นเก็บ inbox แล้ว escalate ภายหลัง
+//   P3 ข้อมูลทั่วไป: ไม่ push ทันที — เก็บ inbox (piggyback) · {digest: true} = รอบสรุปตามเวลา ส่งได้ถ้าผ่านเกณฑ์เดียวกับ P2
+// ผลลัพธ์ {status: 'sent' | 'inboxed' | 'skipped' | 'failed', cost}
+const MAX_OBJECTS = 5;
+const INBOX_TTL = 7 * 86400;
+const INBOX_MAX = 20;                 // เกินแล้วตัดรายการ priority ต่ำสุดออก
+const DIGEST_CRON = '0 0 * * *';
+function gwConfig(env) {
+  const num = (v, d) => { const n = Number(v); return v != null && v !== '' && Number.isFinite(n) ? n : d; };
+  return {
+    plan: env.LINE_PLAN === 'basic' ? 'basic' : 'free',
+    reserve: Math.min(0.9, Math.max(0, num(env.P1_RESERVE, 0.2))),
+    capThb: Math.max(0, num(env.OVERAGE_CAP_THB, 0)),
+    rate: Math.max(0.0001, num(env.OVERAGE_RATE_THB, 0.10)),
+    escalateH: Math.max(0, num(env.ESCALATE_AFTER_H, 6)),
+  };
+}
+// วันที่/เดือนตามเวลาประเทศไทย
+function bkk(d = new Date()) { return new Date(d.getTime() + 7 * 3600e3).toISOString(); }
+function daysLeftInMonth(d = new Date()) {
+  const t = new Date(d.getTime() + 7 * 3600e3), y = t.getUTCFullYear(), m = t.getUTCMonth();
+  return new Date(Date.UTC(y, m + 1, 0)).getUTCDate() - t.getUTCDate() + 1;
+}
+
+// โควตาจาก LINE (endpoint/field เดียวกับโค้ดเดิม: quota.type/value · consumption.totalUsage) · ดึงไม่ได้ = ok:false
+async function quotaState(env, cache) {
+  if (cache && cache.state) return cache.state;
+  const [quota, used] = await Promise.all([lineGet(env, 'https://api.line.me/v2/bot/message/quota'),
+    lineGet(env, 'https://api.line.me/v2/bot/message/quota/consumption')]);
+  const st = !quota || !used ? { ok: false, limit: 0, used: 0 }
+    : quota.type === 'limited' ? { ok: true, limit: Number(quota.value) || 0, used: Number(used.totalUsage) || 0 }
+    : { ok: true, limit: Infinity, used: Number(used.totalUsage) || 0 };
+  if (cache) cache.state = st;
+  return st;
+}
+
+// จำนวนผู้รับ (= ต้นทุนต่อ 1 คำขอ) · null = นับไม่ได้ → ไม่ส่ง
+async function recipientCost(env, to) {
+  if (typeof to === 'string') return 1;
+  if (Array.isArray(to)) return to.length;
+  if (to && to.group) { const mc = await lineGet(env, `https://api.line.me/v2/bot/group/${to.group}/members/count`); return mc && mc.count > 0 ? mc.count : null; }
+  return null;                                              // room: ยังไม่ได้ยืนยัน endpoint นับสมาชิกกับเอกสาร LINE → ไม่ส่ง
+}
+function targetKey(to) { return typeof to === 'string' ? to : to && (to.group || to.room) || null; }
+
+// เกณฑ์ส่ง P2/P3 (และ escalate ที่ไม่ใช้งบรายวัน/สำรอง) — คืน true เมื่อส่งได้
+async function allowed(env, q, cost, cfg, { pacing, reserve }) {
+  if (!q.ok) return false;
+  if (q.limit === Infinity) return true;
+  const ceiling = q.limit + (cfg.plan === 'basic' ? Math.floor(cfg.capThb / cfg.rate) : 0);   // Free: ห้ามเกินโควตาเด็ดขาด
+  const remaining = ceiling - q.used;
+  const rsv = reserve ? Math.ceil(cfg.reserve * q.limit) : 0;
+  if (remaining - cost < rsv) return false;
+  if (!pacing) return true;
+  const spent = Number(await env.USERS.get(`gw:spent:${bkk().slice(0, 10)}`)) || 0;
+  const budget = Math.floor(Math.max(0, remaining + spent - rsv) / daysLeftInMonth());
+  return spent + cost <= budget;
+}
+
+async function send(env, to, messages, opts = {}) {
+  const priority = [1, 2, 3].includes(opts.priority) ? opts.priority : 3;
+  const category = String(opts.category || 'other').slice(0, 40);
+  const cfg = gwConfig(env), q = opts._q || {};
+  const msgs = (messages || []).filter(Boolean);
+  if (!msgs.length) return { status: 'skipped', cost: 0 };
+  if (priority === 3 && !opts.digest) return inboxed(env, to, msgs, priority, category);
+  const per = await recipientCost(env, to);
+  if (per === 0) return { status: 'skipped', cost: 0 };
+  if (per == null) { await bumpStat(env, { skipped_unknown_recipients: 1 }); console.warn('gateway: skip, unknown recipient count', category); return { status: 'skipped', cost: 0 }; }
+  const chunks = [];
+  for (let i = 0; i < msgs.length; i += MAX_OBJECTS) chunks.push(msgs.slice(i, i + MAX_OBJECTS));   // รวม ≤ 5 object ต่อคำขอ
+  const cost = per * chunks.length;
+  const st = await quotaState(env, q);
+  if (priority === 1) {
+    if (st.ok && st.limit !== Infinity && st.limit - st.used < cost) { console.warn('gateway: P1 over quota', { cost }); await bumpStat(env, { p1_over_quota: 1 }); }
+  } else if (!(await allowed(env, st, cost, cfg, { pacing: !opts._escalate, reserve: !opts._escalate }))) {
+    if (opts.digest) { await bumpStat(env, { blocked_quota: 1 }); return { status: 'skipped', cost: 0 }; }
+    if (opts._escalate) return { status: 'skipped', cost: 0 };
+    await bumpStat(env, { blocked_quota: 1 });
+    return inboxed(env, to, msgs, priority, category);
+  }
+  let ok = true;
+  for (const c of chunks) ok = (await pushRaw(env, to, c, category)) && ok;
+  if (!ok) {
+    await bumpStat(env, { failed: 1 });
+    if (priority === 1 && !opts._escalate) await inboxed(env, to, msgs, priority, category);   // P1 ส่งไม่ได้ → แนบกับ reply ครั้งถัดไป
+    return { status: 'failed', cost: 0 };
+  }
+  st.used += cost;
+  if (priority !== 1) {
+    const k = `gw:spent:${bkk().slice(0, 10)}`;
+    await env.USERS.put(k, String((Number(await env.USERS.get(k)) || 0) + cost), { expirationTtl: 3 * 86400 });
+  }
+  await bumpStat(env, { [`sent_p${priority}`]: cost, [`cat:${category}`]: cost, ...(opts._escalate ? { escalated: 1 } : {}) });
+  return { status: 'sent', cost };
+}
+
+async function pushRaw(env, to, messages, label) {
+  if (Array.isArray(to)) {
+    let ok = true;
+    for (let i = 0; i < to.length; i += 500) ok = (await callLine(env, 'https://api.line.me/v2/bot/message/multicast',
+      { to: to.slice(i, i + 500), messages }, `multicast:${label}`)) && ok;
+    return ok;
+  }
+  return callLine(env, 'https://api.line.me/v2/bot/message/push', { to: targetKey(to), messages }, `push:${label}`);
+}
+
+// เก็บเข้า inbox (multicast = แยกเก็บรายคน) · P2 ลงดัชนี gw:pending เพื่อ escalate
+async function inboxed(env, to, messages, priority, category) {
+  const targets = Array.isArray(to) ? to : [targetKey(to)].filter(Boolean);
+  for (const t of targets) {
+    const box = await getInbox(env, t);
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const msgs = messages.slice(0, MAX_OBJECTS);
+    box.push({ id, priority, category, messages: msgs, created: nowIso(), ...(typeof to === 'object' && !Array.isArray(to) ? { to } : {}) });
+    box.sort((a, b) => a.priority - b.priority || (a.created < b.created ? -1 : 1));   // สำคัญกว่าแนบก่อน แล้วเก่าก่อน
+    while (box.length > INBOX_MAX) box.splice(box.map((x) => x.priority).indexOf(Math.max(...box.map((x) => x.priority))), 1);   // ตัดรายการเก่าสุดของ priority ต่ำสุด
+    await putInbox(env, t, box);
+    if (priority <= 2) {
+      const pend = (await env.USERS.get('gw:pending', 'json')) || [];
+      pend.push({ t, id, created: nowIso() });
+      await env.USERS.put('gw:pending', JSON.stringify(pend), { expirationTtl: INBOX_TTL });
+    }
+  }
+  await bumpStat(env, { inboxed: targets.length });
+  return { status: 'inboxed', cost: 0 };
+}
+
+function inboxTarget(ev) {
+  const s = ev && ev.source;
+  if (!s) return null;
+  return s.type === 'user' ? s.userId : s.groupId || s.roomId || null;
+}
+async function getInbox(env, t) { return (t && (await env.USERS.get(`inbox:${t}`, 'json'))) || []; }
+async function putInbox(env, t, box) {
+  if (!box.length) return env.USERS.delete(`inbox:${t}`);
+  return env.USERS.put(`inbox:${t}`, JSON.stringify(box), { expirationTtl: INBOX_TTL });
+}
+async function dropPending(env, t, ids) {
+  const pend = await env.USERS.get('gw:pending', 'json');
+  if (!pend || !pend.length) return;
+  const next = pend.filter((p) => !(p.t === t && ids.includes(p.id)));
+  if (next.length !== pend.length) await env.USERS.put('gw:pending', JSON.stringify(next), { expirationTtl: INBOX_TTL });
+}
+
+// escalate: รายการ P2 ที่ค้างเกิน ESCALATE_AFTER_H → push รวมทุกข้อความค้างของผู้รับนั้น (≤ 5 object/คำขอ)
+// ไม่ใช้งบรายวันและสำรอง P1 แต่ยังห้ามเกินโควตา (Free) / เพดานส่วนเกิน (Basic)
+async function escalate(env) {
+  const pend = (await env.USERS.get('gw:pending', 'json')) || [];
+  if (!pend.length) return;
+  const cfg = gwConfig(env), due = Date.now() - cfg.escalateH * 3600e3, q = {};
+  const targets = [...new Set(pend.filter((p) => Date.parse(p.created) <= due).map((p) => p.t))];
+  for (const t of targets) {
+    const box = await getInbox(env, t);
+    if (!box.length) { await dropPending(env, t, pend.filter((p) => p.t === t).map((p) => p.id)); continue; }
+    const head = box.find((x) => x.to) || {}, to = head.to || t;
+    const r = await send(env, to, box.flatMap((x) => x.messages), { priority: 2, category: 'escalation', _escalate: true, _q: q });
+    if (r.status !== 'sent') continue;
+    await putInbox(env, t, []);
+    await dropPending(env, t, box.map((x) => x.id));
+  }
+}
+
+// ตัวนับรายเดือน (ตัวเลขรวมเท่านั้น · KV ไม่การันตีการเขียนพร้อมกัน ค่าอาจคลาดเล็กน้อย)
+async function bumpStat(env, inc) {
+  const k = `gw:stat:${bkk().slice(0, 7)}`;
+  const cur = (await env.USERS.get(k, 'json')) || {};
+  for (const [f, v] of Object.entries(inc)) if (v) cur[f] = (cur[f] || 0) + v;
+  await env.USERS.put(k, JSON.stringify(cur), { expirationTtl: 400 * 86400 });
+}
+
+// สำหรับ tests เท่านั้น (ไม่ใช่ entrypoint ของ Worker)
+globalThis.__chanatGateway = { send, escalate, dailyDigest, digestSignature, quotaState, daysLeftInMonth };
 
 
 // ─── รายงานสำหรับแผนที่เว็บ (สาธารณะ · ไม่มีข้อมูลส่วนบุคคล) ─────────────
