@@ -175,7 +175,7 @@ def crops():
     print("\n=== ⑤ พืชเศรษฐกิจ v2.2 (ต.จันอัด) ===")
     if not KEY:
         print("(ข้าม — ไม่มี GISTDA_API_KEY)"); return
-    a, b, d = 102.14, 15.145, 0.02
+    a, b, d = 102.10, 15.10, 0.08     # กรอบครอบ ต.จันอัด (รอบก่อนใช้ 0.02° กลางตำบล)
     feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[[a, b], [a + d, b], [a + d, b + d], [a, b + d], [a, b]]]}}
     for c in CROPS:
         for q in (f"lat={LAT}&lon={LON}", "area=" + urllib.parse.quote(json.dumps(feat, separators=(",", ":")))):
@@ -186,10 +186,18 @@ def crops():
                 j = json.loads(body.decode("utf-8", "replace"))
                 print(f"\n[{st}] {c} · {tag} · {len(body)} bytes · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:900])
                 rows = j if isinstance(j, list) else (j.get("features") or j.get("data") or []) if isinstance(j, dict) else []
+                if isinstance(rows, list) and rows and isinstance(rows[0], dict):   # สรุปทั้งกรอบ: จำนวนแถว ผลรวม area ตามชนิด/อายุ
+                    agg = {}
+                    for r in rows:
+                        k = r.get("result") or r.get("age")
+                        agg.setdefault(str(k), [0, 0.0]); agg[str(k)][0] += 1; agg[str(k)][1] += float(r.get("area") or 0)
+                    print("   สรุป (ค่า: [แถว, ผลรวม area]):", json.dumps(agg, ensure_ascii=False)[:600])
                 for r in rows[:6] if isinstance(rows, list) else []:
                     if not isinstance(r, dict):
                         continue
                     g = r.get("geom") or r.get("geometry")
+                    if isinstance(g, list):   # check-crop: geom เป็นรายการ geometry ต่อชนิดพืช
+                        g = {"type": f"list[{len(g)}]·{','.join(sorted({str((x or {}).get('type')) for x in g}))}", "coordinates": [(x or {}).get("coordinates") or [] for x in g]}
                     cs = []
                     def walk(x):
                         if x and isinstance(x[0], (int, float)): cs.append(x)
