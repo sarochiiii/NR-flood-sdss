@@ -1,5 +1,5 @@
-// gistda-tile-proxy · Cloudflare Worker (v1.3 · เพิ่ม /dri/ พื้นที่เสี่ยงภัยแล้ง DRI+ 7 วัน)
-// ส่งต่อ tile ของ GISTDA (น้ำท่วมซ้ำซาก · DRI+) โดยเก็บ API key ไว้ฝั่ง Worker เท่านั้น
+// gistda-tile-proxy · Cloudflare Worker (v1.4 · ดัชนีภัยแล้ง 7 วัน /dri/ /smap/ /ndwi/)
+// ส่งต่อ tile ของ GISTDA (น้ำท่วมซ้ำซาก · DRI+ · SMAP · NDWI) โดยเก็บ API key ไว้ฝั่ง Worker เท่านั้น
 // ตั้งค่าใน Cloudflare → Worker → Settings → Variables and Secrets
 //   GISTDA_API_KEY  (Secret)  key ของ GISTDA
 //   UPSTREAM        (Text)    URL tile จากเอกสาร GISTDA ที่มี {z} {x} {y}
@@ -7,14 +7,17 @@
 //   ALLOWED_ORIGIN  (Text)    https://sarochiiii.github.io
 //   TMS_Y           (Text)    "true" = แปลงแถวเป็นแบบ TMS (นับจากล่าง: y_tms = 2^z − 1 − y) — path ของ GISTDA มีคำว่า tms
 //   SWAP_XY         (Text)    "true" = สลับ {x}/{y} ก่อนส่งต่อ (เอกสาร GISTDA เรียก x = row, y = column — ยังไม่ยืนยันกับ tile จริง)
-//   DRI_UPSTREAM    (Text)    ไม่บังคับ · ค่าเริ่มต้น = DRI_DEFAULT ด้านล่าง (ตรวจแล้ว 23 ต.ค. 69: แกน y แบบ XYZ · ต้องไม่มี .png ท้าย)
-// เรียกใช้: https://<worker>.workers.dev/floodfreq/{z}/{x}/{y}.png  ·  /dri/{z}/{x}/{y}.png
+//   DRI_UPSTREAM    (Text)    ไม่บังคับ · ค่าเริ่มต้น = IDX_DEFAULT ด้านล่าง (ตรวจแล้ว 23 ต.ค. 69: แกน y แบบ XYZ · ต้องไม่มี .png ท้าย)
+// เรียกใช้: https://<worker>.workers.dev/floodfreq/{z}/{x}/{y}.png  ·  /dri/ /smap/ /ndwi/{z}/{x}/{y}.png
 
-const DRI_DEFAULT = 'https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/tms/{z}/{x}/{y}';
-// floodfreq: ข้อมูลซ้ำซากเปลี่ยนไม่บ่อย (cache 7 วัน) · dri: GISTDA ปรับรายสัปดาห์ (cache 6 ชม.)
+// ดัชนีภัยแล้ง 7 วันของ GISTDA: path เดียวกันต่างกันที่ชื่อดัชนี (เอกสาร API GISTDA · maps/{dri|smap|ndwi}/7days/tms/{z}/{x}/{y})
+const IDX_DEFAULT = (k) => `https://api-gateway.gistda.or.th/api/2.0/resources/maps/${k}/7days/tms/{z}/{x}/{y}`;
+// floodfreq: ข้อมูลซ้ำซากเปลี่ยนไม่บ่อย (cache 7 วัน) · ดัชนีภัยแล้ง: GISTDA ปรับรายสัปดาห์ (cache 6 ชม.)
 const ROUTES = {
   floodfreq: { zmin: 8, zmax: 17, cache: 7 * 24 * 3600, upstream: (env) => env.UPSTREAM, xform: true },
-  dri: { zmin: 6, zmax: 15, cache: 6 * 3600, upstream: (env) => env.DRI_UPSTREAM || DRI_DEFAULT, xform: false },
+  dri: { zmin: 6, zmax: 15, cache: 6 * 3600, upstream: (env) => env.DRI_UPSTREAM || IDX_DEFAULT('dri'), xform: false },
+  smap: { zmin: 6, zmax: 15, cache: 6 * 3600, upstream: () => IDX_DEFAULT('smap'), xform: false },
+  ndwi: { zmin: 6, zmax: 15, cache: 6 * 3600, upstream: () => IDX_DEFAULT('ndwi'), xform: false },
 };
 // ขอบเขต 26 ตำบล อ.โนนไทย–โนนสูง (จาก region/data/tambon.geojson) + ขอบ 0.05°
 const BBOX = { w: 101.82, s: 14.98, e: 102.49, n: 15.44 };
@@ -44,7 +47,7 @@ export default {
     if (req.method !== 'GET') return new Response('method not allowed', { status: 405, headers: h });
 
     const url = new URL(req.url);
-    const m = url.pathname.match(/^\/(floodfreq|dri)\/(\d{1,2})\/(\d+)\/(\d+)(?:\.png)?$/);
+    const m = url.pathname.match(/^\/(floodfreq|dri|smap|ndwi)\/(\d{1,2})\/(\d+)\/(\d+)(?:\.png)?$/);
     if (!m) return new Response('not found', { status: 404, headers: h });
     const name = m[1], R = ROUTES[name], z = +m[2], x = +m[3], y = +m[4];
     const CACHE_SEC = R.cache;
