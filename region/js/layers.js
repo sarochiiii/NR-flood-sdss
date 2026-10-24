@@ -279,8 +279,9 @@ document.addEventListener('sdss:ready', async () => {
   // ชื่อจาก API ตรวจแล้ว 24 ต.ค. 69: Cassava · Maize · Oil palm · Para rubber · Rice · Sugarcane
   const CROP = { Sugarcane: ['อ้อย', '#E39B7B'], Cassava: ['มันสำปะหลัง', '#F5B887'], Maize: ['ข้าวโพด', '#EFD08C'], Rice: ['ข้าว', '#9ED29A'],
     'Para rubber': ['ยางพารา', '#6D9F71'], 'Oil palm': ['ปาล์มน้ำมัน', '#B5A642'] };
-  // วันที่ปรับปรุงล่าสุด: update ของแต่ละแปลงต่างกัน (ยางพารา/ปาล์มเป็นรายปี เช่น "2023") → ใช้วันที่ YYYY-MM-DD ล่าสุด
-  const cropUp = (d) => (d.data_updates || []).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).sort().slice(-1)[0];
+  // รอบข้อมูล: ใช้เฉพาะรอบล่าสุดของแต่ละพืช (d.latest · ผู้ใช้กำหนด 24 ต.ค. 69) · ยางพารา/ปาล์มเป็นรายปี (เช่น "2023")
+  const cropUp = (d) => Object.values(d.latest || {}).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).sort().slice(-1)[0];
+  const upTxt = (u) => /^\d{4}$/.test(u || '') ? `ปี ${Number(u) + 543}` : dDate(u);
   const CROP_X = ['#B39DDB', '#80CBC4', '#BCAAA4', '#90A4AE'];
   const cropOf = (c, i) => CROP[c] || [c, CROP_X[i % CROP_X.length]];
   const rai = (v) => Number(v || 0).toLocaleString('th-TH');
@@ -328,14 +329,15 @@ document.addEventListener('sdss:ready', async () => {
         const cs = d.crops || [], col = {}; cs.forEach((c, i) => col[c] = cropOf(c, i));
         const up = cropUp(d);
         const lyr = L.geoJSON(d, { style: f => ({ stroke: false, fillColor: (col[f.properties.crop] || cropOf(f.properties.crop, 0))[1], fillOpacity: 0.75 }),
-          onEachFeature: (f, l) => l.bindTooltip(`${esc((col[f.properties.crop] || [f.properties.crop])[0])} · GISTDA`, { sticky: true }) });
-        LGD.crops = `<b>พื้นที่การเกษตร (GISTDA · ปรับปรุงล่าสุด ${dDate(up)})</b>` + cs.slice().sort((a, b) => ((d.total_rai || {})[b] || 0) - ((d.total_rai || {})[a] || 0)).map(c =>
-          `<div class="row"><span class="sw" style="background:${col[c][1]}"></span>${esc(col[c][0])} ${rai((d.total_rai || {})[c])} ไร่</div>`).join('')
-          + '<div class="muted">พื้นที่ใน 26 ตำบล · คำนวณจากขอบเขตแปลง</div>';
+          onEachFeature: (f, l) => l.bindTooltip(`${esc((col[f.properties.crop] || [f.properties.crop])[0])} · GISTDA รอบข้อมูล ${upTxt(f.properties.update)}`, { sticky: true }) });
+        const lt = d.latest || {};
+        LGD.crops = `<b>พื้นที่การเกษตร (GISTDA · รอบล่าสุด ${dDate(up)})</b>` + cs.slice().sort((a, b) => ((d.total_rai || {})[b] || 0) - ((d.total_rai || {})[a] || 0)).map(c =>
+          `<div class="row"><span class="sw" style="background:${col[c][1]}"></span>${esc(col[c][0])} ${rai((d.total_rai || {})[c])} ไร่${lt[c] && lt[c] !== up ? ` (${upTxt(lt[c])})` : ''}</div>`).join('')
+          + '<div class="muted">รวม 26 ตำบล · เฉพาะรอบข้อมูลล่าสุดของแต่ละพืช · ดาวเทียม 40 ม.</div>';
         lyr.on('add remove', () => setTimeout(legendD));
         const ca = ((d.by_tambon || {})['301010'] || {}).crops_rai || {};
         const caTxt = Object.entries(ca).sort((a, b) => b[1] - a[1]).map(([c, v]) => `${(col[c] || [c])[0]} ${rai(v)}`).join(' · ');
-        return { lyr, sub: `ปรับปรุงล่าสุด ${dDate(up)} (ราย 2 สัปดาห์)${caTxt ? ` · ต.จันอัด ${caTxt} ไร่` : ''}`, attr: 'พื้นที่ปลูกพืช © GISTDA' };
+        return { lyr, sub: `รอบข้อมูลล่าสุด ${dDate(up)} (ราย 2 สัปดาห์)${caTxt ? ` · ต.จันอัด ${caTxt} ไร่` : ''}`, attr: 'พื้นที่ปลูกพืช © GISTDA' };
       }
     },
     {
@@ -863,10 +865,9 @@ document.addEventListener('sdss:ready', async () => {
     const ag = sec('🌾 พื้นที่การเกษตรที่ปลูกอยู่ (GISTDA)');
     try {
       const d = await json('data/crops_summary.json'), ca = ((d.by_tambon || {})['301010'] || {}).crops_rai || {};   // ไฟล์สรุป (เล็ก) ไม่ต้องโหลด polygon
-      const up = cropUp(d), tot = Object.values(ca).reduce((a, b) => a + b, 0), area = ((d.by_tambon || {})['301010'] || {}).area_rai;
-      const ent = Object.entries(ca).sort((a, b) => b[1] - a[1]);
-      if (!ent.length) ag.push(['ต.จันอัด', 'ไม่พบพื้นที่ปลูกพืชเศรษฐกิจ', `ปรับปรุงล่าสุด ${dDate(up)}`]);
-      ent.forEach(([c, v], i) => ag.push([cropOf(c, i)[0], `${rai(v)} ไร่`, i === 0 ? `ต.จันอัด${area ? ` (${fmt(tot / area * 100, 0)}% ของพื้นที่ตำบล ${rai(area)} ไร่)` : ''} · GISTDA ปรับปรุงล่าสุด ${dDate(up)}` : '']));
+      const lt = d.latest || {}, ent = Object.entries(ca).sort((a, b) => b[1] - a[1]);   // ไม่แสดงขนาด/สัดส่วนพื้นที่ตำบล (ผู้ใช้กำหนด)
+      if (!ent.length) ag.push(['ต.จันอัด', 'ไม่พบพื้นที่ปลูกพืชเศรษฐกิจ', `รอบข้อมูลล่าสุด ${dDate(cropUp(d))}`]);
+      ent.forEach(([c, v], i) => ag.push([cropOf(c, i)[0], `${rai(v)} ไร่`, `${i === 0 ? 'ต.จันอัด · ' : ''}รอบข้อมูล ${upTxt(lt[c])}`]));
     } catch (e) { ag.push(['ต.จันอัด', '—', 'รอ workflow crop-layers สร้างข้อมูล']); }
     dRep = R;
     $('drep-ts').textContent = '· ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
