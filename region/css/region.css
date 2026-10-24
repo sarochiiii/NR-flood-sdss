@@ -244,5 +244,11 @@ button.btn{background:#fff;font-family:inherit;cursor:pointer}button.btn:disable
 @media print{.modetabs{display:none}}
 .kpi[hidden]{display:none}
 body.mode-drought .bank-legend{display:none}
-@media (min-width:821px){#kpi-drought{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* แท็บภัยแล้ง: ซ่อนส่วนของน้ำท่วมในแผงขวา (แจ้งเหตุ · การ์ดตำบล · ติดตามเหตุ · รายงาน LINE · ลำเชียงไกร) · รายงานภัยแล้งแทนแถบ KPI */
+body.mode-drought .flood-only,body.mode-drought #lrep{display:none!important}
+.drep .rail-h{margin:0 0 6px}
+.drep .dr-sec{margin:8px 0 2px;font-weight:600;font-size:13px}
+.drep .dr-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:2px 0;border-bottom:1px dashed var(--border)}
+.drep .dr-row .mono{white-space:nowrap}
+.drep .dr-sub{display:block;font-size:11.5px;color:#64748B}
 .legend-d{left:auto;right:10px;bottom:40px;max-width:240px;max-height:calc(100% - 120px);overflow:auto}.legend-d b{white-space:normal;display:block}.legend-d .row+b{display:block;margin-top:4px}.legend[hidden]{display:none}

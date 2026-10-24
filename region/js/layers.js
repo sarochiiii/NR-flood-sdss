@@ -813,16 +813,28 @@ document.addEventListener('sdss:ready', async () => {
     if (i && i.pct != null && (!h2.length || i.date >= h2[h2.length - 1][0])) return { pct: i.pct, date: i.date, prev: h2.length ? h2[h2.length - 1][2] : null };
     return h2.length ? { pct: h2[h2.length - 1][2], date: h2[h2.length - 1][0], prev: h2.length > 1 ? h2[h2.length - 2][2] : null } : null; };
   const dDate = (s) => s ? new Date(s + 'T00:00:00+07:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '—';
+  // รายงานสถานการณ์ภัยแล้ง (แผงขวา + หน้าพิมพ์ A4) — แทนแถบ KPI เดิม · แสดงค่าจริง ไม่จัดระดับแล้ง
+  // แต่ละหัวข้อเป็น [หัวข้อ, [[ชื่อ, ค่า, คำอธิบาย], …]] · ข้อความสำหรับพิมพ์สร้างจากโครงสร้างเดียวกัน (window.SDSS.droughtReport)
+  let dRep = null;
+  function droughtText(R) {
+    const now = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short' });
+    const out = ['รายงานสถานการณ์ภัยแล้ง ต.จันอัด อ.โนนสูง จ.นครราชสีมา', `สร้างเมื่อ ${now} น.`];
+    R.forEach(([h, rows]) => { out.push('', h); rows.forEach(([k, v, sub]) => out.push(`• ${k}: ${v}${sub ? ` (${sub})` : ''}`)); });
+    out.push('', 'ดัชนีภัยแล้ง DRI/SMAP/NDWI (GISTDA ราย 7 วัน) ดูบนแผนที่', 'แสดงค่าจริงจากหน่วยงาน ไม่จัดระดับความรุนแรงภัยแล้ง · ไม่ใช่ประกาศเตือนภัยทางการ');
+    return out.join('\n');
+  }
   async function refreshDrought() {
+    const R = [], sec = (h) => { const rows = []; R.push([h, rows]); return rows; };
+    const res = sec('💧 น้ำในอ่างเก็บน้ำ');
     try {
       const rid = await json('data/live/rid_reservoir.json');
-      [['k-d-up', 'rsv300'], ['k-d-lo', 'rsv292']].forEach(([k, code]) => { const r = lckPct(rid, code);
-        setK(k, r ? fmt(r.pct, 0) + '%' : '—', r ? `ข้อมูลวันที่ ${dDate(r.date)}${r.prev != null && r.pct !== r.prev ? ` · ${r.pct > r.prev ? '▲' : '▼'} ${fmt(Math.abs(r.pct - r.prev), 1)}% จากวันก่อน` : ''} · กรมชลประทาน` : 'ไม่มีข้อมูล'); });
-    } catch (e) { setK('k-d-up', '—', 'ไม่มีข้อมูล'); setK('k-d-lo', '—', 'ไม่มีข้อมูล'); }
+      [['อ่างลำเชียงไกรตอนบน', 'rsv300'], ['อ่างลำเชียงไกรตอนล่าง', 'rsv292']].forEach(([n, code]) => { const r = lckPct(rid, code);
+        res.push([n, r ? fmt(r.pct, 0) + '% ความจุ' : '—', r ? `ข้อมูลวันที่ ${dDate(r.date)}${r.prev != null && r.pct !== r.prev ? ` · ${r.pct > r.prev ? '▲' : '▼'} ${fmt(Math.abs(r.pct - r.prev), 1)}% จากวันก่อน` : ''} · กรมชลประทาน` : 'ไม่มีข้อมูล']); });
+    } catch (e) { res.push(['อ่างลำเชียงไกร', '—', 'ไม่มีข้อมูล']); }
     try {
       const p = await province(), dams = (p.dams || []).filter(d => !d.stale && d.pct != null && rel(d));
       const crit = dams.filter(d => d.pct < 30), low = dams.filter(d => d.pct >= 30 && d.pct < 50);   // ช่วงสีเดิมของชั้นอ่าง (DAM_BR)
-      setK('k-d-low', `${crit.length}`, `30–50% อีก ${low.length} อ่าง · จาก ${dams.length} อ่าง · ${hhmm(p.updated_at)}`);
+      res.push(['อ่างในจังหวัด < 30% ความจุ', `${crit.length} อ่าง`, `30–50% อีก ${low.length} อ่าง · จาก ${dams.length} อ่าง · ${hhmm(p.updated_at)}`]);
       const h = await history();
       const rows = dams.slice().sort((a, b) => a.pct - b.pct).slice(0, 8);
       $('now-title').textContent = 'อ่างเก็บน้ำที่ควรจับตา (น้ำน้อยก่อน)';
@@ -835,22 +847,36 @@ document.addEventListener('sdss:ready', async () => {
         if (!state.dams.on) await setOn('dams', true);
         const m = MARK[el.dataset.k]; if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 11)); m.openPopup(); }
       });
-    } catch (e) { setK('k-d-low', '—', e.message); }
-    try {   // ภัยแล้งซ้ำซาก ต.จันอัด: จำนวนครั้งที่ครอบคลุมพื้นที่ตำบลมากที่สุด (สัดส่วนพื้นที่จากขอบเขตตำบลของโครงการ)
+    } catch (e) { res.push(['อ่างในจังหวัด', '—', e.message]); }
+    const rec = sec('🔁 ภัยแล้งซ้ำซาก (GISTDA)');
+    try {   // จำนวนครั้งที่ครอบคลุมพื้นที่ตำบลมากที่สุด (สัดส่วนพื้นที่จากขอบเขตตำบลของโครงการ)
       const d = await droughtfreq(), ca = (d.by_tambon || {})['301010'], ys = d.years || [];
       if (!ca || !ca.mode) throw new Error('no');
       const oth = Object.entries(ca.share).filter(([k, v]) => +k !== ca.mode && v >= 0.01).sort((a, b) => b[1] - a[1])
         .map(([k, v]) => `${k} ครั้ง ${fmt(v * 100, 0)}%`).join(' · ');
-      setK('k-d-dri', `${ca.mode} ครั้ง/${ys.length} ปี`, `${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่ตำบล${oth ? ' · ' + oth : ''} · ปี ${thYr(ys[0])}–${thYr(ys[ys.length - 1])} · GISTDA`);
-    } catch (e) { setK('k-d-dri', '—', 'รอ workflow drought-layers สร้างข้อมูล'); }
+      rec.push(['ต.จันอัด', `${ca.mode} ครั้ง ใน ${ys.length} ปี`, `${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่ตำบล${oth ? ' · ' + oth : ''} · ปี ${thYr(ys[0])}–${thYr(ys[ys.length - 1])}`]);
+    } catch (e) { rec.push(['ต.จันอัด', '—', 'รอ workflow drought-layers สร้างข้อมูล']); }
+    const ag = sec('🌾 พื้นที่การเกษตรที่ปลูกอยู่ (GISTDA)');
+    try {
+      const d = await json('data/crops.geojson'), ca = ((d.by_tambon || {})['301010'] || {}).crops_rai || {};
+      const up = (d.data_updates || []).slice(-1)[0];
+      const ent = Object.entries(ca).sort((a, b) => b[1] - a[1]);
+      if (!ent.length) ag.push(['ต.จันอัด', 'ไม่พบพื้นที่ปลูกพืชเศรษฐกิจ', `ข้อมูลวันที่ ${dDate(up)}`]);
+      ent.forEach(([c, v], i) => ag.push([cropOf(c, i)[0], `${rai(v)} ไร่`, i === 0 ? `ต.จันอัด · ข้อมูลวันที่ ${dDate(up)} (ราย 2 สัปดาห์)` : '']));
+    } catch (e) { ag.push(['ต.จันอัด', '—', 'รอ workflow crop-layers สร้างข้อมูล']); }
+    dRep = R;
+    $('drep-ts').textContent = '· ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    $('drep-body').innerHTML = R.map(([h, rows]) => `<div class="dr-sec">${esc(h)}</div>` + rows.map(([k, v, sub]) =>
+      `<div class="dr-row"><span>${esc(k)}${sub ? `<span class="dr-sub">${esc(sub)}</span>` : ''}</span><span class="mono">${esc(v)}</span></div>`).join('')).join('');
   }
+  window.SDSS.droughtReport = async () => { if (!dRep) await refreshDrought(); return droughtText(dRep); };
 
-  // สลับแท็บ: เปิด/ปิดชั้นข้อมูลตามค่าเริ่มต้นของแท็บ · สลับแถว KPI · รายการจับตา · แถบเตือนตลิ่ง (เฉพาะน้ำท่วม)
+  // สลับแท็บ: เปิด/ปิดชั้นข้อมูลตามค่าเริ่มต้นของแท็บ · แถว KPI (น้ำท่วม) / รายงานภัยแล้ง (แผงขวา) · รายการจับตา · แถบเตือนตลิ่ง (เฉพาะน้ำท่วม)
   function applyMode(m, first) {
     mode = m;
     document.querySelectorAll('#modetabs .mtab[data-mode]').forEach(a => { const on = a.dataset.mode === m;
       a.classList.toggle('on', on); a.setAttribute('aria-current', on ? 'page' : 'false'); });
-    $('kpi-flood').hidden = m !== 'flood'; $('kpi-drought').hidden = m !== 'drought';
+    $('kpi-flood').hidden = m !== 'flood'; $('drep').hidden = m !== 'drought';
     document.body.classList.toggle('mode-drought', m === 'drought');
     if (m !== 'flood' && $('bank-alert')) $('bank-alert').hidden = true;
     setTimeout(legendD);
