@@ -21,7 +21,7 @@ jobs:
       - run: pip install --quiet shapely
       - name: พื้นที่ปลูกพืชเศรษฐกิจ (API GISTDA check-crop)
         env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
-        run: python scripts/region/build_crops_gistda.py
+        run: python -u scripts/region/build_crops_gistda.py
       - name: commit ผลลัพธ์ (เฉพาะ main)
         if: ${{ github.ref == 'refs/heads/main' }}
         # เหมือน drought-layers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
