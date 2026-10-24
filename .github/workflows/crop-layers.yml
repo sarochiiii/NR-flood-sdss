@@ -1,0 +1,42 @@
+name: crop-layers
+# พื้นที่ปลูกพืชเศรษฐกิจปัจจุบัน 26 ตำบล จาก API GISTDA check-crop v2.2 (ราย 2 สัปดาห์) → region/data/crops.geojson
+# กดรันเอง (Actions → crop-layers → Run workflow) · รันเองวันที่ 2 และ 17 ของเดือน · หรือเมื่อแก้สคริปต์
+# push บน branch อื่นที่ไม่ใช่ main = ทดลองอย่างเดียว (พิมพ์สรุป ไม่ commit)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 3 2,17 * *'     # วันที่ 2 และ 17 ของทุกเดือน 10:35 น.
+  push:
+    paths: [scripts/region/build_crops_gistda.py, .github/workflows/crop-layers.yml]
+concurrency: { group: crop-layers, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.11' }
+      - run: pip install --quiet shapely
+      - name: พื้นที่ปลูกพืชเศรษฐกิจ (API GISTDA check-crop)
+        env: { GISTDA_API_KEY: '${{ secrets.GISTDA_API_KEY }}' }
+        run: python -u scripts/region/build_crops_gistda.py
+      - name: commit ผลลัพธ์ (เฉพาะ main)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        # เหมือน drought-layers: ย้อนไปที่ main ล่าสุดแล้ววางไฟล์ทับ (ไม่ conflict กับ region-live)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          F=region/data/crops.geojson
+          [ -f "$F" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
+          cp "$F" /tmp/crops.geojson
+          for i in 1 2 3 4; do
+            git fetch --quiet origin main && git reset --quiet --hard origin/main
+            cp /tmp/crops.geojson "$F" && git add "$F"
+            git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
+            git commit --quiet -m "data(region): พื้นที่ปลูกพืช GISTDA $(date -u '+%Y-%m-%d')"
+            git push --quiet origin HEAD:main && exit 0
+            sleep $((i * 15))
+          done
+          exit 1

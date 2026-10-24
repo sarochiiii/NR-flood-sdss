@@ -106,10 +106,12 @@
       'data/live/gistda_flood_7d.geojson', 'data/live/ecmwf.json', 'config.json'].map(get));
       return situationReport({ tw, rid, gf, ec, cfg }); };
     // พิมพ์แผนที่ + รายงาน 1 หน้า A4 (region/js/print.js · คำสั่งพิมพ์ของเบราว์เซอร์ ไม่มีค่าใช้จ่าย)
+    // แท็บภัยแล้ง (body.mode-drought): ใช้รายงานภัยแล้งจาก layers.js แทนรายงานสถานการณ์น้ำ
+    const dr = () => document.body.classList.contains('mode-drought') && window.SDSS && window.SDSS.droughtReport;
     if ($('btn-print')) $('btn-print').onclick = () => window.SDSS_PRINT && window.SDSS && window.SDSS_PRINT.open({
-      map: window.SDSS.map, title: 'SDSS-ChanAT · รายงานสถานการณ์น้ำ ต.จันอัด',
+      map: window.SDSS.map, title: dr() ? 'SDSS-ChanAT · รายงานสถานการณ์ภัยแล้ง ต.จันอัด' : 'SDSS-ChanAT · รายงานสถานการณ์น้ำ ต.จันอัด',
       subtitle: 'ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ ตำบลจันอัด อำเภอโนนสูง จังหวัดนครราชสีมา',
-      report: build(), legends: [$('legend'), $('legend-d'), document.querySelector('.bank-legend')], site: location.origin + location.pathname });
+      report: dr() ? window.SDSS.droughtReport() : build(), legends: [$('legend'), $('legend-d'), document.querySelector('.bank-legend')], site: location.origin + location.pathname });
     btn.onclick = async () => {
       btn.disabled = true; btn.textContent = 'กำลังสร้างรายงาน…';
       const txt = await build();

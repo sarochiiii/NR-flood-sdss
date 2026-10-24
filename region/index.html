@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/region.css?v=53">
+<link rel="stylesheet" href="css/region.css?v=55">
 </head>
 <body>
 <!-- แถบโลโก้หน่วยงานสนับสนุน (ลำดับตามที่โครงการกำหนด) · ไฟล์ region/img/logos/ -->
@@ -29,7 +29,6 @@
     <div class="hdr-sub">ระบบสนับสนุนการตัดสินใจเชิงพื้นที่ ตำบลจันอัด อำเภอโนนสูง จังหวัดนครราชสีมา</div>
   </div>
   <div class="hdr-right">
-    <a class="hdr-sbx" href="../chanat/" title="Dan Ting Sandbox · SDSS บ้านด่านติง ต.จันอัด"><i class="ti ti-building" aria-hidden="true"></i> Dan Ting Sandbox</a>
     <span id="badge" class="badge badge-warn">กำลังโหลด</span>
     <span id="updated" class="mono hdr-ts">—</span>
   </div>
@@ -50,13 +49,6 @@
   <div class="kpi-card"><div class="kpi-lab">น้ำท่วมตรวจพบ 7 วัน</div><div class="kpi-val mono" id="k-flood">—</div><div class="kpi-sub" id="k-flood-s"></div></div>
   <div class="kpi-card"><div class="kpi-lab">คาดการณ์ฝน 24 ชม. สูงสุด</div><div class="kpi-val mono" id="k-fcst">—</div><div class="kpi-sub">Open-Meteo รายตำบล</div></div>
 </section>
-<!-- แท็บภัยแล้ง: แสดงค่าจริง ไม่จัดระดับแล้ง/ไม่แล้ง (ยังไม่มีเกณฑ์ที่ยืนยันกับหน่วยงาน) · สีอ่างใช้ช่วงเดิมของชั้นอ่างเก็บน้ำ -->
-<section class="kpi" id="kpi-drought" hidden>
-  <div class="kpi-card"><div class="kpi-lab">อ่างลำเชียงไกรตอนบน</div><div class="kpi-val mono" id="k-d-up">—</div><div class="kpi-sub" id="k-d-up-s"></div></div>
-  <div class="kpi-card"><div class="kpi-lab">อ่างลำเชียงไกรตอนล่าง</div><div class="kpi-val mono" id="k-d-lo">—</div><div class="kpi-sub" id="k-d-lo-s"></div></div>
-  <div class="kpi-card"><div class="kpi-lab">อ่างในจังหวัด &lt; 30% ความจุ</div><div class="kpi-val mono" id="k-d-low">—</div><div class="kpi-sub" id="k-d-low-s"></div></div>
-  <div class="kpi-card"><div class="kpi-lab">ภัยแล้งซ้ำซาก ต.จันอัด (GISTDA)</div><div class="kpi-val mono" id="k-d-dri">—</div><div class="kpi-sub" id="k-d-dri-s"></div></div>
-</section>
 
 <main class="body" id="body">
   <aside class="lpanel" id="lpanel" aria-label="ชั้นข้อมูล">
@@ -76,16 +68,22 @@
       <span><i style="background:#7E22CE"></i>ล้นและยังขึ้น</span><span><i class="lg-pulse"></i>เกิน 100% (อ่าง/สถานี)</span></div>
   </div>
   <aside class="rail">
-    <section class="card" id="query">
+    <!-- แท็บภัยแล้ง: รายงานสถานการณ์ภัยแล้ง (แทนแถบ KPI ด้านบน · ผู้ใช้กำหนด 24 ต.ค. 69) · แสดงค่าจริง ไม่จัดระดับแล้ง -->
+    <section class="card drep" id="drep" hidden>
+      <h2 class="rail-h">รายงานสถานการณ์ภัยแล้ง ต.จันอัด <span id="drep-ts" class="mono" style="font-weight:400"></span></h2>
+      <div id="drep-body"><div class="muted">กำลังโหลด…</div></div>
+      <div class="muted" style="font-size:11.5px;margin-top:6px">แสดงค่าจริงจากหน่วยงาน ไม่จัดระดับความรุนแรงภัยแล้ง (ยังไม่มีเกณฑ์ที่ยืนยันกับหน่วยงาน) · ไม่ใช่ประกาศเตือนภัยทางการ</div>
+    </section>
+    <section class="card flood-only" id="query">
       <div class="muted">แตะตำบลบนแผนที่เพื่อดูรายละเอียด</div>
     </section>
-    <div class="act2" id="act2">
+    <div class="act2 flood-only" id="act2">
       <a class="act act-rep" id="btn-report" href="#">📍 แจ้งเหตุ<small>น้ำท่วมบ้าน/ถนน → จุดแดงบนแผนที่</small></a>
       <a class="act act-help" id="btn-help" href="#">🆘 ขอความช่วยเหลือ<small>ตำแหน่งจริง ทุกคนเห็น · อบต. ติดตาม</small></a>
     </div>
-    <div class="muted" id="act-note" style="font-size:12px;margin:-4px 0 8px">ใช้ผ่านแอป LINE · ทุกคนแจ้งได้ ไม่ต้องลงทะเบียน · อันตรายต่อชีวิตโทร 1669 / 1784</div>
-    <a class="btn" href="monitor.html" style="margin:0 0 8px;font-size:13px" title="สำหรับเจ้าหน้าที่ อบต. · ต้องใช้รหัสติดตามเหตุจากทีมวิจัย">🛡 หน้าติดตามเหตุ (เจ้าหน้าที่ อบต.)</a>
-    <button class="btn" id="btn-lrep" type="button" style="margin-top:0">📋 สร้างรายงานสถานการณ์สำหรับ LINE</button>
+    <div class="muted flood-only" id="act-note" style="font-size:12px;margin:-4px 0 8px">ใช้ผ่านแอป LINE · ทุกคนแจ้งได้ ไม่ต้องลงทะเบียน · อันตรายต่อชีวิตโทร 1669 / 1784</div>
+    <a class="btn flood-only" href="monitor.html" style="margin:0 0 8px;font-size:13px" title="สำหรับเจ้าหน้าที่ อบต. · ต้องใช้รหัสติดตามเหตุจากทีมวิจัย">🛡 หน้าติดตามเหตุ (เจ้าหน้าที่ อบต.)</a>
+    <button class="btn flood-only" id="btn-lrep" type="button" style="margin-top:0">📋 สร้างรายงานสถานการณ์สำหรับ LINE</button>
     <button class="btn" id="btn-print" type="button" style="margin-top:6px">🖨 พิมพ์แผนที่ + รายงาน (A4 / PDF)</button>
     <section class="card lrep" id="lrep" hidden>
       <pre id="lrep-text"></pre>
@@ -93,7 +91,7 @@
         <a id="lrep-share" href="#" target="_blank" rel="noopener">แชร์เข้า LINE</a></div>
       <div class="muted" style="font-size:11.5px">สรุปจากชั้นข้อมูลระดับน้ำ · อ่างเก็บน้ำ · ฝนสถานี · น้ำท่วม GISTDA (ไฟล์อัปเดตทุกชั่วโมง) — ข้อความเดียวกับคำสั่ง "สถานการณ์น้ำ" ใน LINE OA</div>
     </section>
-    <a class="btn" href="lamchiangkrai.html" style="margin-top:8px">เฝ้าระวังลำเชียงไกร · ต้นน้ำ → แม่น้ำมูล →</a>
+    <a class="btn flood-only" href="lamchiangkrai.html" style="margin-top:8px">เฝ้าระวังลำเชียงไกร · ต้นน้ำ → แม่น้ำมูล →</a>
     <section>
       <h2 class="rail-h"><span id="now-title">สถานีที่ควรจับตา</span> <span id="now-ts" class="mono" style="font-weight:400"></span></h2>
       <div id="now" class="collapsed"></div>
@@ -123,10 +121,10 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="liff/config.js?v=53"></script>
-<script src="js/report.js?v=53"></script>
-<script src="js/print.js?v=53"></script>
-<script src="js/layers.js?v=53"></script>
-<script src="js/region.js?v=53"></script>
+<script src="liff/config.js?v=55"></script>
+<script src="js/report.js?v=55"></script>
+<script src="js/print.js?v=55"></script>
+<script src="js/layers.js?v=55"></script>
+<script src="js/region.js?v=55"></script>
 </body>
 </html>

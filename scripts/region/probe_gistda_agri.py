@@ -1,0 +1,255 @@
+"""ตรวจหา API พื้นที่การเกษตร (อ้อย มันสำปะหลัง ข้าวโพด ข้าว) ของ GISTDA — สำหรับวินิจฉัยเท่านั้น ไม่เขียนข้อมูล ไม่ commit
+
+ทำไม: แท็บ "ภัยแล้ง" อาจเพิ่มชั้นพื้นที่การเกษตรแบบเดียวกับแผนที่ภัยแล้งของ GISTDA แต่ห้ามเดา endpoint/field (กฎ CLAUDE.md ข้อ 6)
+ขั้นตอน: ① ค้นชุดข้อมูลใน CKAN ของ opendata.gistda.or.th (คำค้นพืช/เกษตร/การใช้ที่ดิน) → ชื่อชุดข้อมูล resource และ URL ที่พบ
+         ② อ่านหน้าเว็บแผนที่ภัยแล้ง/ภัยพิบัติของ GISTDA และไฟล์ JS ที่หน้าโหลด → หา URL/path ที่เกี่ยวกับพืชหรือเกษตร
+         ③ ไล่ STAC ของ api-gateway (root และ catalog ภัยแล้ง) → หา collection ที่เกี่ยวกับพืช
+         ④ เรียกเฉพาะ URL ที่ค้นพบจริงจาก ①–③ และ cropsdrought zonal (พบใน CKAN รอบก่อน) → พิมพ์สถานะ ชนิด และโครงสร้าง
+         ไม่สุ่มเดา path · ปิดบัง key ทุกจุด · ภาพตัวอย่างเก็บเป็น artifact 3 วัน ไม่ commit
+env: GISTDA_API_KEY (Secret · ไม่มีก็ทำ ①–② ได้) · OUT_DIR (ค่าเริ่มต้น probe_out) · จบ exit 0 เสมอ
+"""
+import json, os, re, sys, urllib.parse, urllib.request
+
+KEY = os.environ.get("GISTDA_API_KEY", "").strip()
+OUT = os.environ.get("OUT_DIR", "probe_out")
+LAT, LON = 15.15629, 102.15786          # ต.จันอัด (จุดเดียวกับ ecmwf.json)
+CKAN = "https://opendata.gistda.or.th/api/3/action/package_search?rows=40&q="
+QUERIES = ["เกษตร", "พืชเศรษฐกิจ", "อ้อย", "มันสำปะหลัง", "ข้าวโพด", "ข้าว", "crop", "agriculture", "sugarcane", "cassava", "maize", "rice", "land use"]
+HINT = re.compile(r"(?i)crop|agri|sugar|cassava|maize|corn|rice|paddy|plant|landuse|land-use|เกษตร|อ้อย|มันสำปะหลัง|ข้าวโพด|ข้าว|พืช")
+# หน้าเว็บของ GISTDA ที่อาจมีแผนที่ภัยแล้ง (ลองอ่าน · หน้าไหนเข้าไม่ได้ก็ข้าม)
+PORTALS = ["https://drought.gistda.or.th/", "https://disaster.gistda.or.th/", "https://disaster.gistda.or.th/drought",
+           "https://cropsdrought.gistda.or.th/", "https://opendata.gistda.or.th/"]
+STAC = ["https://api-gateway.gistda.or.th/api/2.0/resources/stac", "https://api-gateway.gistda.or.th/api/2.0/resources/stac/drought",
+        "https://api-gateway.gistda.or.th/api/2.0/resources/stac/drought/catalogs"]
+ZONAL = ["https://cropsdrought.gistda.or.th/api/rest/zonal/province", "https://cropsdrought.gistda.or.th/api/rest/zonal/irrigation",
+         "https://cropsdrought.gistda.or.th/api/rest/zonal/mainbasin"]
+URLRE = re.compile(r"https?://[A-Za-z0-9.-]*gistda\.or\.th[^\s\"'<>`\\)]*")
+PATHRE = re.compile(r"[\"'`](/(?:api|maps|resources|stac|v\d)[^\"'`\s]{2,160})[\"'`]")
+
+
+def red(s):
+    s = str(s)
+    if KEY:
+        s = s.replace(KEY, "***")
+    return re.sub(r"(?i)(api[-_]?key=)[^&\"'\s]+", r"\1***", s)
+
+
+def get(url, headers=None, timeout=45):
+    h = {"User-Agent": "Mozilla/5.0 NRRU-SDSS-probe/1.0", **(headers or {})}
+    req = urllib.request.Request(url, headers=h)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.status, r.headers.get("Content-Type", ""), r.read()
+
+
+def shape(o, depth=0):
+    if depth > 3:
+        return "…"
+    if isinstance(o, dict):
+        return {k: shape(v, depth + 1) for k, v in list(o.items())[:25]}
+    if isinstance(o, list):
+        return [f"list[{len(o)}]", shape(o[0], depth + 1)] if o else "list[0]"
+    return type(o).__name__ + (f"={str(o)[:50]}" if isinstance(o, (str, int, float)) else "")
+
+
+def ckan(found):
+    print("=== ① ชุดข้อมูลใน opendata.gistda.or.th ===")
+    seen = set()
+    for q in QUERIES:
+        try:
+            st, ct, body = get(CKAN + urllib.parse.quote(q))
+            res = json.loads(body.decode("utf-8", "replace")).get("result", {})
+            print(f"\n[{st}] q={q} · {res.get('count')} ชุดข้อมูล")
+            for p in res.get("results", []):
+                if p.get("name") in seen or not HINT.search(json.dumps(p, ensure_ascii=False)):
+                    continue
+                seen.add(p.get("name"))
+                print(f"  • {p.get('name')} — {p.get('title')} · องค์กร {(p.get('organization') or {}).get('title')} · ปรับปรุง {p.get('metadata_modified', '')[:10]}")
+                notes = re.sub(r"\s+", " ", p.get("notes") or "")[:300]
+                if notes:
+                    print(f"      คำอธิบาย: {red(notes)}")
+                for r in p.get("resources", [])[:10]:
+                    u = r.get("url") or ""
+                    print(f"      - {r.get('name')} [{r.get('format')}] {red(u)[:200]}")
+                txt = json.dumps(p, ensure_ascii=False).replace("\\/", "/")
+                found.update(URLRE.findall(txt))
+                for r in p.get("resources", [])[:6]:     # หน้า resource มักมีตัวอย่าง URL ของ api-gateway
+                    try:
+                        _, _, b = get(f"https://opendata.gistda.or.th/dataset/{p.get('name')}/resource/{r.get('id')}")
+                        found.update(URLRE.findall(b.decode("utf-8", "replace").replace("\\/", "/").replace("&amp;", "&")))
+                    except Exception as e:
+                        print(f"      (อ่านหน้า resource ไม่ได้: {red(e)[:80]})")
+        except Exception as e:
+            print(f"[ERR] q={q} · {red(e)[:160]}")
+
+
+def portals(found, paths):
+    print("\n=== ② หน้าเว็บ GISTDA และไฟล์ JS ===")
+    for pg in PORTALS:
+        try:
+            st, ct, body = get(pg)
+            html = body.decode("utf-8", "replace")
+            title = re.search(r"<title>(.*?)</title>", html, re.S)
+            scripts = re.findall(r"<script[^>]+src=[\"']([^\"']+)", html)
+            print(f"\n[{st}] {pg} · {len(body)} bytes · title={title.group(1).strip()[:80] if title else '-'} · script {len(scripts)} ไฟล์")
+            found.update(URLRE.findall(html))
+            for s in scripts[:25]:
+                u = urllib.parse.urljoin(pg, s)
+                try:
+                    _, _, jb = get(u, timeout=60)
+                    js = jb.decode("utf-8", "replace").replace("\\/", "/")
+                    us, ps = URLRE.findall(js), PATHRE.findall(js)
+                    hit = sorted({x for x in us + ps if HINT.search(x)})
+                    found.update(us); paths.update((pg, x) for x in ps if HINT.search(x))
+                    # คำที่เกี่ยวกับพืชในโค้ด (ชื่อชั้น/ป้าย) — ช่วยหาว่าชั้นพื้นที่การเกษตรมาจากไหน
+                    kw = sorted(set(m.group(0)[:120] for m in re.finditer(r"[^\"'`\n]{0,60}(?:อ้อย|มันสำปะหลัง|ข้าวโพด|sugarcane|cassava|maize)[^\"'`\n]{0,60}", js)))[:8]
+                    print(f"   - {red(u)[:140]} · {len(jb)} bytes · URL/path ที่เกี่ยวกับพืช {len(hit)}")
+                    for x in hit[:15]:
+                        print(f"       {red(x)[:200]}")
+                    for x in kw:
+                        print(f"       คำ: {red(x)}")
+                except Exception as e:
+                    print(f"   - {red(u)[:140]} (อ่านไม่ได้: {red(e)[:80]})")
+        except Exception as e:
+            print(f"\n[ERR] {pg} · {red(e)[:120]}")
+
+
+def stac(found):
+    print("\n=== ③ STAC ของ api-gateway ===")
+    if not KEY:
+        print("(ข้าม — ไม่มี GISTDA_API_KEY)"); return
+    for u in STAC:
+        try:
+            st, ct, body = get(u, {"API-Key": KEY})
+            j = json.loads(body.decode("utf-8", "replace"))
+            links = [l for l in (j.get("links") or []) if isinstance(l, dict)] if isinstance(j, dict) else []
+            print(f"\n[{st}] {u} · id={j.get('id') if isinstance(j, dict) else '-'} · links {len(links)}")
+            for l in links[:60]:
+                h = l.get("href", "")
+                print(f"   {l.get('rel')} · {l.get('title') or ''} · {red(h)[:160]}")
+                if HINT.search(h + " " + str(l.get("title") or "")):
+                    found.add(h)
+        except urllib.error.HTTPError as e:
+            print(f"\n[HTTP {e.code}] {u} · {red(e.read().decode('utf-8', 'replace'))[:160]}")
+        except Exception as e:
+            print(f"\n[ERR] {u} · {red(e)[:160]}")
+
+
+def call(cand):
+    print(f"\n=== ④ เรียก URL ที่ค้นพบ ({len(cand)}) ===")
+    os.makedirs(OUT, exist_ok=True)
+    for i, u in enumerate(cand[:25]):
+        url = re.sub(r"(?i)(api[-_]?key=)[^&]*&?", "", u).rstrip("?&")
+        url = re.sub(r"(?i)\b(lat(?:itude)?=)[^&]*", rf"\g<1>{LAT}", url)
+        url = re.sub(r"(?i)\b((?:lon|lng|longitude)=)[^&]*", rf"\g<1>{LON}", url)
+        if "{" in url:
+            print(f"\n[ข้าม · มีตัวแปร] {red(url)[:200]}"); continue
+        hdr = {"API-Key": KEY} if KEY and "api-gateway" in url else {}
+        try:
+            st, ct, body = get(url, hdr, timeout=60)
+            print(f"\n[{st}] {ct} · {len(body)} bytes · {red(url)[:200]}")
+            if "image" in ct:
+                open(os.path.join(OUT, f"agri_{i}.png"), "wb").write(body)
+                continue
+            txt = body.decode("utf-8", "replace")
+            try:
+                j = json.loads(txt)
+                print("   โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:1500])
+                if isinstance(j, list) and j and isinstance(j[0], dict):   # หาแถวนครราชสีมาถ้ามี
+                    nr = [r for r in j if "นครราชสีมา" in json.dumps(r, ensure_ascii=False)][:2]
+                    for r in nr:
+                        print("   แถวนครราชสีมา:", red(json.dumps(r, ensure_ascii=False))[:600])
+            except Exception:
+                print("   ข้อความ:", red(txt)[:500].replace("\n", " "))
+        except urllib.error.HTTPError as e:
+            print(f"\n[HTTP {e.code}] {red(url)[:200]} · {red(e.read().decode('utf-8', 'replace'))[:200]}")
+        except Exception as e:
+            print(f"\n[ERR] {red(url)[:200]} · {red(e)[:160]}")
+
+
+AG = "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v2.2/agriculture/"
+CROPS = ["sugarcane-weekly-40m", "cassava-weekly-40m", "maize-weekly-40m", "rice-weekly-40m", "check-crop"]
+
+
+def crops():
+    """⑤ พืชเศรษฐกิจ v2.2 (พบใน CKAN รอบแรก): จุด ต.จันอัด และแบบพื้นที่ (กรอบ ~2×2 กม. กลาง ต.จันอัด) → โครงสร้าง แถวตัวอย่าง กรอบ geom"""
+    print("\n=== ⑤ พืชเศรษฐกิจ v2.2 (ต.จันอัด) ===")
+    if not KEY:
+        print("(ข้าม — ไม่มี GISTDA_API_KEY)"); return
+    a, b, d = 102.10, 15.10, 0.08     # กรอบครอบ ต.จันอัด (รอบก่อนใช้ 0.02° กลางตำบล)
+    feat = {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[[a, b], [a + d, b], [a + d, b + d], [a, b + d], [a, b]]]}}
+    for c in CROPS:
+        for q in (f"lat={LAT}&lon={LON}", "area=" + urllib.parse.quote(json.dumps(feat, separators=(",", ":")))):
+            url = AG + c + "?" + q
+            tag = "จุด" if q.startswith("lat") else "พื้นที่"
+            try:
+                st, ct, body = get(url, {"API-Key": KEY}, timeout=120)
+                j = json.loads(body.decode("utf-8", "replace"))
+                print(f"\n[{st}] {c} · {tag} · {len(body)} bytes · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:900])
+                rows = j if isinstance(j, list) else (j.get("features") or j.get("data") or []) if isinstance(j, dict) else []
+                if isinstance(rows, list) and rows and isinstance(rows[0], dict):   # สรุปทั้งกรอบ: จำนวนแถว ผลรวม area ตามชนิด/อายุ
+                    agg = {}
+                    for r in rows:
+                        k = r.get("result") or r.get("age")
+                        agg.setdefault(str(k), [0, 0.0]); agg[str(k)][0] += 1; agg[str(k)][1] += float(r.get("area") or 0)
+                    print("   สรุป (ค่า: [แถว, ผลรวม area]):", json.dumps(agg, ensure_ascii=False)[:600])
+                for r in rows[:6] if isinstance(rows, list) else []:
+                    if not isinstance(r, dict):
+                        continue
+                    g = r.get("geom") or r.get("geometry")
+                    if isinstance(g, list):   # check-crop: geom เป็นรายการ geometry ต่อชนิดพืช
+                        g = {"type": f"list[{len(g)}]·{','.join(sorted({str((x or {}).get('type')) for x in g}))}", "coordinates": [(x or {}).get("coordinates") or [] for x in g]}
+                    cs = []
+                    def walk(x):
+                        if x and isinstance(x[0], (int, float)): cs.append(x)
+                        elif isinstance(x, list): [walk(y) for y in x]
+                    walk((g or {}).get("coordinates") or [])
+                    props = {k: v for k, v in r.items() if k not in ("geom", "geometry")}
+                    bb = [round(min(x[0] for x in cs), 4), round(min(x[1] for x in cs), 4), round(max(x[0] for x in cs), 4), round(max(x[1] for x in cs), 4)] if cs else None
+                    print(f"   · {red(json.dumps(props, ensure_ascii=False))[:400]} · geom={(g or {}).get('type')} จุด={len(cs)} กรอบ={bb}")
+                if isinstance(rows, list) and len(rows) > 6:
+                    print(f"   … อีก {len(rows) - 6} แถว")
+            except urllib.error.HTTPError as e:
+                print(f"\n[HTTP {e.code}] {c} · {tag} · {red(e.read().decode('utf-8', 'replace'))[:200]}")
+            except Exception as e:
+                print(f"\n[ERR] {c} · {tag} · {red(e)[:160]}")
+    for u in ZONAL + ["https://cropsdrought.gistda.or.th/api/statwater/et/province", "https://cropsdrought.gistda.or.th/api-docs"]:
+        try:
+            st, ct, body = get(u, timeout=60)
+            txt = body.decode("utf-8", "replace")
+            try:
+                j = json.loads(txt)
+                print(f"\n[{st}] {u} · โครงสร้าง:", red(json.dumps(shape(j), ensure_ascii=False))[:700])
+                nr = [r for r in (j if isinstance(j, list) else j.get("data", []) if isinstance(j, dict) else []) if "นครราชสีมา" in json.dumps(r, ensure_ascii=False)][:1]
+                for r in nr:
+                    print("   แถวนครราชสีมา:", red(json.dumps(r, ensure_ascii=False))[:500])
+            except Exception:
+                print(f"\n[{st}] {u} · {ct} · {len(body)} bytes · ข้อความ:", red(txt)[:300].replace("\n", " "))
+        except urllib.error.HTTPError as e:
+            print(f"\n[HTTP {e.code}] {u}")
+        except Exception as e:
+            print(f"\n[ERR] {u} · {red(e)[:120]}")
+
+
+def main():
+    if os.environ.get("ONLY_CROPS") == "1":
+        return crops()
+    found, paths = set(), set()
+    ckan(found)
+    portals(found, paths)
+    stac(found)
+    cand = sorted({u.rstrip(".,;") for u in found if HINT.search(u)} | set(ZONAL))
+    print(f"\n=== URL ที่เกี่ยวกับพืช/เกษตร ({len(cand)} จาก {len(found)}) ===")
+    for u in cand:
+        print("   ", red(u)[:240])
+    print(f"\n=== path ในโค้ดหน้าเว็บที่เกี่ยวกับพืช ({len(paths)}) ===")
+    for pg, p in sorted(paths)[:40]:
+        print(f"    {pg} → {red(p)[:200]}")
+    call(cand)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(f"::error::{red(e)[:300]}")
+    sys.exit(0)
