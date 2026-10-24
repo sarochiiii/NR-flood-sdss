@@ -9,6 +9,7 @@ API: GET https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v2.2/agri
      → ใช้เฉพาะแปลงในรอบข้อมูลล่าสุดของแต่ละพืช (update สูงสุดของพืชนั้น · ผู้ใช้กำหนด 24 ต.ค. 69) · พิมพ์พื้นที่ทุกรอบไว้ใน log/all_rounds_rai เพื่อตรวจสอบ
 สรุปรายตำบล: พื้นที่ (ไร่) ตามชนิดพืช คำนวณจาก geometry เอง (ไม่ใช้ field area ของ API เพราะเอกสารไม่ระบุหน่วย) · ไม่บันทึกขนาดพื้นที่ตำบล (ผู้ใช้กำหนด)
 ชื่อพืชเก็บตามที่ API ส่งมา (ไม่แปล/ไม่เดา) · หน้าเว็บแปลเป็นไทยเฉพาะชื่อที่ตรวจแล้ว
+เก็บเฉพาะ ข้าว อ้อย มันสำปะหลัง ข้าวโพด (KEEP · ผู้ใช้กำหนด 24 ต.ค. 69) — ตัดยางพารา/ปาล์มน้ำมัน (รายปี · พบเพียงไม่กี่ไร่ใน 26 ตำบล)
 เรียกไม่สำเร็จแม้ช่องเดียว (หลังลองซ้ำ) → ไม่เขียนทับไฟล์เดิม · พิมพ์ ::error:: · จบ exit 0
 ผลรอบแรก (24 ต.ค. 69): ชื่อพืช Cassava · Maize · Oil palm · Para rubber · Rice · Sugarcane · update ของแต่ละแปลงต่างกัน (ปี 2023 ถึงวันที่ล่าสุด)
      · 322 คำขอ ~15 นาที · ไฟล์ ~2.8 MB → เขียนสรุปรายตำบลแยกเป็น crops_summary.json (เล็ก) ให้รายงานบนเว็บโหลดเร็ว
@@ -27,7 +28,8 @@ STEP = float(os.environ.get("STEP") or 0.02)
 WORKERS = int(os.environ.get("WORKERS") or 6)
 BUDGET = float(os.environ.get("BUDGET_MIN") or 45) * 60
 KX, KY = 111320 * math.cos(15.2 * math.pi / 180), 110540   # ม./องศา ที่ละติจูดพื้นที่ศึกษา
-RAI = 1600.0                                                 # ตร.ม. ต่อไร่
+RAI = 1600.0
+KEEP = {"Rice", "Sugarcane", "Cassava", "Maize"}               # ชื่อตามที่ API ส่งมา (ตรวจแล้ว 24 ต.ค. 69)                                                 # ตร.ม. ต่อไร่
 
 
 def red(s):
@@ -95,7 +97,7 @@ def main():
             ex.shutdown(wait=False, cancel_futures=True); return
         for r in rows:
             c, gs = r.get("result"), r.get("geom")
-            if not c or not gs:
+            if not c or not gs or c not in KEEP:
                 continue
             if r.get("update"):
                 updates.add(r["update"])

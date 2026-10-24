@@ -276,9 +276,8 @@ document.addEventListener('sdss:ready', async () => {
   const droughtfreq = () => dfCache || (dfCache = json('data/droughtfreq.geojson').catch(e => { dfCache = null; throw e; }));
   const thYr = (y) => Number(y) + 543;
   // พื้นที่ปลูกพืช (GISTDA check-crop): ชื่อจาก API → ชื่อไทย + สีโทนเดียวกับแผนที่ภัยแล้งของ GISTDA · ชื่อที่ไม่อยู่ในตารางแสดงตามที่ API ส่งมา
-  // ชื่อจาก API ตรวจแล้ว 24 ต.ค. 69: Cassava · Maize · Oil palm · Para rubber · Rice · Sugarcane
-  const CROP = { Sugarcane: ['อ้อย', '#E39B7B'], Cassava: ['มันสำปะหลัง', '#F5B887'], Maize: ['ข้าวโพด', '#EFD08C'], Rice: ['ข้าว', '#9ED29A'],
-    'Para rubber': ['ยางพารา', '#6D9F71'], 'Oil palm': ['ปาล์มน้ำมัน', '#B5A642'] };
+  // ชื่อจาก API ตรวจแล้ว 24 ต.ค. 69 · ดึงเฉพาะ ข้าว อ้อย มันสำปะหลัง ข้าวโพด (ผู้ใช้กำหนด · scripts/region/build_crops_gistda.py KEEP)
+  const CROP = { Sugarcane: ['อ้อย', '#E39B7B'], Cassava: ['มันสำปะหลัง', '#F5B887'], Maize: ['ข้าวโพด', '#EFD08C'], Rice: ['ข้าว', '#9ED29A'] };
   // รอบข้อมูล: ใช้เฉพาะรอบล่าสุดของแต่ละพืช (d.latest · ผู้ใช้กำหนด 24 ต.ค. 69) · ยางพารา/ปาล์มเป็นรายปี (เช่น "2023")
   const cropUp = (d) => Object.values(d.latest || {}).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).sort().slice(-1)[0];
   const upTxt = (u) => /^\d{4}$/.test(u || '') ? `ปี ${Number(u) + 543}` : dDate(u);
