@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-10-24T00:47:41+00:00",
+"updated_at":"2026-10-24T01:16:21+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -190,7 +190,7 @@
 "lon":102.054758,
 "rain_24h":0.0,
 "rain_1h":0.0,
-"time":"2026-10-24 06:00",
+"time":"2026-10-24 07:00",
 "amphoe":"เมืองนครราชสีมา",
 "agency":"ชป."
 },
@@ -201,7 +201,7 @@
 "lon":102.40242,
 "rain_24h":0.0,
 "rain_1h":0.0,
-"time":"2026-10-24 06:00",
+"time":"2026-10-24 07:00",
 "amphoe":"จักราช",
 "agency":"ชป."
 },
@@ -212,7 +212,7 @@
 "lon":102.328184,
 "rain_24h":0.0,
 "rain_1h":0.0,
-"time":"2026-10-24 06:00",
+"time":"2026-10-24 07:00",
 "amphoe":"คง",
 "agency":"ชป."
 },
@@ -326,7 +326,7 @@
 "bank_msl":201.97,
 "storage_pct":90.99,
 "discharge":null,
-"measured_at":"2026-10-24 07:30",
+"measured_at":"2026-10-24 08:00",
 "amphoe":"ด่านขุนทด"
 },
 {
@@ -338,7 +338,7 @@
 "bank_msl":155.3,
 "storage_pct":78.77,
 "discharge":55.05,
-"measured_at":"2026-10-24 06:00",
+"measured_at":"2026-10-24 07:00",
 "amphoe":"พิมาย"
 },
 {
@@ -350,7 +350,7 @@
 "bank_msl":177.6,
 "storage_pct":71.02,
 "discharge":3.8,
-"measured_at":"2026-10-24 06:00",
+"measured_at":"2026-10-24 07:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -358,11 +358,11 @@
 "name":"บ้านโนนค่า",
 "lat":14.93225,
 "lon":101.867882,
-"level_msl":202.67,
+"level_msl":202.65,
 "bank_msl":203.9,
-"storage_pct":69.02,
-"discharge":1.53,
-"measured_at":"2026-10-24 06:00",
+"storage_pct":68.51,
+"discharge":1.38,
+"measured_at":"2026-10-24 07:00",
 "amphoe":"สูงเนิน"
 },
 {
@@ -374,7 +374,7 @@
 "bank_msl":158.1,
 "storage_pct":59.59,
 "discharge":55.0,
-"measured_at":"2026-10-24 06:00",
+"measured_at":"2026-10-24 07:00",
 "amphoe":"พิมาย"
 },
 {
@@ -384,22 +384,10 @@
 "lon":102.23782,
 "level_msl":164.34,
 "bank_msl":167.83,
-"storage_pct":49.85,
+"storage_pct":49.88,
 "discharge":null,
-"measured_at":"2026-10-24 07:30",
+"measured_at":"2026-10-24 08:00",
 "amphoe":"เฉลิมพระเกียรติ"
-},
-{
-"code":"M.188A",
-"name":"บ้านบัว",
-"lat":15.18159,
-"lon":102.242737,
-"level_msl":160.68,
-"bank_msl":162.6,
-"storage_pct":48.39,
-"discharge":3.54,
-"measured_at":"2026-10-24 06:00",
-"amphoe":"โนนสูง"
 },
 {
 "code":"M.2A",
@@ -410,8 +398,20 @@
 "bank_msl":167.7,
 "storage_pct":45.7,
 "discharge":20.5,
-"measured_at":"2026-10-24 06:00",
+"measured_at":"2026-10-24 07:00",
 "amphoe":"เฉลิมพระเกียรติ"
+},
+{
+"code":"M.188A",
+"name":"บ้านบัว",
+"lat":15.18159,
+"lon":102.242737,
+"level_msl":160.56,
+"bank_msl":162.6,
+"storage_pct":45.16,
+"discharge":2.45,
+"measured_at":"2026-10-24 07:00",
+"amphoe":"โนนสูง"
 },
 {
 "code":"M.191",
@@ -422,7 +422,7 @@
 "bank_msl":195.3,
 "storage_pct":42.31,
 "discharge":1.8,
-"measured_at":"2026-10-24 06:00",
+"measured_at":"2026-10-24 07:00",
 "amphoe":"เมืองนครราชสีมา"
 }
 ],
