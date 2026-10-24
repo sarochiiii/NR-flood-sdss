@@ -8,7 +8,9 @@ API: GET https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v2.2/agri
 สรุปรายตำบล: พื้นที่ (ไร่) ตามชนิดพืช คำนวณจาก geometry เอง (ไม่ใช้ field area ของ API เพราะเอกสารไม่ระบุหน่วย)
 ชื่อพืชเก็บตามที่ API ส่งมา (ไม่แปล/ไม่เดา) · หน้าเว็บแปลเป็นไทยเฉพาะชื่อที่ตรวจแล้ว
 เรียกไม่สำเร็จแม้ช่องเดียว (หลังลองซ้ำ) → ไม่เขียนทับไฟล์เดิม · พิมพ์ ::error:: · จบ exit 0
-env: GISTDA_API_KEY (Secret) · OUT (ค่าเริ่มต้น region/data/crops.geojson) · STEP (ค่าเริ่มต้น 0.02) · WORKERS (คำขอพร้อมกัน ค่าเริ่มต้น 6)
+ผลรอบแรก (24 ต.ค. 69): ชื่อพืช Cassava · Maize · Oil palm · Para rubber · Rice · Sugarcane · update ของแต่ละแปลงต่างกัน (ปี 2023 ถึงวันที่ล่าสุด)
+     · 322 คำขอ ~15 นาที · ไฟล์ ~2.8 MB → เขียนสรุปรายตำบลแยกเป็น crops_summary.json (เล็ก) ให้รายงานบนเว็บโหลดเร็ว
+env: GISTDA_API_KEY (Secret) · OUT (ค่าเริ่มต้น region/data/crops.geojson · สรุปเขียนข้างกันชื่อ crops_summary.json) · STEP (ค่าเริ่มต้น 0.02) · WORKERS (คำขอพร้อมกัน ค่าเริ่มต้น 6)
      BUDGET_MIN (เวลาสูงสุด นาที ค่าเริ่มต้น 45 · เกินแล้วหยุดโดยไม่เขียนทับไฟล์) · ต้องมี shapely
 รอบแรก (24 ต.ค. 69) เรียกทีละช่องเกิน 40 นาที → เรียกพร้อมกันหลายช่อง และพิมพ์ความคืบหน้าระหว่างทาง (python -u)
 """
@@ -134,6 +136,9 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))
+    summ = {k: v for k, v in out.items() if k not in ("type", "features")}
+    with open(os.path.join(os.path.dirname(OUT), "crops_summary.json"), "w", encoding="utf-8") as fh:
+        json.dump(summ, fh, ensure_ascii=False, separators=(",", ":"))
     print(f"บันทึก {len(feats)} polygon (จาก {n_raw} ดิบ · {n_call} คำขอ · {time.time() - t0:.0f} วินาที) · {os.path.getsize(OUT) / 1e6:.2f} MB → {OUT}")
     print(f"ชื่อพืชที่ API ส่งมา: {sorted(unions)} · วันที่ข้อมูล {sorted(updates)}")
     print(f"พื้นที่รวม 26 ตำบล (ไร่): {total}")

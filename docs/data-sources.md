@@ -112,3 +112,4 @@
 - `check-crop` แบบ area ตอบ `[{result: ชื่อพืช, update: "YYYY-MM-DD", geom: [geometry, …]}]` · รายพืชตอบ `[{update, age, area, geom}]` (เอกสารไม่ระบุหน่วยของ `age`/`area` จึงไม่ใช้) · ไม่พบ = `{"result":"not found"}` หรือ `{"result":"Data was not found."}`
 - กรอบ 0.02° ได้ผล · กรอบ 0.08° ไม่ได้ JSON → `build_crops_gistda.py` แบ่งช่อง 0.02°
 - ใช้ไม่ได้: v1.0 ตอบ 404 · `crop-suitability` v1.1 ตอบ 503 · `cropsdrought.gistda.or.th/api/…` ถูกระบบป้องกันบอทบล็อก (ได้ HTML) · `api-drought.minik-api.com` เป็นโดเมนภายนอกที่ใช้ token อื่น (ไม่ส่ง key ของโครงการไป)
+- ผลรันจริง (24 ต.ค. 69): `check-crop` ส่งชื่อพืช `Cassava` `Maize` `Oil palm` `Para rubber` `Rice` `Sugarcane` · `update` ของแต่ละแปลงต่างกัน ตั้งแต่ "2023" (ยางพารา/ปาล์ม รายปี) ถึงวันที่ล่าสุด จึงแสดง "ปรับปรุงล่าสุด" ไม่ใช่วันเดียวทั้งชั้น · 322 คำขอ ~15 นาที (6 คำขอพร้อมกัน)
