@@ -1,5 +1,5 @@
 name: crop-layers
-# พื้นที่ปลูกพืชเศรษฐกิจปัจจุบัน 26 ตำบล จาก API GISTDA check-crop v2.2 (ราย 2 สัปดาห์) → region/data/crops.geojson
+# พื้นที่ปลูกพืชเศรษฐกิจปัจจุบัน 26 ตำบล จาก API GISTDA check-crop v2.2 (ราย 2 สัปดาห์) → region/data/crops.geojson + crops_summary.json
 # กดรันเอง (Actions → crop-layers → Run workflow) · รันเองวันที่ 2 และ 17 ของเดือน · หรือเมื่อแก้สคริปต์
 # push บน branch อื่นที่ไม่ใช่ main = ทดลองอย่างเดียว (พิมพ์สรุป ไม่ commit)
 on:
@@ -28,12 +28,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          F=region/data/crops.geojson
-          [ -f "$F" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
-          cp "$F" /tmp/crops.geojson
+          F=region/data/crops.geojson; S=region/data/crops_summary.json
+          [ -f "$F" ] && [ -f "$S" ] || { echo "ไม่มีไฟล์ใหม่"; exit 0; }
+          cp "$F" /tmp/crops.geojson; cp "$S" /tmp/crops_summary.json
           for i in 1 2 3 4; do
             git fetch --quiet origin main && git reset --quiet --hard origin/main
-            cp /tmp/crops.geojson "$F" && git add "$F"
+            cp /tmp/crops.geojson "$F" && cp /tmp/crops_summary.json "$S" && git add "$F" "$S"
             git diff --staged --quiet && { echo "ไม่มีข้อมูลเปลี่ยน"; exit 0; }
             git commit --quiet -m "data(region): พื้นที่ปลูกพืช GISTDA $(date -u '+%Y-%m-%d')"
             git push --quiet origin HEAD:main && exit 0
