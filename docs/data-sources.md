@@ -105,3 +105,10 @@
 - **ภัยแล้งซ้ำซาก**: `GET …/gi-service/v1.1/disasters/drought-recurrence?lat=&lon=` หรือ `?area={GeoJSON Feature}` · header `API-Key` · ตอบ `[{subdistrict_name, district_name, province_name, total, detail:[{year:"2023".."2018", freq}], area, geom}]` · แบบ area: `geom` = patch ที่ถูกตัดตามกรอบที่ส่ง (โครงสร้างเดียวกับ flood-recurrence) · ต.จันอัด (จุดตัวแทน) total = 5 (ไม่เกิดปี 2022)
 - `scripts/region/build_droughtfreq_gistda.py` (workflow `drought-layers`): ตาราง 0.05° ครอบ 26 ตำบล → dissolve ตาม total → ตัดตามขอบเขตตำบล → `region/data/droughtfreq.geojson` + `by_tambon` (สัดส่วนพื้นที่ตำบลตามจำนวนครั้ง ใช้ขอบเขตตำบลของโครงการ ไม่ใช้ชื่อตำบลที่ GISTDA ติดมากับ patch)
 - อื่น ๆ ที่พบ (ยังไม่ใช้): STAC `…/stac/drought/catalogs/{dri_plus,lst,ndwi,smap}` · `cropsdrought.gistda.or.th/api/rest/zonal/{province,irrigation,mainbasin}`
+
+## GISTDA พื้นที่ปลูกพืชเศรษฐกิจ — ตรวจแล้ว 23–24 ต.ค. 69 (workflow `gistda-agri-probe`)
+- แคตตาล็อก opendata.gistda.or.th ชุด "พื้นที่ปลูกพืชเศรษฐกิจ 6 ชนิด (ล่าสุด)" และรายพืช (ข้าว อ้อย มันสำปะหลัง ข้าวโพด ราย 2 สัปดาห์ · ยางพารา ปาล์มน้ำมัน รายปี) ความละเอียด 40 ม.
+- `GET https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v2.2/agriculture/{check-crop|rice-weekly-40m|sugarcane-weekly-40m|cassava-weekly-40m|maize-weekly-40m|palm-yearly-40m|rubber-yearly-40m}?lat=&lon=` หรือ `?area={GeoJSON Feature}` · header `API-Key`
+- `check-crop` แบบ area ตอบ `[{result: ชื่อพืช, update: "YYYY-MM-DD", geom: [geometry, …]}]` · รายพืชตอบ `[{update, age, area, geom}]` (เอกสารไม่ระบุหน่วยของ `age`/`area` จึงไม่ใช้) · ไม่พบ = `{"result":"not found"}` หรือ `{"result":"Data was not found."}`
+- กรอบ 0.02° ได้ผล · กรอบ 0.08° ไม่ได้ JSON → `build_crops_gistda.py` แบ่งช่อง 0.02°
+- ใช้ไม่ได้: v1.0 ตอบ 404 · `crop-suitability` v1.1 ตอบ 503 · `cropsdrought.gistda.or.th/api/…` ถูกระบบป้องกันบอทบล็อก (ได้ HTML) · `api-drought.minik-api.com` เป็นโดเมนภายนอกที่ใช้ token อื่น (ไม่ส่ง key ของโครงการไป)

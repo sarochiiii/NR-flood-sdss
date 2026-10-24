@@ -266,15 +266,20 @@ document.addEventListener('sdss:ready', async () => {
   };
   const DF_COL = ['#FEF3C7', '#FDE68A', '#FBBF24', '#F59E0B', '#D97706', '#92400E'];   // ภัยแล้งซ้ำซาก 1–6 ครั้ง
   const TILE_WORKER = 'https://gistda-tile-proxy.sarochinee-k.workers.dev';   // เหมือน GISTDA_TILE_WORKER ใน chanat/index.html · key อยู่ใน Secret ของ Worker
-  const LGD = { dri: '', droughtfreq: '' };
+  const LGD = { dri: '', droughtfreq: '', crops: '' };
   function legendD() {
     const el = $('legend-d'); if (!el) return;
-    const h = ['dri', 'droughtfreq'].filter(k => state[k] && state[k].on && LGD[k]).map(k => LGD[k]).join('');
+    const h = ['dri', 'droughtfreq', 'crops'].filter(k => state[k] && state[k].on && LGD[k]).map(k => LGD[k]).join('');
     el.innerHTML = h; el.hidden = !h;
   }
   let dfCache = null;
   const droughtfreq = () => dfCache || (dfCache = json('data/droughtfreq.geojson').catch(e => { dfCache = null; throw e; }));
   const thYr = (y) => Number(y) + 543;
+  // พื้นที่ปลูกพืช (GISTDA check-crop): ชื่อจาก API → ชื่อไทย + สีโทนเดียวกับแผนที่ภัยแล้งของ GISTDA · ชื่อที่ไม่อยู่ในตารางแสดงตามที่ API ส่งมา
+  const CROP = { Sugarcane: ['อ้อย', '#E39B7B'], Cassava: ['มันสำปะหลัง', '#F5B887'], Maize: ['ข้าวโพด', '#EFD08C'], Rice: ['ข้าว', '#9ED29A'] };
+  const CROP_X = ['#B39DDB', '#80CBC4', '#BCAAA4', '#90A4AE'];
+  const cropOf = (c, i) => CROP[c] || [c, CROP_X[i % CROP_X.length]];
+  const rai = (v) => Number(v || 0).toLocaleString('th-TH');
 
   /* ---------- นิยามเลเยอร์ ---------- */
   const defs = [
@@ -309,6 +314,24 @@ document.addEventListener('sdss:ready', async () => {
         const ca = (d.by_tambon || {})['301010'];
         return { lyr, sub: `GISTDA ปี ${yr}${ca ? ` · ต.จันอัด ส่วนใหญ่ ${ca.mode} ครั้ง (${fmt((ca.share[ca.mode] || 0) * 100, 0)}% ของพื้นที่)` : ''} · ดึงเมื่อ ${hhmm(d.updated_at)}`,
           attr: 'ภัยแล้งซ้ำซาก © GISTDA' };
+      }
+    },
+    {
+      id: 'crops', icon: 'ti-plant-2', label: 'พื้นที่การเกษตร (GISTDA)', on: false,
+      async build() {
+        // สร้างโดย .github/workflows/crop-layers.yml (scripts/region/build_crops_gistda.py) · พืชที่ปลูกอยู่ ณ รอบข้อมูลล่าสุด (ราย 2 สัปดาห์)
+        const d = await json('data/crops.geojson').catch(() => { throw new Error('รอ workflow crop-layers สร้างข้อมูล'); });
+        const cs = d.crops || [], col = {}; cs.forEach((c, i) => col[c] = cropOf(c, i));
+        const up = (d.data_updates || []).slice(-1)[0];
+        const lyr = L.geoJSON(d, { style: f => ({ stroke: false, fillColor: (col[f.properties.crop] || cropOf(f.properties.crop, 0))[1], fillOpacity: 0.75 }),
+          onEachFeature: (f, l) => l.bindTooltip(`${esc((col[f.properties.crop] || [f.properties.crop])[0])} · GISTDA ข้อมูลวันที่ ${dDate(up)}`, { sticky: true }) });
+        LGD.crops = `<b>พื้นที่การเกษตร (GISTDA · ${dDate(up)})</b>` + cs.map(c =>
+          `<div class="row"><span class="sw" style="background:${col[c][1]}"></span>${esc(col[c][0])} ${rai((d.total_rai || {})[c])} ไร่</div>`).join('')
+          + '<div class="muted">พื้นที่ใน 26 ตำบล · คำนวณจากขอบเขตแปลง</div>';
+        lyr.on('add remove', () => setTimeout(legendD));
+        const ca = ((d.by_tambon || {})['301010'] || {}).crops_rai || {};
+        const caTxt = Object.entries(ca).sort((a, b) => b[1] - a[1]).map(([c, v]) => `${(col[c] || [c])[0]} ${rai(v)}`).join(' · ');
+        return { lyr, sub: `ข้อมูลวันที่ ${dDate(up)} (ราย 2 สัปดาห์)${caTxt ? ` · ต.จันอัด ${caTxt} ไร่` : ''}`, attr: 'พื้นที่ปลูกพืช © GISTDA' };
       }
     },
     {
@@ -653,9 +676,9 @@ document.addEventListener('sdss:ready', async () => {
     ['rivers', 'ลำน้ำ'], ['water', 'แหล่งน้ำ'], ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน'], ['reports', 'จุดแจ้งเหตุ']];
   // แท็บภัยแล้ง: เฉพาะชั้นที่ใช้วิเคราะห์ภัยแล้ง (ผู้ใช้กำหนด 24 ต.ค. 69) — ดัชนี GISTDA → น้ำต้นทุน → พื้นฐาน
   // ฝน เรดาร์ ระดับน้ำ GloFAS ลำน้ำ ลุ่มน้ำ อาคารชลศาสตร์ อยู่เฉพาะแท็บน้ำท่วม · ชั้น dri/droughtfreq ไม่อยู่ในแท็บน้ำท่วม
-  const GROUPS_D = [['① ดัชนีภัยแล้ง (GISTDA)', ['dri', 'droughtfreq']], ['② น้ำต้นทุน', ['dams', 'water']],
+  const GROUPS_D = [['① ดัชนีภัยแล้ง (GISTDA)', ['dri', 'droughtfreq', 'crops']], ['② น้ำต้นทุน', ['dams', 'water']],
     ['พื้นฐาน', ['labels', 'villages']]];
-  const QUICK_D = [['dri', 'ดัชนีภัยแล้ง'], ['droughtfreq', 'แล้งซ้ำซาก'], ['dams', 'อ่างเก็บน้ำ'], ['water', 'แหล่งน้ำ'],
+  const QUICK_D = [['dri', 'ดัชนีภัยแล้ง'], ['droughtfreq', 'แล้งซ้ำซาก'], ['crops', 'พื้นที่เกษตร'], ['dams', 'อ่างเก็บน้ำ'], ['water', 'แหล่งน้ำ'],
     ['labels', 'เขตตำบล'], ['villages', 'หมู่บ้าน']];
   const MODES = {
     flood: { groups: GROUPS, quick: QUICK, on: defs.filter(d => d.on).map(d => d.id) },
