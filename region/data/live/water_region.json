@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-10-25T10:16:21+00:00",
+ "updated_at": "2026-10-25T11:16:20+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.71,
    "bank_m": 201.97,
    "storage_pct": 89.32,
-   "measured_at": "2026-10-25 17:00"
+   "measured_at": "2026-10-25 18:00"
   },
   {
    "code": "M.184",
@@ -58,7 +58,7 @@
    "level_m": 164.33,
    "bank_m": 167.83,
    "storage_pct": 49.75,
-   "measured_at": "2026-10-25 17:00"
+   "measured_at": "2026-10-25 18:00"
   },
   {
    "code": "M.2A",
