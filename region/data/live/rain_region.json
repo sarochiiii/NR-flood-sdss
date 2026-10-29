@@ -1,13 +1,13 @@
 {
  "status": "ok",
- "updated_at": "2026-10-29T21:15:47+00:00",
+ "updated_at": "2026-10-29T22:15:43+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
    "tcode": "300901",
-   "rain_24h_mm": 7.2,
-   "rain_7d_mm": 13.5,
-   "rain_next24h_mm": 8.2
+   "rain_24h_mm": 7.3,
+   "rain_7d_mm": 13.6,
+   "rain_next24h_mm": 8.1
   },
   {
    "tcode": "300902",
@@ -17,39 +17,39 @@
   },
   {
    "tcode": "300903",
-   "rain_24h_mm": 8.7,
-   "rain_7d_mm": 16.2,
-   "rain_next24h_mm": 9.8
+   "rain_24h_mm": 8.8,
+   "rain_7d_mm": 16.3,
+   "rain_next24h_mm": 9.7
   },
   {
    "tcode": "300904",
-   "rain_24h_mm": 8.7,
-   "rain_7d_mm": 16.2,
-   "rain_next24h_mm": 9.8
+   "rain_24h_mm": 8.8,
+   "rain_7d_mm": 16.3,
+   "rain_next24h_mm": 9.7
   },
   {
    "tcode": "300905",
-   "rain_24h_mm": 7.7,
-   "rain_7d_mm": 21.4,
-   "rain_next24h_mm": 9.7
+   "rain_24h_mm": 7.8,
+   "rain_7d_mm": 21.5,
+   "rain_next24h_mm": 9.6
   },
   {
    "tcode": "300906",
-   "rain_24h_mm": 7.7,
-   "rain_7d_mm": 21.4,
-   "rain_next24h_mm": 9.7
+   "rain_24h_mm": 7.8,
+   "rain_7d_mm": 21.5,
+   "rain_next24h_mm": 9.6
   },
   {
    "tcode": "300907",
-   "rain_24h_mm": 6.2,
-   "rain_7d_mm": 18.8,
-   "rain_next24h_mm": 8.6
+   "rain_24h_mm": 6.3,
+   "rain_7d_mm": 18.9,
+   "rain_next24h_mm": 8.5
   },
   {
    "tcode": "300908",
-   "rain_24h_mm": 7.2,
-   "rain_7d_mm": 13.5,
-   "rain_next24h_mm": 8.2
+   "rain_24h_mm": 7.3,
+   "rain_7d_mm": 13.6,
+   "rain_next24h_mm": 8.1
   },
   {
    "tcode": "300909",
