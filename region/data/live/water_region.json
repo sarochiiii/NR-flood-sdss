@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-01T08:16:15+00:00",
+ "updated_at": "2026-11-01T09:15:47+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.79,
    "bank_m": 201.97,
    "storage_pct": 92.66,
-   "measured_at": "2026-11-01 15:00"
+   "measured_at": "2026-11-01 16:00"
   },
   {
    "code": "M.184",
@@ -18,7 +18,7 @@
    "level_m": 153.78,
    "bank_m": 155.3,
    "storage_pct": 73.33,
-   "measured_at": "2026-11-01 13:00"
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "M.164",
@@ -26,15 +26,15 @@
    "level_m": 176.68,
    "bank_m": 177.6,
    "storage_pct": 70.7,
-   "measured_at": "2026-11-01 13:00"
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.35,
+   "level_m": 202.31,
    "bank_m": 203.9,
-   "storage_pct": 60.96,
-   "measured_at": "2026-11-01 13:00"
+   "storage_pct": 59.95,
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "M.188A",
@@ -42,23 +42,23 @@
    "level_m": 161.08,
    "bank_m": 162.6,
    "storage_pct": 59.14,
-   "measured_at": "2026-11-01 13:00"
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 154.95,
+   "level_m": 154.94,
    "bank_m": 158.1,
-   "storage_pct": 56.85,
-   "measured_at": "2026-11-01 13:00"
+   "storage_pct": 56.71,
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 164.33,
    "bank_m": 167.83,
-   "storage_pct": 49.69,
-   "measured_at": "2026-11-01 15:00"
+   "storage_pct": 49.72,
+   "measured_at": "2026-11-01 16:00"
   },
   {
    "code": "M.2A",
@@ -66,15 +66,15 @@
    "level_m": 163.19,
    "bank_m": 167.7,
    "storage_pct": 45.33,
-   "measured_at": "2026-11-01 13:00"
+   "measured_at": "2026-11-01 15:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.17,
+   "level_m": 193.18,
    "bank_m": 195.3,
-   "storage_pct": 36.98,
-   "measured_at": "2026-11-01 13:00"
+   "storage_pct": 37.28,
+   "measured_at": "2026-11-01 15:00"
   }
  ]
 }
