@@ -1,6 +1,6 @@
 {
  "status": "ok",
- "updated_at": "2026-11-03T00:15:59+00:00",
+ "updated_at": "2026-11-03T01:16:05+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
@@ -91,7 +91,7 @@
    "tcode": "301005",
    "rain_24h_mm": 0.4,
    "rain_7d_mm": 10.2,
-   "rain_next24h_mm": 0.3
+   "rain_next24h_mm": 0.4
   },
   {
    "tcode": "301006",
