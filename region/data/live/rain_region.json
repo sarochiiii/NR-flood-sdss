@@ -1,6 +1,6 @@
 {
  "status": "ok",
- "updated_at": "2026-11-03T13:15:59+00:00",
+ "updated_at": "2026-11-03T14:15:59+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
@@ -65,31 +65,31 @@
   },
   {
    "tcode": "301001",
-   "rain_24h_mm": 1.2,
+   "rain_24h_mm": 1.0,
    "rain_7d_mm": 12.6,
    "rain_next24h_mm": 3.6
   },
   {
    "tcode": "301002",
-   "rain_24h_mm": 0.7,
+   "rain_24h_mm": 0.6,
    "rain_7d_mm": 18.6,
    "rain_next24h_mm": 4.7
   },
   {
    "tcode": "301003",
-   "rain_24h_mm": 1.9,
+   "rain_24h_mm": 1.7,
    "rain_7d_mm": 12.4,
    "rain_next24h_mm": 2.1
   },
   {
    "tcode": "301004",
-   "rain_24h_mm": 1.2,
+   "rain_24h_mm": 1.0,
    "rain_7d_mm": 12.6,
    "rain_next24h_mm": 3.6
   },
   {
    "tcode": "301005",
-   "rain_24h_mm": 0.5,
+   "rain_24h_mm": 0.2,
    "rain_7d_mm": 9.9,
    "rain_next24h_mm": 0.4
   },
@@ -101,19 +101,19 @@
   },
   {
    "tcode": "301007",
-   "rain_24h_mm": 0.4,
+   "rain_24h_mm": 0.2,
    "rain_7d_mm": 11.1,
    "rain_next24h_mm": 1.3
   },
   {
    "tcode": "301008",
-   "rain_24h_mm": 0.3,
+   "rain_24h_mm": 0.2,
    "rain_7d_mm": 12.5,
    "rain_next24h_mm": 2.4
   },
   {
    "tcode": "301009",
-   "rain_24h_mm": 0.4,
+   "rain_24h_mm": 0.3,
    "rain_7d_mm": 13.4,
    "rain_next24h_mm": 1.9
   },
@@ -125,37 +125,37 @@
   },
   {
    "tcode": "301011",
-   "rain_24h_mm": 0.4,
+   "rain_24h_mm": 0.3,
    "rain_7d_mm": 13.4,
    "rain_next24h_mm": 1.9
   },
   {
    "tcode": "301012",
-   "rain_24h_mm": 0.7,
+   "rain_24h_mm": 0.6,
    "rain_7d_mm": 18.6,
    "rain_next24h_mm": 4.7
   },
   {
    "tcode": "301013",
-   "rain_24h_mm": 0.1,
+   "rain_24h_mm": 0.0,
    "rain_7d_mm": 11.2,
    "rain_next24h_mm": 3.1
   },
   {
    "tcode": "301014",
-   "rain_24h_mm": 0.1,
+   "rain_24h_mm": 0.0,
    "rain_7d_mm": 11.2,
    "rain_next24h_mm": 3.1
   },
   {
    "tcode": "301015",
-   "rain_24h_mm": 1.9,
+   "rain_24h_mm": 1.7,
    "rain_7d_mm": 12.4,
    "rain_next24h_mm": 2.1
   },
   {
    "tcode": "301016",
-   "rain_24h_mm": 1.9,
+   "rain_24h_mm": 1.7,
    "rain_7d_mm": 12.4,
    "rain_next24h_mm": 2.1
   }
