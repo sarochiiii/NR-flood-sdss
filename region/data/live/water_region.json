@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-03T12:15:59+00:00",
+ "updated_at": "2026-11-03T13:16:00+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.77,
    "bank_m": 201.97,
    "storage_pct": 91.83,
-   "measured_at": "2026-11-03 19:00"
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.184",
@@ -18,23 +18,23 @@
    "level_m": 153.77,
    "bank_m": 155.3,
    "storage_pct": 73.16,
-   "measured_at": "2026-11-03 18:00"
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.51,
+   "level_m": 161.5,
    "bank_m": 162.6,
-   "storage_pct": 70.7,
-   "measured_at": "2026-11-03 18:00"
+   "storage_pct": 70.43,
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.63,
+   "level_m": 202.62,
    "bank_m": 203.9,
-   "storage_pct": 68.01,
-   "measured_at": "2026-11-03 18:00"
+   "storage_pct": 67.76,
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.164",
@@ -42,7 +42,7 @@
    "level_m": 176.58,
    "bank_m": 177.6,
    "storage_pct": 67.52,
-   "measured_at": "2026-11-03 18:00"
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.195",
@@ -50,15 +50,15 @@
    "level_m": 154.94,
    "bank_m": 158.1,
    "storage_pct": 56.71,
-   "measured_at": "2026-11-03 18:00"
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
-   "level_m": 164.39,
+   "level_m": 164.4,
    "bank_m": 167.83,
-   "storage_pct": 50.61,
-   "measured_at": "2026-11-03 19:00"
+   "storage_pct": 50.64,
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.2A",
@@ -66,7 +66,7 @@
    "level_m": 163.25,
    "bank_m": 167.7,
    "storage_pct": 46.06,
-   "measured_at": "2026-11-03 18:00"
+   "measured_at": "2026-11-03 20:00"
   },
   {
    "code": "M.191",
@@ -74,7 +74,7 @@
    "level_m": 193.41,
    "bank_m": 195.3,
    "storage_pct": 44.08,
-   "measured_at": "2026-11-03 18:00"
+   "measured_at": "2026-11-03 20:00"
   }
  ]
 }
