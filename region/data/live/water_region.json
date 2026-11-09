@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-09T11:15:42+00:00",
+ "updated_at": "2026-11-09T12:15:36+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.9,
    "bank_m": 201.97,
    "storage_pct": 97.25,
-   "measured_at": "2026-11-09 18:00"
+   "measured_at": "2026-11-09 19:00"
   },
   {
    "code": "M.184",
@@ -18,23 +18,23 @@
    "level_m": 153.95,
    "bank_m": 155.3,
    "storage_pct": 76.32,
-   "measured_at": "2026-11-09 17:00"
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.75,
+   "level_m": 176.74,
    "bank_m": 177.6,
-   "storage_pct": 72.93,
-   "measured_at": "2026-11-09 17:00"
+   "storage_pct": 72.61,
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.57,
+   "level_m": 202.55,
    "bank_m": 203.9,
-   "storage_pct": 66.5,
-   "measured_at": "2026-11-09 17:00"
+   "storage_pct": 66.0,
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "M.188A",
@@ -42,7 +42,7 @@
    "level_m": 161.17,
    "bank_m": 162.6,
    "storage_pct": 61.56,
-   "measured_at": "2026-11-09 17:00"
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "M.195",
@@ -50,7 +50,7 @@
    "level_m": 155.08,
    "bank_m": 158.1,
    "storage_pct": 58.63,
-   "measured_at": "2026-11-09 17:00"
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "MUN002",
@@ -58,7 +58,7 @@
    "level_m": 164.54,
    "bank_m": 167.83,
    "storage_pct": 52.8,
-   "measured_at": "2026-11-09 18:00"
+   "measured_at": "2026-11-09 19:00"
   },
   {
    "code": "M.2A",
@@ -66,15 +66,15 @@
    "level_m": 163.4,
    "bank_m": 167.7,
    "storage_pct": 47.88,
-   "measured_at": "2026-11-09 17:00"
+   "measured_at": "2026-11-09 18:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.26,
+   "level_m": 193.28,
    "bank_m": 195.3,
-   "storage_pct": 39.65,
-   "measured_at": "2026-11-09 17:00"
+   "storage_pct": 40.24,
+   "measured_at": "2026-11-09 18:00"
   }
  ]
 }
