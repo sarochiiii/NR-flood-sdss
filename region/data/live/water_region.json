@@ -1,6 +1,6 @@
 {
- "status": "ok",
- "message": null,
+ "status": "error",
+ "message": "error: The read operation timed out",
  "updated_at": "2026-11-09T14:15:40+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
