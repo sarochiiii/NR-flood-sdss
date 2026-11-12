@@ -1,5 +1,6 @@
 {
- "status": "ok",
+ "status": "error",
+ "message": "<urlopen error _ssl.c:1001: The handshake operation timed out>",
  "updated_at": "2026-11-12T19:16:18+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
