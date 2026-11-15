@@ -1,7 +1,6 @@
 {
- "status": "error",
- "message": "HTTP Error 429: Too Many Requests",
- "updated_at": "2026-11-15T21:15:26+00:00",
+ "status": "ok",
+ "updated_at": "2026-11-15T22:51:40+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
