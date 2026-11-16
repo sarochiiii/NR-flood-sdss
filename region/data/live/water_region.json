@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-15T23:18:30+00:00",
+ "updated_at": "2026-11-16T00:18:31+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -15,18 +15,10 @@
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 153.87,
+   "level_m": 153.84,
    "bank_m": 155.3,
-   "storage_pct": 74.91,
-   "measured_at": "2026-11-15 21:00"
-  },
-  {
-   "code": "M.188A",
-   "name": "บ้านบัว",
-   "level_m": 161.45,
-   "bank_m": 162.6,
-   "storage_pct": 69.09,
-   "measured_at": "2026-11-15 21:00"
+   "storage_pct": 74.39,
+   "measured_at": "2026-11-16 06:00"
   },
   {
    "code": "M.164",
@@ -34,23 +26,31 @@
    "level_m": 176.61,
    "bank_m": 177.6,
    "storage_pct": 68.47,
-   "measured_at": "2026-11-15 21:00"
+   "measured_at": "2026-11-16 06:00"
+  },
+  {
+   "code": "M.188A",
+   "name": "บ้านบัว",
+   "level_m": 161.39,
+   "bank_m": 162.6,
+   "storage_pct": 67.47,
+   "measured_at": "2026-11-16 06:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.33,
+   "level_m": 202.31,
    "bank_m": 203.9,
-   "storage_pct": 60.45,
-   "measured_at": "2026-11-15 21:00"
+   "storage_pct": 59.95,
+   "measured_at": "2026-11-16 06:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 154.99,
+   "level_m": 154.97,
    "bank_m": 158.1,
-   "storage_pct": 57.4,
-   "measured_at": "2026-11-15 21:00"
+   "storage_pct": 57.12,
+   "measured_at": "2026-11-16 06:00"
   },
   {
    "code": "MUN002",
@@ -63,18 +63,18 @@
   {
    "code": "M.2A",
    "name": "บ้านด่านกะตา",
-   "level_m": 162.93,
+   "level_m": 162.91,
    "bank_m": 167.7,
-   "storage_pct": 42.18,
-   "measured_at": "2026-11-15 21:00"
+   "storage_pct": 41.94,
+   "measured_at": "2026-11-16 06:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.08,
+   "level_m": 193.16,
    "bank_m": 195.3,
-   "storage_pct": 34.32,
-   "measured_at": "2026-11-15 21:00"
+   "storage_pct": 36.69,
+   "measured_at": "2026-11-16 06:00"
   }
  ]
 }
