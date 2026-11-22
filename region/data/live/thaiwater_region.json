@@ -1,5 +1,5 @@
 {
-"updated_at":"2026-11-22T06:54:45+00:00",
+"updated_at":"2026-11-22T07:15:55+00:00",
 "bbox":[
 101.71793,
 14.879299999999999,
@@ -370,7 +370,7 @@
 "bank_msl":201.97,
 "storage_pct":89.74,
 "discharge":null,
-"measured_at":"2026-11-22 13:40",
+"measured_at":"2026-11-22 14:00",
 "amphoe":"ด่านขุนทด"
 },
 {
@@ -382,7 +382,7 @@
 "bank_msl":177.6,
 "storage_pct":70.7,
 "discharge":3.6,
-"measured_at":"2026-11-22 12:00",
+"measured_at":"2026-11-22 13:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -394,7 +394,7 @@
 "bank_msl":155.3,
 "storage_pct":69.65,
 "discharge":30.7,
-"measured_at":"2026-11-22 12:00",
+"measured_at":"2026-11-22 13:00",
 "amphoe":"พิมาย"
 },
 {
@@ -402,11 +402,11 @@
 "name":"บ้านบัว",
 "lat":15.18159,
 "lon":102.242737,
-"level_msl":161.01,
+"level_msl":160.99,
 "bank_msl":162.6,
-"storage_pct":57.26,
-"discharge":7.64,
-"measured_at":"2026-11-22 12:00",
+"storage_pct":56.72,
+"discharge":7.3,
+"measured_at":"2026-11-22 13:00",
 "amphoe":"โนนสูง"
 },
 {
@@ -418,7 +418,7 @@
 "bank_msl":203.9,
 "storage_pct":54.41,
 "discharge":0.25,
-"measured_at":"2026-11-22 12:00",
+"measured_at":"2026-11-22 13:00",
 "amphoe":"สูงเนิน"
 },
 {
@@ -430,7 +430,7 @@
 "bank_msl":158.1,
 "storage_pct":54.25,
 "discharge":18.4,
-"measured_at":"2026-11-22 12:00",
+"measured_at":"2026-11-22 13:00",
 "amphoe":"พิมาย"
 },
 {
@@ -442,7 +442,7 @@
 "bank_msl":195.3,
 "storage_pct":45.27,
 "discharge":2.05,
-"measured_at":"2026-11-22 12:00",
+"measured_at":"2026-11-22 13:00",
 "amphoe":"เมืองนครราชสีมา"
 },
 {
@@ -454,7 +454,7 @@
 "bank_msl":167.83,
 "storage_pct":43.06,
 "discharge":null,
-"measured_at":"2026-11-22 13:40",
+"measured_at":"2026-11-22 14:00",
 "amphoe":"เฉลิมพระเกียรติ"
 },
 {
@@ -462,11 +462,11 @@
 "name":"บ้านด่านกะตา",
 "lat":14.96803,
 "lon":102.237831,
-"level_msl":162.73,
+"level_msl":162.72,
 "bank_msl":167.7,
-"storage_pct":39.76,
-"discharge":8.6,
-"measured_at":"2026-11-22 12:00",
+"storage_pct":39.64,
+"discharge":8.4,
+"measured_at":"2026-11-22 13:00",
 "amphoe":"เฉลิมพระเกียรติ"
 }
 ],
