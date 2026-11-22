@@ -1,6 +1,6 @@
 {
  "status": "ok",
- "updated_at": "2026-11-22T01:15:59+00:00",
+ "updated_at": "2026-11-22T05:19:01+00:00",
  "model": "ecmwf_ifs025",
  "source": "ECMWF IFS ผ่าน Open-Meteo (CC BY 4.0)",
  "point": {
