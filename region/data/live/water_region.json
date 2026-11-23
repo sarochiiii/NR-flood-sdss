@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-23T04:16:45+00:00",
+ "updated_at": "2026-11-23T05:16:42+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.71,
    "bank_m": 201.97,
    "storage_pct": 89.32,
-   "measured_at": "2026-11-23 11:00"
+   "measured_at": "2026-11-23 12:00"
   },
   {
    "code": "M.164",
@@ -18,7 +18,7 @@
    "level_m": 176.67,
    "bank_m": 177.6,
    "storage_pct": 70.38,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "M.184",
@@ -26,15 +26,15 @@
    "level_m": 153.49,
    "bank_m": 155.3,
    "storage_pct": 68.25,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 202.06,
+   "level_m": 202.05,
    "bank_m": 203.9,
-   "storage_pct": 53.65,
-   "measured_at": "2026-11-23 10:00"
+   "storage_pct": 53.4,
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "M.195",
@@ -42,7 +42,7 @@
    "level_m": 154.68,
    "bank_m": 158.1,
    "storage_pct": 53.15,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "M.188A",
@@ -50,7 +50,7 @@
    "level_m": 160.81,
    "bank_m": 162.6,
    "storage_pct": 51.88,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "M.191",
@@ -58,15 +58,15 @@
    "level_m": 193.42,
    "bank_m": 195.3,
    "storage_pct": 44.38,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 163.86,
    "bank_m": 167.83,
-   "storage_pct": 42.94,
-   "measured_at": "2026-11-23 11:00"
+   "storage_pct": 42.91,
+   "measured_at": "2026-11-23 12:00"
   },
   {
    "code": "M.2A",
@@ -74,7 +74,7 @@
    "level_m": 162.71,
    "bank_m": 167.7,
    "storage_pct": 39.52,
-   "measured_at": "2026-11-23 10:00"
+   "measured_at": "2026-11-23 11:00"
   }
  ]
 }
