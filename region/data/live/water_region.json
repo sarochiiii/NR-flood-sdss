@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-25T18:16:18+00:00",
+ "updated_at": "2026-11-25T19:16:10+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.68,
    "bank_m": 201.97,
    "storage_pct": 88.07,
-   "measured_at": "2026-11-26 01:00"
+   "measured_at": "2026-11-26 02:00"
   },
   {
    "code": "M.164",
@@ -53,20 +53,20 @@
    "measured_at": "2026-11-25 18:00"
   },
   {
-   "code": "MUN002",
-   "name": "เฉลิมพระเกียรติ",
-   "level_m": 163.93,
-   "bank_m": 167.83,
-   "storage_pct": 43.93,
-   "measured_at": "2026-11-26 01:00"
-  },
-  {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
    "level_m": 193.39,
    "bank_m": 195.3,
    "storage_pct": 43.49,
    "measured_at": "2026-11-25 18:00"
+  },
+  {
+   "code": "MUN002",
+   "name": "เฉลิมพระเกียรติ",
+   "level_m": 163.88,
+   "bank_m": 167.83,
+   "storage_pct": 43.24,
+   "measured_at": "2026-11-26 02:00"
   },
   {
    "code": "M.2A",
