@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-27T00:16:02+00:00",
+ "updated_at": "2026-11-27T01:16:06+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,7 +10,7 @@
    "level_m": 201.65,
    "bank_m": 201.97,
    "storage_pct": 86.82,
-   "measured_at": "2026-11-27 07:10"
+   "measured_at": "2026-11-27 08:00"
   },
   {
    "code": "M.164",
@@ -18,7 +18,7 @@
    "level_m": 176.65,
    "bank_m": 177.6,
    "storage_pct": 69.75,
-   "measured_at": "2026-11-27 06:00"
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "M.184",
@@ -26,7 +26,7 @@
    "level_m": 153.43,
    "bank_m": 155.3,
    "storage_pct": 67.19,
-   "measured_at": "2026-11-27 06:00"
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "M.188A",
@@ -34,23 +34,23 @@
    "level_m": 161.06,
    "bank_m": 162.6,
    "storage_pct": 58.6,
-   "measured_at": "2026-11-27 06:00"
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 154.64,
+   "level_m": 154.63,
    "bank_m": 158.1,
-   "storage_pct": 52.6,
-   "measured_at": "2026-11-27 06:00"
+   "storage_pct": 52.47,
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 201.97,
+   "level_m": 201.96,
    "bank_m": 203.9,
-   "storage_pct": 51.39,
-   "measured_at": "2026-11-27 06:00"
+   "storage_pct": 51.13,
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "M.191",
@@ -58,7 +58,7 @@
    "level_m": 193.48,
    "bank_m": 195.3,
    "storage_pct": 46.15,
-   "measured_at": "2026-11-27 06:00"
+   "measured_at": "2026-11-27 07:00"
   },
   {
    "code": "MUN002",
@@ -66,7 +66,7 @@
    "level_m": 163.76,
    "bank_m": 167.83,
    "storage_pct": 41.47,
-   "measured_at": "2026-11-27 07:10"
+   "measured_at": "2026-11-27 08:00"
   },
   {
    "code": "M.2A",
@@ -74,7 +74,7 @@
    "level_m": 162.61,
    "bank_m": 167.7,
    "storage_pct": 38.3,
-   "measured_at": "2026-11-27 06:00"
+   "measured_at": "2026-11-27 07:00"
   }
  ]
 }
