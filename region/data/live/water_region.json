@@ -1,7 +1,7 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-27T22:15:36+00:00",
+ "updated_at": "2026-11-27T23:15:36+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
@@ -10,63 +10,63 @@
    "level_m": 201.66,
    "bank_m": 201.97,
    "storage_pct": 87.24,
-   "measured_at": "2026-11-28 04:40"
+   "measured_at": "2026-11-28 06:00"
   },
   {
    "code": "M.164",
    "name": "ตำบลในเมือง",
-   "level_m": 176.66,
+   "level_m": 176.67,
    "bank_m": 177.6,
-   "storage_pct": 70.06,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 70.38,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "M.184",
    "name": "บ้านซึม",
-   "level_m": 153.4,
+   "level_m": 153.34,
    "bank_m": 155.3,
-   "storage_pct": 66.67,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 65.61,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "M.188A",
    "name": "บ้านบัว",
-   "level_m": 161.06,
+   "level_m": 161.07,
    "bank_m": 162.6,
-   "storage_pct": 58.6,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 58.87,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "M.195",
    "name": "บ้านสัมฤทธิ์",
-   "level_m": 154.65,
+   "level_m": 154.64,
    "bank_m": 158.1,
-   "storage_pct": 52.74,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 52.6,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "M.192",
    "name": "บ้านโนนค่า",
-   "level_m": 201.96,
+   "level_m": 201.93,
    "bank_m": 203.9,
-   "storage_pct": 51.13,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 50.38,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "M.191",
    "name": "บ้านโคกกรวด",
-   "level_m": 193.42,
+   "level_m": 193.38,
    "bank_m": 195.3,
-   "storage_pct": 44.38,
-   "measured_at": "2026-11-27 16:00"
+   "storage_pct": 43.2,
+   "measured_at": "2026-11-28 05:00"
   },
   {
    "code": "MUN002",
    "name": "เฉลิมพระเกียรติ",
    "level_m": 163.75,
    "bank_m": 167.83,
-   "storage_pct": 41.32,
-   "measured_at": "2026-11-28 04:40"
+   "storage_pct": 41.33,
+   "measured_at": "2026-11-28 06:00"
   },
   {
    "code": "M.2A",
@@ -74,7 +74,7 @@
    "level_m": 162.6,
    "bank_m": 167.7,
    "storage_pct": 38.18,
-   "measured_at": "2026-11-27 16:00"
+   "measured_at": "2026-11-28 05:00"
   }
  ]
 }
