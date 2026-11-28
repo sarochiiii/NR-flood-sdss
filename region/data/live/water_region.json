@@ -1,16 +1,16 @@
 {
  "status": "ok",
  "message": null,
- "updated_at": "2026-11-28T04:15:37+00:00",
+ "updated_at": "2026-11-28T05:15:38+00:00",
  "source": "ThaiWater (สสน.) waterlevel_load",
  "stations": [
   {
    "code": "ONE022",
    "name": "คลองสามบาท บ้านกุดพิมาน",
-   "level_m": 201.65,
+   "level_m": 201.64,
    "bank_m": 201.97,
-   "storage_pct": 86.82,
-   "measured_at": "2026-11-28 11:00"
+   "storage_pct": 86.41,
+   "measured_at": "2026-11-28 12:00"
   },
   {
    "code": "M.164",
@@ -65,8 +65,8 @@
    "name": "เฉลิมพระเกียรติ",
    "level_m": 163.74,
    "bank_m": 167.83,
-   "storage_pct": 41.24,
-   "measured_at": "2026-11-28 11:00"
+   "storage_pct": 41.16,
+   "measured_at": "2026-11-28 12:00"
   },
   {
    "code": "M.2A",
