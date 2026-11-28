@@ -1,7 +1,6 @@
 {
- "status": "error",
- "message": "<urlopen error _ssl.c:1001: The handshake operation timed out>",
- "updated_at": "2026-11-27T23:15:35+00:00",
+ "status": "ok",
+ "updated_at": "2026-11-28T01:15:36+00:00",
  "source": "Open-Meteo Forecast API",
  "tambon": [
   {
@@ -92,31 +91,31 @@
    "tcode": "301005",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.1
   },
   {
    "tcode": "301006",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.2
   },
   {
    "tcode": "301007",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.1
   },
   {
    "tcode": "301008",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.2
   },
   {
    "tcode": "301009",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.1
   },
   {
    "tcode": "301010",
@@ -128,7 +127,7 @@
    "tcode": "301011",
    "rain_24h_mm": 0.0,
    "rain_7d_mm": 0.0,
-   "rain_next24h_mm": 0.0
+   "rain_next24h_mm": 0.1
   },
   {
    "tcode": "301012",
